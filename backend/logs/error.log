@@ -1,0 +1,1181 @@
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:50:45.941
+LEVEL: ERROR
+PID: 13824
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.getUserProfile
+MESSAGE: Get profile failed
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: GET_USER_PROFILE
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: Cannot read properties of undefined (reading 'id')
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:1651:28
+    at asyncUtilWrap (C:\WebDev\educademy-react\backend\node_modules\express-async-handler\index.js:3:20)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:157:13)
+    at isLoggedIn (file:///C:/WebDev/educademy-react/backend/middlewares/isLoggedIn.js:29:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 31981568,
+    "heapTotal": 21876736,
+    "heapUsed": 19591264,
+    "external": 3758268,
+    "arrayBuffers": 45547
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:50:45.943
+LEVEL: ERROR
+PID: 13824
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.getUserProfile
+MESSAGE: HTTP SERVER ERROR: GET /api/auth/profile [500]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/auth/profile
+  Status Code: 500
+  Duration: 2087ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.43.4
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.43.4",
+    "accept": "*/*",
+    "postman-token": "049bc0c8-9d3b-4266-9ac6-438bf79aa556",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 32227328,
+    "heapTotal": 21876736,
+    "heapUsed": 19656480,
+    "external": 3758268,
+    "arrayBuffers": 45547
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:52:28.386
+LEVEL: ERROR
+PID: 11248
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.getUserProfile
+MESSAGE: Get profile failed
+
+REQUEST CONTEXT:
+
+USER CONTEXT:
+  User ID: cmb68gy040000im7w7wndn3bu
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: GET_USER_PROFILE
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: Cannot read properties of undefined (reading 'id')
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:1662:29
+    at asyncUtilWrap (C:\WebDev\educademy-react\backend\node_modules\express-async-handler\index.js:3:20)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:157:13)
+    at isLoggedIn (file:///C:/WebDev/educademy-react/backend/middlewares/isLoggedIn.js:29:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 88309760,
+    "heapTotal": 37867520,
+    "heapUsed": 22365120,
+    "external": 3737215,
+    "arrayBuffers": 23089
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:52:28.393
+LEVEL: ERROR
+PID: 11248
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.getUserProfile
+MESSAGE: HTTP SERVER ERROR: GET /api/auth/profile [500]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/auth/profile
+  Status Code: 500
+  Duration: 2091ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.43.4
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.43.4",
+    "accept": "*/*",
+    "postman-token": "6f38c690-5edc-47f4-9b4e-8a07fb6f2b7a",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 88383488,
+    "heapTotal": 37867520,
+    "heapUsed": 22434576,
+    "external": 3745407,
+    "arrayBuffers": 31281
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:53:45.555
+LEVEL: ERROR
+PID: 26464
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.getUserProfile
+MESSAGE: Get profile failed
+
+REQUEST CONTEXT:
+
+USER CONTEXT:
+  User ID: cmb68gy040000im7w7wndn3bu
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: GET_USER_PROFILE
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: Cannot read properties of undefined (reading 'id')
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:1664:29
+    at asyncUtilWrap (C:\WebDev\educademy-react\backend\node_modules\express-async-handler\index.js:3:20)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:157:13)
+    at isLoggedIn (file:///C:/WebDev/educademy-react/backend/middlewares/isLoggedIn.js:29:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 88719360,
+    "heapTotal": 38129664,
+    "heapUsed": 23454504,
+    "external": 3737215,
+    "arrayBuffers": 23089
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:53:45.558
+LEVEL: ERROR
+PID: 26464
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.getUserProfile
+MESSAGE: HTTP SERVER ERROR: GET /api/auth/profile [500]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/auth/profile
+  Status Code: 500
+  Duration: 2164ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.43.4
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.43.4",
+    "accept": "*/*",
+    "postman-token": "f266b1b4-d682-4501-af2e-fc7d07a0e419",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 88764416,
+    "heapTotal": 38129664,
+    "heapUsed": 23540664,
+    "external": 3745407,
+    "arrayBuffers": 31281
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:56:12.093
+LEVEL: ERROR
+PID: 18000
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: Logout failed
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: USER_LOGOUT
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: Cannot read properties of undefined (reading 'id')
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:2444:30
+    at asyncUtilWrap (C:\WebDev\educademy-react\backend\node_modules\express-async-handler\index.js:3:20)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:157:13)
+    at isLoggedIn (file:///C:/WebDev/educademy-react/backend/middlewares/isLoggedIn.js:29:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 23973888,
+    "heapTotal": 20828160,
+    "heapUsed": 18863656,
+    "external": 3745908,
+    "arrayBuffers": 33187
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-29 02:56:12.095
+LEVEL: ERROR
+PID: 18000
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: HTTP SERVER ERROR: POST /api/auth/logout [500]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/logout
+  Status Code: 500
+  Duration: 463ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.43.4
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.43.4",
+    "accept": "*/*",
+    "postman-token": "c23fe7c2-c32e-4884-b9b9-09d7c3a52636",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 24236032,
+    "heapTotal": 20828160,
+    "heapUsed": 18932464,
+    "external": 3745908,
+    "arrayBuffers": 33187
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 13:40:52.132
+LEVEL: ERROR
+PID: 10328
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.verifyOTP
+MESSAGE: OTP verification failed
+
+REQUEST CONTEXT:
+  Body: {
+    "email": "pt713138@gmail.com",
+    "otp": "622008"
+}
+
+USER CONTEXT:
+  User ID: N/A
+  Email: pt713138@gmail.com
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: VERIFY_OTP
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: PrismaClientValidationError
+  Error Message: 
+[31mInvalid [1m`prisma.user.update()`[22m invocation:[39m
+
+{
+  where: {
+    email: "pt713138@gmail.com"
+  },
+  data: {
+    isVerified: true,
+    [31mverificationCode[39m: null,
+    [31m~~~~~~~~~~~~~~~~[39m
+    verificationExpires: null,
+[32m?[39m   [32mid[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mcreatedAt[39m[32m?[39m[32m: [39m[32mDateTime | DateTimeFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mupdatedAt[39m[32m?[39m[32m: [39m[32mDateTime | DateTimeFieldUpdateOperationsInput[39m,
+[32m?[39m   [32memail[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mpasswordHash[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32msalt[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mfirstName[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mlastName[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mprofileImage[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mbio[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mrole[39m[32m?[39m[32m: [39m[32mUserRole | EnumUserRoleFieldUpdateOperationsInput[39m,
+[32m?[39m   [32misActive[39m[32m?[39m[32m: [39m[32mBoolean | BoolFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mlastLogin[39m[32m?[39m[32m: [39m[32mDateTime | NullableDateTimeFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mtimezone[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mlanguage[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mcountry[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mphoneNumber[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mdateOfBirth[39m[32m?[39m[32m: [39m[32mDateTime | NullableDateTimeFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mwebsite[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mlinkedinProfile[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mtwitterProfile[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mgithubProfile[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32msocialLogins[39m[32m?[39m[32m: [39m[32mSocialLoginUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mstudentProfile[39m[32m?[39m[32m: [39m[32mStudentUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32minstructorProfile[39m[32m?[39m[32m: [39m[32mInstructorUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32madminProfile[39m[32m?[39m[32m: [39m[32mAdminUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32mnotifications[39m[32m?[39m[32m: [39m[32mNotificationUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mactivities[39m[32m?[39m[32m: [39m[32mActivityUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32msessions[39m[32m?[39m[32m: [39m[32mSessionUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32muserActivities[39m[32m?[39m[32m: [39m[32mUserActivityUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mdeviceSessions[39m[32m?[39m[32m: [39m[32mDeviceSessionUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mnotificationSettings[39m[32m?[39m[32m: [39m[32mNotificationSettingsUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32mdiscussions[39m[32m?[39m[32m: [39m[32mDiscussionUpdateManyWithoutAuthorNestedInput[39m,
+[32m?[39m   [32mdiscussionReplies[39m[32m?[39m[32m: [39m[32mDiscussionReplyUpdateManyWithoutAuthorNestedInput[39m,
+[32m?[39m   [32mreviews[39m[32m?[39m[32m: [39m[32mReviewUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mreviewReplies[39m[32m?[39m[32m: [39m[32mReviewReplyUpdateManyWithoutAuthorNestedInput[39m,
+[32m?[39m   [32mmessages[39m[32m?[39m[32m: [39m[32mMessageUpdateManyWithoutSenderNestedInput[39m,
+[32m?[39m   [32mreceivedMessages[39m[32m?[39m[32m: [39m[32mMessageUpdateManyWithoutReceiverNestedInput[39m,
+[32m?[39m   [32mfollowers[39m[32m?[39m[32m: [39m[32mFollowUpdateManyWithoutFollowingNestedInput[39m,
+[32m?[39m   [32mfollowing[39m[32m?[39m[32m: [39m[32mFollowUpdateManyWithoutFollowerNestedInput[39m,
+[32m?[39m   [32mbookmarks[39m[32m?[39m[32m: [39m[32mBookmarkUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mnotes[39m[32m?[39m[32m: [39m[32mNoteUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mcouponsCreated[39m[32m?[39m[32m: [39m[32mCouponUpdateManyWithoutCreatedByNestedInput[39m,
+[32m?[39m   [32mcouponUsages[39m[32m?[39m[32m: [39m[32mCouponUsageUpdateManyWithoutUserNestedInput[39m
+  }
+}
+
+Unknown argument `[31mverificationCode[39m`. Available options are listed in [32mgreen[39m.
+  Error Code: UNKNOWN
+  Stack Trace:
+PrismaClientValidationError: 
+[31mInvalid [1m`prisma.user.update()`[22m invocation:[39m
+
+{
+  where: {
+    email: "pt713138@gmail.com"
+  },
+  data: {
+    isVerified: true,
+    [31mverificationCode[39m: null,
+    [31m~~~~~~~~~~~~~~~~[39m
+    verificationExpires: null,
+[32m?[39m   [32mid[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mcreatedAt[39m[32m?[39m[32m: [39m[32mDateTime | DateTimeFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mupdatedAt[39m[32m?[39m[32m: [39m[32mDateTime | DateTimeFieldUpdateOperationsInput[39m,
+[32m?[39m   [32memail[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mpasswordHash[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32msalt[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mfirstName[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mlastName[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mprofileImage[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mbio[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mrole[39m[32m?[39m[32m: [39m[32mUserRole | EnumUserRoleFieldUpdateOperationsInput[39m,
+[32m?[39m   [32misActive[39m[32m?[39m[32m: [39m[32mBoolean | BoolFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mlastLogin[39m[32m?[39m[32m: [39m[32mDateTime | NullableDateTimeFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mtimezone[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mlanguage[39m[32m?[39m[32m: [39m[32mString | StringFieldUpdateOperationsInput[39m,
+[32m?[39m   [32mcountry[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mphoneNumber[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mdateOfBirth[39m[32m?[39m[32m: [39m[32mDateTime | NullableDateTimeFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mwebsite[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mlinkedinProfile[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mtwitterProfile[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32mgithubProfile[39m[32m?[39m[32m: [39m[32mString | NullableStringFieldUpdateOperationsInput | Null[39m,
+[32m?[39m   [32msocialLogins[39m[32m?[39m[32m: [39m[32mSocialLoginUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mstudentProfile[39m[32m?[39m[32m: [39m[32mStudentUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32minstructorProfile[39m[32m?[39m[32m: [39m[32mInstructorUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32madminProfile[39m[32m?[39m[32m: [39m[32mAdminUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32mnotifications[39m[32m?[39m[32m: [39m[32mNotificationUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mactivities[39m[32m?[39m[32m: [39m[32mActivityUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32msessions[39m[32m?[39m[32m: [39m[32mSessionUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32muserActivities[39m[32m?[39m[32m: [39m[32mUserActivityUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mdeviceSessions[39m[32m?[39m[32m: [39m[32mDeviceSessionUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mnotificationSettings[39m[32m?[39m[32m: [39m[32mNotificationSettingsUpdateOneWithoutUserNestedInput[39m,
+[32m?[39m   [32mdiscussions[39m[32m?[39m[32m: [39m[32mDiscussionUpdateManyWithoutAuthorNestedInput[39m,
+[32m?[39m   [32mdiscussionReplies[39m[32m?[39m[32m: [39m[32mDiscussionReplyUpdateManyWithoutAuthorNestedInput[39m,
+[32m?[39m   [32mreviews[39m[32m?[39m[32m: [39m[32mReviewUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mreviewReplies[39m[32m?[39m[32m: [39m[32mReviewReplyUpdateManyWithoutAuthorNestedInput[39m,
+[32m?[39m   [32mmessages[39m[32m?[39m[32m: [39m[32mMessageUpdateManyWithoutSenderNestedInput[39m,
+[32m?[39m   [32mreceivedMessages[39m[32m?[39m[32m: [39m[32mMessageUpdateManyWithoutReceiverNestedInput[39m,
+[32m?[39m   [32mfollowers[39m[32m?[39m[32m: [39m[32mFollowUpdateManyWithoutFollowingNestedInput[39m,
+[32m?[39m   [32mfollowing[39m[32m?[39m[32m: [39m[32mFollowUpdateManyWithoutFollowerNestedInput[39m,
+[32m?[39m   [32mbookmarks[39m[32m?[39m[32m: [39m[32mBookmarkUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mnotes[39m[32m?[39m[32m: [39m[32mNoteUpdateManyWithoutUserNestedInput[39m,
+[32m?[39m   [32mcouponsCreated[39m[32m?[39m[32m: [39m[32mCouponUpdateManyWithoutCreatedByNestedInput[39m,
+[32m?[39m   [32mcouponUsages[39m[32m?[39m[32m: [39m[32mCouponUsageUpdateManyWithoutUserNestedInput[39m
+  }
+}
+
+Unknown argument `[31mverificationCode[39m`. Available options are listed in [32mgreen[39m.
+    at kn (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:29:1363)
+    at Zn.handleRequestError (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:7102)
+    at Zn.handleAndLogRequestError (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:6784)
+    at Zn.request (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:6491)
+    at async l (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:130:9778)
+    at async file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:886:18
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 38395904,
+    "heapTotal": 22650880,
+    "heapUsed": 21558912,
+    "external": 3827123,
+    "arrayBuffers": 96252
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 13:40:52.145
+LEVEL: ERROR
+PID: 10328
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.verifyOTP
+MESSAGE: HTTP SERVER ERROR: POST /api/auth/verify-otp [500]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/verify-otp
+  Status Code: 500
+  Duration: 441ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Body: {
+    "email": "pt713138@gmail.com",
+    "otp": "622008"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "45",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"",
+    "content-type": "application/json",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0; next-auth.csrf-token=bd2a60fa12c90e4572bf91419aa6f309ddb99b9e5a5a95eaf106d4a1aee07cfb%7C1b897ff62df1f3214f9d61f2a322c8024241ec15e555f84b979a7313597b9628; next-auth.callback-url=http%3A%2F%2Flocalhost%3A3000%2Flogin"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 38518784,
+    "heapTotal": 22650880,
+    "heapUsed": 21703112,
+    "external": 3852151,
+    "arrayBuffers": 121280
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 21:08:24.171
+LEVEL: ERROR
+PID: 23480
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Failed to initialize email transporter
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23506cf5411sm44404845ad.188 - gsmtp
+  Error Code: EAUTH
+  Stack Trace:
+Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-23506cf5411sm44404845ad.188 - gsmtp
+    at SMTPConnection._formatError (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:1588:34)
+    at SMTPConnection.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:556:26)
+    at SMTPConnection._processResponse (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:993:20)
+    at SMTPConnection._onData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:774:14)
+    at SMTPConnection._onSocketData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 82386944,
+    "heapTotal": 38047744,
+    "heapUsed": 23895864,
+    "external": 3737306,
+    "arrayBuffers": 23180
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 21:08:45.470
+LEVEL: ERROR
+PID: 11712
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Failed to initialize email transporter
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-747affafbfcsm4751117b3a.89 - gsmtp
+  Error Code: EAUTH
+  Stack Trace:
+Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-747affafbfcsm4751117b3a.89 - gsmtp
+    at SMTPConnection._formatError (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:1588:34)
+    at SMTPConnection.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:556:26)
+    at SMTPConnection._processResponse (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:993:20)
+    at SMTPConnection._onData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:774:14)
+    at SMTPConnection._onSocketData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 82874368,
+    "heapTotal": 38174720,
+    "heapUsed": 23388128,
+    "external": 3739793,
+    "arrayBuffers": 23178
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 21:11:24.568
+LEVEL: ERROR
+PID: 24700
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Failed to initialize email transporter
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3124e2cf113sm2858239a91.13 - gsmtp
+  Error Code: EAUTH
+  Stack Trace:
+Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3124e2cf113sm2858239a91.13 - gsmtp
+    at SMTPConnection._formatError (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:1588:34)
+    at SMTPConnection.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:556:26)
+    at SMTPConnection._processResponse (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:993:20)
+    at SMTPConnection._onData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:774:14)
+    at SMTPConnection._onSocketData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 83124224,
+    "heapTotal": 37855232,
+    "heapUsed": 21409048,
+    "external": 3737304,
+    "arrayBuffers": 23178
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 21:12:27.634
+LEVEL: ERROR
+PID: 24744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Failed to initialize email transporter
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3124e39742fsm3124500a91.27 - gsmtp
+  Error Code: EAUTH
+  Stack Trace:
+Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3124e39742fsm3124500a91.27 - gsmtp
+    at SMTPConnection._formatError (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:1588:34)
+    at SMTPConnection.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:556:26)
+    at SMTPConnection._processResponse (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:993:20)
+    at SMTPConnection._onData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:774:14)
+    at SMTPConnection._onSocketData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 83025920,
+    "heapTotal": 37855232,
+    "heapUsed": 22596496,
+    "external": 3737304,
+    "arrayBuffers": 23178
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 21:12:54.278
+LEVEL: ERROR
+PID: 11180
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Failed to initialize email transporter
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-747afeaad78sm4723865b3a.46 - gsmtp
+  Error Code: EAUTH
+  Stack Trace:
+Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-747afeaad78sm4723865b3a.46 - gsmtp
+    at SMTPConnection._formatError (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:1588:34)
+    at SMTPConnection.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:556:26)
+    at SMTPConnection._processResponse (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:993:20)
+    at SMTPConnection._onData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:774:14)
+    at SMTPConnection._onSocketData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 82853888,
+    "heapTotal": 37593088,
+    "heapUsed": 21730456,
+    "external": 3737304,
+    "arrayBuffers": 23178
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-05-31 21:13:03.541
+LEVEL: ERROR
+PID: 8992
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Failed to initialize email transporter
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3124e3219cdsm2847904a91.41 - gsmtp
+  Error Code: EAUTH
+  Stack Trace:
+Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-3124e3219cdsm2847904a91.41 - gsmtp
+    at SMTPConnection._formatError (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:1588:34)
+    at SMTPConnection.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:556:26)
+    at SMTPConnection._processResponse (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:993:20)
+    at SMTPConnection._onData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:774:14)
+    at SMTPConnection._onSocketData (C:\WebDev\educademy-react\backend\node_modules\nodemailer\lib\smtp-connection\index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 83337216,
+    "heapTotal": 38436864,
+    "heapUsed": 23299320,
+    "external": 3739793,
+    "arrayBuffers": 23178
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-01 13:22:55.154
+LEVEL: ERROR
+PID: 21608
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.registerUser
+MESSAGE: Registration failed
+
+REQUEST CONTEXT:
+  Body: {
+    "firstName": "Ankit",
+    "lastName": "Tiwari",
+    "email": "pt713138@gmail.com",
+    "password": "[MASKED]",
+    "role": "admin"
+}
+
+USER CONTEXT:
+  User ID: N/A
+  Email: pt713138@gmail.com
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: USER_REGISTRATION
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: PrismaClientValidationError
+  Error Message: 
+[31mInvalid [1m`prisma.user.create()`[22m invocation:[39m
+
+{
+  data: {
+    firstName: "Ankit",
+    lastName: "Tiwari",
+    email: "pt713138@gmail.com",
+    passwordHash: "$2b$12$As3QuOr4SJDlVyOJJ2KtzOfskaDXjyTScSu7ajWQJ7cAMHZVy7G9W",
+    salt: "$2b$12$As3QuOr4SJDlVyOJJ2KtzO",
+    role: [31m"admin"[39m,
+          [31m~~~~~~~[39m
+    profileImage: null,
+    isVerified: false,
+    isActive: true
+  }
+}
+
+Invalid value for argument `[1mrole[22m`. Expected [32mUserRole[39m.
+  Error Code: UNKNOWN
+  Stack Trace:
+PrismaClientValidationError: 
+[31mInvalid [1m`prisma.user.create()`[22m invocation:[39m
+
+{
+  data: {
+    firstName: "Ankit",
+    lastName: "Tiwari",
+    email: "pt713138@gmail.com",
+    passwordHash: "$2b$12$As3QuOr4SJDlVyOJJ2KtzOfskaDXjyTScSu7ajWQJ7cAMHZVy7G9W",
+    salt: "$2b$12$As3QuOr4SJDlVyOJJ2KtzO",
+    role: [31m"admin"[39m,
+          [31m~~~~~~~[39m
+    profileImage: null,
+    isVerified: false,
+    isActive: true
+  }
+}
+
+Invalid value for argument `[1mrole[22m`. Expected [32mUserRole[39m.
+    at kn (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:29:1363)
+    at Zn.handleRequestError (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:7102)
+    at Zn.handleAndLogRequestError (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:6784)
+    at Zn.request (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:6491)
+    at async l (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:130:9778)
+    at async file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:675:20
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 24936448,
+    "heapTotal": 24485888,
+    "heapUsed": 23070648,
+    "external": 3854490,
+    "arrayBuffers": 115265
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-01 13:22:55.159
+LEVEL: ERROR
+PID: 21608
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.registerUser
+MESSAGE: HTTP SERVER ERROR: POST /api/auth/register [500]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/register
+  Status Code: 500
+  Duration: 1107ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Body: {
+    "firstName": "Ankit",
+    "lastName": "Tiwari",
+    "email": "pt713138@gmail.com",
+    "password": "[MASKED]",
+    "role": "admin"
+}
+  Headers: {
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "fa372e9d-796c-472d-85fe-93d5ce04c317",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "139"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 25391104,
+    "heapTotal": 24485888,
+    "heapUsed": 23150176,
+    "external": 3854328,
+    "arrayBuffers": 123457
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-02 15:15:28.216
+LEVEL: FATAL
+PID: 16232
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.updateProfileImage
+MESSAGE: UNHANDLED REJECTION
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_FAILURE
+  Entity: N/A
+  Entity ID: N/A
+  Status: FATAL_ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Invalid resource type 'auto'. Must be one of: image, javascript, css, video, raw.
+  Error Code: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 36409344,
+    "heapTotal": 22917120,
+    "heapUsed": 20946000,
+    "external": 4648640,
+    "arrayBuffers": 935919
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-02 15:19:37.677
+LEVEL: FATAL
+PID: 11504
+REQUEST_ID: 4d50kh2um
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: UNHANDLED REJECTION
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_FAILURE
+  Entity: N/A
+  Entity ID: N/A
+  Status: FATAL_ERROR
+
+ERROR DETAILS:
+  Error Name: Unknown
+  Error Message: UNHANDLED REJECTION
+  Error Code: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 50266112,
+    "heapTotal": 21344256,
+    "heapUsed": 19292864,
+    "external": 4483188,
+    "arrayBuffers": 770467
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-02 15:24:33.377
+LEVEL: ERROR
+PID: 6808
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.updateProfileImage
+MESSAGE: Profile image update failed
+
+REQUEST CONTEXT:
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: UPDATE_PROFILE_IMAGE
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: Cannot read properties of undefined (reading 'id')
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:1070:30
+    at done (C:\WebDev\educademy-react\backend\node_modules\multer\lib\make-middleware.js:59:7)
+    at indicateDone (C:\WebDev\educademy-react\backend\node_modules\multer\lib\make-middleware.js:63:68)
+    at C:\WebDev\educademy-react\backend\node_modules\multer\lib\make-middleware.js:169:11
+    at CloudinaryStorage.<anonymous> (C:\WebDev\educademy-react\backend\node_modules\multer-storage-cloudinary\lib\index.js:107:25)
+    at step (C:\WebDev\educademy-react\backend\node_modules\multer-storage-cloudinary\lib\index.js:33:23)
+    at Object.next (C:\WebDev\educademy-react\backend\node_modules\multer-storage-cloudinary\lib\index.js:14:53)
+    at fulfilled (C:\WebDev\educademy-react\backend\node_modules\multer-storage-cloudinary\lib\index.js:5:58)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 75288576,
+    "heapTotal": 20819968,
+    "heapUsed": 19624384,
+    "external": 4429439,
+    "arrayBuffers": 716718
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-02 15:24:33.391
+LEVEL: ERROR
+PID: 6808
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.updateProfileImage
+MESSAGE: HTTP SERVER ERROR: POST /api/auth/profile/image [500]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/profile/image
+  Status Code: 500
+  Duration: 8201ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "1672243",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "authorization": "[MASKED]",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"",
+    "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryZyF7ucMlDiDCDZ4H",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 75300864,
+    "heapTotal": 20819968,
+    "heapUsed": 19696032,
+    "external": 4429439,
+    "arrayBuffers": 716718
+}
+====================================================================================================
+
