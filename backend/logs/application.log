@@ -61303,3 +61303,3725 @@ SYSTEM CONTEXT:
 }
 ====================================================================================================
 
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:55.804
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:55.886
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 59138048,
+    "heapTotal": 31608832,
+    "heapUsed": 17159672,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:56.134
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 74235904,
+    "heapTotal": 37703680,
+    "heapUsed": 21559400,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:56.137
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 74334208,
+    "heapTotal": 37703680,
+    "heapUsed": 21668088,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:56.202
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 82337792,
+    "heapTotal": 37703680,
+    "heapUsed": 21877288,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:56.203
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 82354176,
+    "heapTotal": 37965824,
+    "heapUsed": 22152928,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:17:57.157
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 85094400,
+    "heapTotal": 38121472,
+    "heapUsed": 22641616,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:16.802
+LEVEL: HTTP
+PID: 6848
+REQUEST_ID: e5prmjnlb
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP REQUEST: POST /api/auth/login
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/login
+  Status Code: INCOMING
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Body: {
+    "email": "pt713138@gmail.com",
+    "password": "[MASKED]"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "52",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"",
+    "content-type": "application/json",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 66969600,
+    "heapTotal": 20033536,
+    "heapUsed": 18748432,
+    "external": 3729583,
+    "arrayBuffers": 16862
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:16.806
+LEVEL: TRACE
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: ENTERING AuthController.loginUser()
+
+REQUEST CONTEXT:
+  Params: {
+    "email": "pt713138@gmail.com",
+    "hasPassword": "true",
+    "clientIp": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+}
+
+BUSINESS OPERATION:
+  Operation: METHOD_ENTRY
+  Entity: AuthController
+  Entity ID: N/A
+  Status: STARTED
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 67051520,
+    "heapTotal": 20295680,
+    "heapUsed": 19087832,
+    "external": 3729583,
+    "arrayBuffers": 16862
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:19.466
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: user
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: user
+  Duration: 490msms
+
+SQL QUERY:
+SELECT "public"."User"."id",
+        "public"."User"."firstName",
+        "public"."User"."lastName",
+        "public"."User"."email",
+        "public"."User"."passwordHash",
+        "public"."User"."role"::text,
+        "public"."User"."profileImage",
+        "public"."User"."bio",
+        "public"."User"."isVerified",
+        "public"."User"."isActive",
+        "public"."User"."timezone",
+        "public"."User"."language",
+        "public"."User"."country",
+        "public"."User"."phoneNumber",
+        "public"."User"."dateOfBirth",
+        "public"."User"."website",
+        "public"."User"."linkedinProfile",
+        "public"."User"."twitterProfile",
+        "public"."User"."githubProfile",
+        "public"."User"."lastLogin",
+        "public"."User"."createdAt",
+        "public"."User"."updatedAt" 
+      FROM "public"."User" 
+      WHERE ("public"."User"."email" = $1 
+        AND 1=1) 
+      LIMIT $2 
+      OFFSET $3
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:20.216
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE INSERT: session
+
+DATABASE OPERATION:
+  Operation: INSERT
+  Table: session
+  Duration: 465msms
+
+SQL QUERY:
+INSERT INTO "public"."Session" ("id",
+        "createdAt",
+        "updatedAt",
+        "expiresAt",
+        "token",
+        "device",
+        "ipAddress",
+        "userId") 
+      VALUES ($1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8) RETURNING "public"."Session"."id",
+        "public"."Session"."createdAt",
+        "public"."Session"."updatedAt",
+        "public"."Session"."expiresAt",
+        "public"."Session"."token",
+        "public"."Session"."device",
+        "public"."Session"."ipAddress",
+        "public"."Session"."userId"
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:22.504
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE UPDATE: user
+
+DATABASE OPERATION:
+  Operation: UPDATE
+  Table: user
+  Duration: 454msms
+
+SQL QUERY:
+UPDATE "public"."User" 
+      SET "lastLogin" = $1,
+        "updatedAt" = $2 
+      WHERE ("public"."User"."id" = $3 
+        AND 1=1) RETURNING "public"."User"."id",
+        "public"."User"."createdAt",
+        "public"."User"."updatedAt",
+        "public"."User"."email",
+        "public"."User"."passwordHash",
+        "public"."User"."salt",
+        "public"."User"."firstName",
+        "public"."User"."lastName",
+        "public"."User"."profileImage",
+        "public"."User"."bio",
+        "public"."User"."role"::text,
+        "public"."User"."isVerified",
+        "public"."User"."isActive",
+        "public"."User"."lastLogin",
+        "public"."User"."timezone",
+        "public"."User"."language",
+        "public"."User"."country",
+        "public"."User"."phoneNumber",
+        "public"."User"."dateOfBirth",
+        "public"."User"."website",
+        "public"."User"."linkedinProfile",
+        "public"."User"."twitterProfile",
+        "public"."User"."githubProfile"
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:22.509
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: Sending login alert
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 74625024,
+    "heapTotal": 20819968,
+    "heapUsed": 19004496,
+    "external": 3741884,
+    "arrayBuffers": 29163
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:22.510
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: Sending email
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 74719232,
+    "heapTotal": 20819968,
+    "heapUsed": 19090288,
+    "external": 3741884,
+    "arrayBuffers": 29163
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:22.518
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: PERFORMANCE: USER_LOGIN completed in 5713ms
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+PERFORMANCE:
+  Operation: USER_LOGIN
+  Duration: 5713ms
+  Memory Usage: {
+    "rss": 74846208,
+    "heapTotal": 20819968,
+    "heapUsed": 19273992,
+    "external": 3741924,
+    "arrayBuffers": 29203
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 74846208,
+    "heapTotal": 20819968,
+    "heapUsed": 19276088,
+    "external": 3741924,
+    "arrayBuffers": 29203
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:22.518
+LEVEL: TRACE
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: EXITING AuthController.loginUser()
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: METHOD_EXIT
+  Entity: AuthController
+  Entity ID: N/A
+  Status: COMPLETED
+
+PERFORMANCE:
+  Operation: AuthController.loginUser
+  Duration: 5713.168399999999ms
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 74854400,
+    "heapTotal": 20819968,
+    "heapUsed": 19298304,
+    "external": 3741924,
+    "arrayBuffers": 29203
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:22.521
+LEVEL: HTTP
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: HTTP SUCCESS: POST /api/auth/login [200]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/login
+  Status Code: 200
+  Duration: 5723ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Body: {
+    "email": "pt713138@gmail.com",
+    "password": "[MASKED]"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "52",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"",
+    "content-type": "application/json",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 75001856,
+    "heapTotal": 20819968,
+    "heapUsed": 19337032,
+    "external": 3750116,
+    "arrayBuffers": 37395
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:25.579
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: SEND
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 76193792,
+    "heapTotal": 21344256,
+    "heapUsed": 20237912,
+    "external": 3777027,
+    "arrayBuffers": 64306
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:18:25.580
+LEVEL: INFO
+PID: 6848
+REQUEST_ID: hvsrhce1o
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: PERFORMANCE: EMAIL_SEND completed in 3070ms
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+PERFORMANCE:
+  Operation: EMAIL_SEND
+  Duration: 3070ms
+  Memory Usage: {
+    "rss": 76259328,
+    "heapTotal": 21344256,
+    "heapUsed": 20266072,
+    "external": 3777027,
+    "arrayBuffers": 64306
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 76259328,
+    "heapTotal": 21344256,
+    "heapUsed": 20267288,
+    "external": 3777027,
+    "arrayBuffers": 64306
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:11.831
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:11.888
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 63778816,
+    "heapTotal": 32133120,
+    "heapUsed": 15971448,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:12.036
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 77869056,
+    "heapTotal": 37441536,
+    "heapUsed": 19824616,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:12.039
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 77877248,
+    "heapTotal": 37441536,
+    "heapUsed": 20123088,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:12.067
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 85880832,
+    "heapTotal": 37441536,
+    "heapUsed": 20325320,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:12.068
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 85897216,
+    "heapTotal": 37703680,
+    "heapUsed": 20598080,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:12.952
+LEVEL: INFO
+PID: 2616
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 87552000,
+    "heapTotal": 37859328,
+    "heapUsed": 21125960,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:22.015
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:22.067
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 63258624,
+    "heapTotal": 31870976,
+    "heapUsed": 17262736,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:22.201
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 77983744,
+    "heapTotal": 37441536,
+    "heapUsed": 21619344,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:22.205
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 78053376,
+    "heapTotal": 37441536,
+    "heapUsed": 21731112,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:22.229
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 85676032,
+    "heapTotal": 37703680,
+    "heapUsed": 22302160,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:22.230
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 85692416,
+    "heapTotal": 37703680,
+    "heapUsed": 22358720,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:19:23.143
+LEVEL: INFO
+PID: 13252
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 87494656,
+    "heapTotal": 37859328,
+    "heapUsed": 22847928,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:02.559
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:02.611
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 62156800,
+    "heapTotal": 31870976,
+    "heapUsed": 16870768,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:02.738
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 76378112,
+    "heapTotal": 37179392,
+    "heapUsed": 21066280,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:02.741
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 76451840,
+    "heapTotal": 37179392,
+    "heapUsed": 21269168,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:02.765
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84107264,
+    "heapTotal": 37179392,
+    "heapUsed": 21725624,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:02.766
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84115456,
+    "heapTotal": 37179392,
+    "heapUsed": 21758696,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:21:03.653
+LEVEL: INFO
+PID: 2648
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 87203840,
+    "heapTotal": 37597184,
+    "heapUsed": 22315168,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:40:58.577
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:40:58.698
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58261504,
+    "heapTotal": 31608832,
+    "heapUsed": 17362680,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:40:58.960
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73031680,
+    "heapTotal": 37179392,
+    "heapUsed": 21629032,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:40:58.963
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73048064,
+    "heapTotal": 37179392,
+    "heapUsed": 21784832,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:40:59.026
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80764928,
+    "heapTotal": 37441536,
+    "heapUsed": 22321592,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:40:59.027
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80777216,
+    "heapTotal": 37441536,
+    "heapUsed": 22345504,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:41:00.188
+LEVEL: INFO
+PID: 11356
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84398080,
+    "heapTotal": 37859328,
+    "heapUsed": 22954200,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:05.840
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:05.898
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 59215872,
+    "heapTotal": 31346688,
+    "heapUsed": 18392776,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:06.038
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72794112,
+    "heapTotal": 37109760,
+    "heapUsed": 22650576,
+    "external": 3711743,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:06.041
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72880128,
+    "heapTotal": 37371904,
+    "heapUsed": 23007296,
+    "external": 3711743,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:06.067
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81117184,
+    "heapTotal": 37371904,
+    "heapUsed": 23212784,
+    "external": 3730930,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:06.068
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81125376,
+    "heapTotal": 37371904,
+    "heapUsed": 23243472,
+    "external": 3730930,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:07.003
+LEVEL: INFO
+PID: 8892
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84815872,
+    "heapTotal": 38051840,
+    "heapUsed": 23891840,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:15.198
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:15.251
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58126336,
+    "heapTotal": 31346688,
+    "heapUsed": 17417968,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:15.392
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72900608,
+    "heapTotal": 37441536,
+    "heapUsed": 21756472,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:15.397
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72974336,
+    "heapTotal": 37441536,
+    "heapUsed": 21871568,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:15.424
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80977920,
+    "heapTotal": 37703680,
+    "heapUsed": 22324432,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:15.425
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80990208,
+    "heapTotal": 37703680,
+    "heapUsed": 22348264,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:48:17.081
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84459520,
+    "heapTotal": 37859328,
+    "heapUsed": 22911360,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:49:45.842
+LEVEL: INFO
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: SIGINT received, shutting down gracefully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 50778112,
+    "heapTotal": 20295680,
+    "heapUsed": 17777648,
+    "external": 3729524,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:24.294
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:24.354
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58036224,
+    "heapTotal": 31608832,
+    "heapUsed": 17015120,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:24.515
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72675328,
+    "heapTotal": 37441536,
+    "heapUsed": 21046896,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:24.518
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72683520,
+    "heapTotal": 37441536,
+    "heapUsed": 21155536,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:24.581
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80572416,
+    "heapTotal": 37441536,
+    "heapUsed": 21684848,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:24.581
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80596992,
+    "heapTotal": 37703680,
+    "heapUsed": 21960520,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:25.553
+LEVEL: INFO
+PID: 14816
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84246528,
+    "heapTotal": 37859328,
+    "heapUsed": 22271584,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:33.177
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:33.224
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58032128,
+    "heapTotal": 32133120,
+    "heapUsed": 17168680,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:33.354
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73035776,
+    "heapTotal": 37441536,
+    "heapUsed": 21540160,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:33.357
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73101312,
+    "heapTotal": 37441536,
+    "heapUsed": 21656720,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:33.384
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80961536,
+    "heapTotal": 37703680,
+    "heapUsed": 22110160,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:33.385
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81039360,
+    "heapTotal": 37703680,
+    "heapUsed": 22133944,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:50:34.283
+LEVEL: INFO
+PID: 9604
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84480000,
+    "heapTotal": 37859328,
+    "heapUsed": 22680896,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:49.520
+LEVEL: INFO
+PID: 6944
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:49.604
+LEVEL: INFO
+PID: 6944
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58396672,
+    "heapTotal": 32133120,
+    "heapUsed": 16422880,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:49.865
+LEVEL: INFO
+PID: 6944
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73084928,
+    "heapTotal": 37179392,
+    "heapUsed": 20448880,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:49.869
+LEVEL: INFO
+PID: 6944
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73162752,
+    "heapTotal": 37179392,
+    "heapUsed": 20557712,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:49.939
+LEVEL: INFO
+PID: 6944
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80928768,
+    "heapTotal": 37179392,
+    "heapUsed": 20968808,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:49.939
+LEVEL: INFO
+PID: 6944
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80945152,
+    "heapTotal": 37441536,
+    "heapUsed": 21243024,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:51.095
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:51.145
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58163200,
+    "heapTotal": 31346688,
+    "heapUsed": 17320408,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:51.283
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72720384,
+    "heapTotal": 36917248,
+    "heapUsed": 21552264,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:51.288
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72798208,
+    "heapTotal": 36917248,
+    "heapUsed": 21696488,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:51.314
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80957440,
+    "heapTotal": 37179392,
+    "heapUsed": 22202824,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:51.315
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80977920,
+    "heapTotal": 37179392,
+    "heapUsed": 22226616,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:53:52.436
+LEVEL: INFO
+PID: 22596
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84393984,
+    "heapTotal": 37597184,
+    "heapUsed": 22849600,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:23.966
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:24.020
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58777600,
+    "heapTotal": 31346688,
+    "heapUsed": 18252512,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:24.183
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72609792,
+    "heapTotal": 37109760,
+    "heapUsed": 22451672,
+    "external": 3711743,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:24.187
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72712192,
+    "heapTotal": 37371904,
+    "heapUsed": 22807456,
+    "external": 3711743,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:24.230
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80801792,
+    "heapTotal": 37371904,
+    "heapUsed": 23010008,
+    "external": 3730930,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:24.233
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80809984,
+    "heapTotal": 37371904,
+    "heapUsed": 23033800,
+    "external": 3730930,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:25.942
+LEVEL: INFO
+PID: 13380
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84254720,
+    "heapTotal": 37789696,
+    "heapUsed": 23743736,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:27.043
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:27.102
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58580992,
+    "heapTotal": 31666176,
+    "heapUsed": 17896216,
+    "external": 3714199,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:27.262
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73113600,
+    "heapTotal": 38023168,
+    "heapUsed": 22027544,
+    "external": 3714231,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:27.266
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73199616,
+    "heapTotal": 38023168,
+    "heapUsed": 22358296,
+    "external": 3714231,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:27.298
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81276928,
+    "heapTotal": 38285312,
+    "heapUsed": 22811832,
+    "external": 3733418,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:27.299
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81289216,
+    "heapTotal": 38285312,
+    "heapUsed": 22835624,
+    "external": 3733418,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:55:28.214
+LEVEL: INFO
+PID: 19216
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84979712,
+    "heapTotal": 38440960,
+    "heapUsed": 23397832,
+    "external": 3739629,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:52.845
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:52.898
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58146816,
+    "heapTotal": 31608832,
+    "heapUsed": 17117536,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:53.038
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72785920,
+    "heapTotal": 36917248,
+    "heapUsed": 21348864,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:53.041
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72802304,
+    "heapTotal": 36917248,
+    "heapUsed": 21507360,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:53.068
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80887808,
+    "heapTotal": 36917248,
+    "heapUsed": 21825672,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:53.069
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80887808,
+    "heapTotal": 36917248,
+    "heapUsed": 21858648,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:53.985
+LEVEL: INFO
+PID: 21940
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84385792,
+    "heapTotal": 37597184,
+    "heapUsed": 22689648,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:56.517
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:56.602
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58089472,
+    "heapTotal": 31346688,
+    "heapUsed": 17079792,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:56.770
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72716288,
+    "heapTotal": 37179392,
+    "heapUsed": 21132856,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:56.775
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72798208,
+    "heapTotal": 37179392,
+    "heapUsed": 21274288,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:56.817
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80850944,
+    "heapTotal": 37179392,
+    "heapUsed": 21537792,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:56.818
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80871424,
+    "heapTotal": 37441536,
+    "heapUsed": 21813464,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:58:58.548
+LEVEL: INFO
+PID: 22144
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84455424,
+    "heapTotal": 37597184,
+    "heapUsed": 22359688,
+    "external": 3737138,
+    "arrayBuffers": 23012
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:26.714
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:26.767
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 57561088,
+    "heapTotal": 31608832,
+    "heapUsed": 17287864,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:26.911
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72204288,
+    "heapTotal": 37441536,
+    "heapUsed": 21667232,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:26.916
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72208384,
+    "heapTotal": 37441536,
+    "heapUsed": 21859200,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:26.943
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80297984,
+    "heapTotal": 37703680,
+    "heapUsed": 22454408,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:26.944
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 80310272,
+    "heapTotal": 37703680,
+    "heapUsed": 22478296,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:03:27.862
+LEVEL: INFO
+PID: 14744
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 83943424,
+    "heapTotal": 37859328,
+    "heapUsed": 22976816,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:25.407
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:25.461
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58490880,
+    "heapTotal": 31608832,
+    "heapUsed": 17340432,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:25.625
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73228288,
+    "heapTotal": 37441536,
+    "heapUsed": 21310696,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:25.628
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73236480,
+    "heapTotal": 37441536,
+    "heapUsed": 21471544,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:25.660
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81170432,
+    "heapTotal": 37703680,
+    "heapUsed": 22185808,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:25.661
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81182720,
+    "heapTotal": 37703680,
+    "heapUsed": 22209672,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:26.621
+LEVEL: INFO
+PID: 14388
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 85016576,
+    "heapTotal": 37859328,
+    "heapUsed": 22520592,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:40.864
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:40.914
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58781696,
+    "heapTotal": 31346688,
+    "heapUsed": 17442840,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:41.116
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73207808,
+    "heapTotal": 37179392,
+    "heapUsed": 21838416,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:41.120
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73285632,
+    "heapTotal": 37179392,
+    "heapUsed": 21954160,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:41.160
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81039360,
+    "heapTotal": 37441536,
+    "heapUsed": 22402880,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:41.161
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81051648,
+    "heapTotal": 37441536,
+    "heapUsed": 22426776,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:42.858
+LEVEL: INFO
+PID: 16032
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84385792,
+    "heapTotal": 37597184,
+    "heapUsed": 22911104,
+    "external": 3737139,
+    "arrayBuffers": 23013
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:50.549
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:50.614
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58675200,
+    "heapTotal": 32133120,
+    "heapUsed": 16525464,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:50.755
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 72994816,
+    "heapTotal": 37179392,
+    "heapUsed": 20512592,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:50.760
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 73072640,
+    "heapTotal": 37179392,
+    "heapUsed": 20707112,
+    "external": 3711742,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:50.799
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81076224,
+    "heapTotal": 37179392,
+    "heapUsed": 21083960,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:50.800
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81092608,
+    "heapTotal": 37441536,
+    "heapUsed": 21358160,
+    "external": 3730929,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:06:51.741
+LEVEL: INFO
+PID: 5372
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 84574208,
+    "heapTotal": 37859328,
+    "heapUsed": 21951808,
+    "external": 3737140,
+    "arrayBuffers": 23014
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:27.185
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:27.239
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 59932672,
+    "heapTotal": 32452608,
+    "heapUsed": 18225104,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:28.007
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 94089216,
+    "heapTotal": 64733184,
+    "heapUsed": 39330792,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:28.013
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 94289920,
+    "heapTotal": 64733184,
+    "heapUsed": 39439576,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:28.069
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 106090496,
+    "heapTotal": 64733184,
+    "heapUsed": 39703664,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:28.070
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 106102784,
+    "heapTotal": 64733184,
+    "heapUsed": 39727504,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:29.012
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 109690880,
+    "heapTotal": 65413120,
+    "heapUsed": 40629304,
+    "external": 4558154,
+    "arrayBuffers": 786608
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:36.019
+LEVEL: INFO
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: SIGINT received, shutting down gracefully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81432576,
+    "heapTotal": 31395840,
+    "heapUsed": 28780976,
+    "external": 4221122,
+    "arrayBuffers": 452735
+}
+====================================================================================================
+

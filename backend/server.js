@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { config } from "dotenv";
 import socketManager from "./utils/socket-io.js";
 import authRoutes from "./routes/auth.route.js";
+import adminRoutes from "./routes/admin.route.js";
 import {
   errorHandler,
   notFound,
@@ -19,25 +20,23 @@ config();
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
     const allowedOrigins = [
       "http://localhost:3000",
-      "http://localhost:5173", // Vite default port
+      "http://localhost:5173",
       "http://localhost:3001",
       "http://127.0.0.1:3000",
       "http://127.0.0.1:5173",
       process.env.FRONTEND_URL,
-    ].filter(Boolean); // Remove undefined values
-
+    ].filter(Boolean);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: [
     "Origin",
@@ -49,7 +48,7 @@ const corsOptions = {
     "X-CSRF-Token",
   ],
   exposedHeaders: ["set-cookie"],
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200,
 };
 
 const app = express();
@@ -75,8 +74,8 @@ const io = socketManager.init(server);
 app.set("socketManager", socketManager);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
-// Health check endpoint
 app.get("/health", (req, res) => {
   const healthData = {
     status: "healthy",
@@ -92,7 +91,6 @@ app.get("/health", (req, res) => {
   res.status(200).json(healthData);
 });
 
-// Socket.IO status endpoint
 app.get("/socket-status", (req, res) => {
   const socketStatus = {
     connectedUsers: socketManager.getConnectedUsersCount(),
@@ -103,9 +101,6 @@ app.get("/socket-status", (req, res) => {
   res.status(200).json(socketStatus);
 });
 
-// =============================================
-// ERROR HANDLING MIDDLEWARE
-// =============================================
 app.use(validationErrorHandler);
 app.use(databaseErrorHandler);
 app.use(authErrorHandler);
@@ -113,9 +108,6 @@ app.use(rateLimitErrorHandler);
 app.use(notFound);
 app.use(errorHandler);
 
-// =============================================
-// GRACEFUL SHUTDOWN HANDLING
-// =============================================
 const gracefulShutdown = (signal) => {
   educademyLogger.info(`${signal} received, shutting down gracefully`, {
     uptime: process.uptime(),
@@ -123,14 +115,12 @@ const gracefulShutdown = (signal) => {
     connectedUsers: socketManager.getConnectedUsersCount(),
   });
 
-  // Close server first
   server.close((err) => {
     if (err) {
       educademyLogger.error("Error during server shutdown", err);
       process.exit(1);
     }
 
-    // Close Socket.IO connections
     io.close((err) => {
       if (err) {
         educademyLogger.error("Error closing Socket.IO", err);
@@ -142,7 +132,6 @@ const gracefulShutdown = (signal) => {
     });
   });
 
-  // Force close after 10 seconds
   setTimeout(() => {
     educademyLogger.error("Forced shutdown after timeout");
     process.exit(1);
@@ -152,7 +141,6 @@ const gracefulShutdown = (signal) => {
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
-// Handle uncaught exceptions
 process.on("uncaughtException", (error) => {
   educademyLogger.fatal("Uncaught Exception", error, {
     connectedUsers: socketManager.getConnectedUsersCount(),

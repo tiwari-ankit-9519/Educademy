@@ -1179,3 +1179,85 @@ SYSTEM CONTEXT:
 }
 ====================================================================================================
 
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 11:49:45.846
+LEVEL: ERROR
+PID: 8512
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Error closing Socket.IO
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Server is not running.
+  Error Code: ERR_SERVER_NOT_RUNNING
+  Stack Trace:
+Error [ERR_SERVER_NOT_RUNNING]: Server is not running.
+    at Server.close (node:net:2280:12)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:531:35)
+    at emitCloseNT (node:net:2340:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 52215808,
+    "heapTotal": 20295680,
+    "heapUsed": 17828120,
+    "external": 3729524,
+    "arrayBuffers": 16803
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-03 12:14:36.023
+LEVEL: ERROR
+PID: 24268
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Error closing Socket.IO
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Server is not running.
+  Error Code: ERR_SERVER_NOT_RUNNING
+  Stack Trace:
+Error [ERR_SERVER_NOT_RUNNING]: Server is not running.
+    at Server.close (node:net:2280:12)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:531:35)
+    at emitCloseNT (node:net:2340:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:81:21)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 81584128,
+    "heapTotal": 31395840,
+    "heapUsed": 29081976,
+    "external": 4221122,
+    "arrayBuffers": 452735
+}
+====================================================================================================
+
