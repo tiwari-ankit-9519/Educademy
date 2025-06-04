@@ -1909,6 +1909,547 @@ export const getUserActivities = asyncHandler(async (req, res) => {
   }
 });
 
+export const getReactivationRequests = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+
+  const {
+    page = 1,
+    limit = 20,
+    status = "",
+    search = "",
+    startDate = "",
+    endDate = "",
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "getReactivationRequests",
+  });
+
+  try {
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = {};
+
+    if (status) where.status = status;
+
+    if (search) {
+      where.OR = [
+        { userEmail: { contains: search, mode: "insensitive" } },
+        { userName: { contains: search, mode: "insensitive" } },
+        { reason: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate);
+      if (endDate) where.createdAt.lte = new Date(endDate);
+    }
+
+    const [reactivationRequests, totalCount, statusCounts] = await Promise.all([
+      prisma.reactivationRequest.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              role: true,
+              profileImage: true,
+              isActive: true,
+              isVerified: true,
+              lastLogin: true,
+              createdAt: true,
+            },
+          },
+          reviewedBy: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+        skip,
+        take: parseInt(limit),
+        orderBy: { [sortBy]: sortOrder },
+      }),
+      prisma.reactivationRequest.count({ where }),
+      prisma.reactivationRequest.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+      }),
+    ]);
+
+    const enrichedRequests = reactivationRequests.map((request) => ({
+      ...request,
+      requestAge: Math.floor(
+        (new Date() - new Date(request.createdAt)) / (1000 * 60 * 60 * 24)
+      ),
+      userInfo: {
+        name: `${request.user.firstName} ${request.user.lastName}`,
+        email: request.user.email,
+        role: request.user.role,
+        currentStatus: {
+          isActive: request.user.isActive,
+          isVerified: request.user.isVerified,
+        },
+        accountAge: Math.floor(
+          (new Date() - new Date(request.user.createdAt)) /
+            (1000 * 60 * 60 * 24)
+        ),
+        lastLogin: request.user.lastLogin,
+      },
+      reviewerInfo: request.reviewedBy
+        ? `${request.reviewedBy.firstName} ${request.reviewedBy.lastName}`
+        : null,
+      isPending: request.status === "PENDING",
+      isUrgent:
+        request.createdAt &&
+        new Date() - new Date(request.createdAt) > 7 * 24 * 60 * 60 * 1000,
+    }));
+
+    const statusDistribution = statusCounts.reduce((acc, item) => {
+      acc[item.status] = item._count._all;
+      return acc;
+    }, {});
+
+    const urgentRequests = enrichedRequests.filter(
+      (request) => request.isUrgent && request.isPending
+    );
+    const recentRequests = enrichedRequests.filter(
+      (request) =>
+        new Date() - new Date(request.createdAt) < 24 * 60 * 60 * 1000
+    );
+
+    educademyLogger.logBusinessOperation(
+      "GET_REACTIVATION_REQUESTS",
+      "REACTIVATION_REQUEST",
+      req.userAuthId,
+      "SUCCESS",
+      {
+        totalCount,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        filters: { status, search, startDate, endDate },
+        adminId: req.userAuthId,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        reactivationRequests: enrichedRequests,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(totalCount / parseInt(limit)),
+          totalCount,
+          hasNextPage: skip + parseInt(limit) < totalCount,
+          hasPrevPage: parseInt(page) > 1,
+        },
+        analytics: {
+          statusDistribution,
+          urgentRequests: urgentRequests.length,
+          recentRequests: recentRequests.length,
+          averageResponseTime:
+            enrichedRequests
+              .filter((r) => r.reviewedAt)
+              .reduce((sum, r) => {
+                const responseTime =
+                  new Date(r.reviewedAt) - new Date(r.createdAt);
+                return sum + responseTime / (1000 * 60 * 60 * 24);
+              }, 0) / enrichedRequests.filter((r) => r.reviewedAt).length || 0,
+        },
+        summary: {
+          totalRequests: totalCount,
+          pendingRequests: statusDistribution.PENDING || 0,
+          approvedRequests: statusDistribution.APPROVED || 0,
+          rejectedRequests: statusDistribution.REJECTED || 0,
+          urgentRequests: urgentRequests.length,
+          requestsToday: recentRequests.length,
+        },
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Get reactivation requests failed", error, {
+      userId: req.userAuthId,
+      business: {
+        operation: "GET_REACTIVATION_REQUESTS",
+        entity: "REACTIVATION_REQUEST",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve reactivation requests",
+      requestId,
+    });
+  }
+});
+
+export const reviewReactivationRequest = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+  const { reactivationRequestId } = req.params;
+  const { action, adminNotes, reason } = req.body;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "reviewReactivationRequest",
+  });
+
+  try {
+    if (!["APPROVE", "REJECT"].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: "Action must be either APPROVE or REJECT",
+      });
+    }
+
+    const reactivationRequest = await prisma.reactivationRequest.findUnique({
+      where: { id: reactivationRequestId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    if (!reactivationRequest) {
+      return res.status(404).json({
+        success: false,
+        message: "Reactivation request not found",
+      });
+    }
+
+    if (reactivationRequest.status !== "PENDING") {
+      return res.status(400).json({
+        success: false,
+        message: "Request has already been reviewed",
+      });
+    }
+
+    const updateData = {
+      status: action === "APPROVE" ? "APPROVED" : "REJECTED",
+      reviewedAt: new Date(),
+      reviewedById: req.userAuthId,
+      adminNotes: adminNotes || "",
+      rejectionReason: action === "REJECT" ? reason : null,
+    };
+
+    const updatedRequest = await prisma.reactivationRequest.update({
+      where: { id: reactivationRequestId },
+      data: updateData,
+    });
+
+    if (action === "APPROVE") {
+      await prisma.user.update({
+        where: { id: reactivationRequest.userId },
+        data: { isActive: true },
+      });
+
+      await prisma.notification.create({
+        data: {
+          type: "SYSTEM_ANNOUNCEMENT",
+          title: "Account Reactivated",
+          message:
+            "Your account reactivation request has been approved. Your account is now active.",
+          userId: reactivationRequest.userId,
+          priority: "HIGH",
+          data: {
+            reactivationRequestId,
+            approvedBy: req.userAuthId,
+            adminNotes: adminNotes || "",
+          },
+        },
+      });
+
+      educademyLogger.logAuditTrail(
+        "APPROVE_REACTIVATION_REQUEST",
+        "USER",
+        reactivationRequest.userId,
+        { isActive: false },
+        { isActive: true },
+        req.userAuthId
+      );
+    } else {
+      await prisma.notification.create({
+        data: {
+          type: "SYSTEM_ANNOUNCEMENT",
+          title: "Account Reactivation Denied",
+          message: `Your account reactivation request has been denied. ${
+            reason ? `Reason: ${reason}` : ""
+          }`,
+          userId: reactivationRequest.userId,
+          priority: "NORMAL",
+          data: {
+            reactivationRequestId,
+            rejectedBy: req.userAuthId,
+            rejectionReason: reason || "",
+            adminNotes: adminNotes || "",
+          },
+        },
+      });
+    }
+
+    educademyLogger.logBusinessOperation(
+      "REVIEW_REACTIVATION_REQUEST",
+      "REACTIVATION_REQUEST",
+      reactivationRequestId,
+      "SUCCESS",
+      {
+        action,
+        userId: reactivationRequest.userId,
+        userEmail: reactivationRequest.userEmail,
+        adminId: req.userAuthId,
+        approved: action === "APPROVE",
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Reactivation request ${action.toLowerCase()}ed successfully`,
+      data: {
+        reactivationRequest: updatedRequest,
+        userReactivated: action === "APPROVE",
+        action,
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Review reactivation request failed", error, {
+      userId: req.userAuthId,
+      reactivationRequestId,
+      action,
+      business: {
+        operation: "REVIEW_REACTIVATION_REQUEST",
+        entity: "REACTIVATION_REQUEST",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to review reactivation request",
+      requestId,
+    });
+  }
+});
+
+export const getReactivationRequestDetails = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+  const { reactivationRequestId } = req.params;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "getReactivationRequestDetails",
+  });
+
+  try {
+    const reactivationRequest = await prisma.reactivationRequest.findUnique({
+      where: { id: reactivationRequestId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            profileImage: true,
+            isActive: true,
+            isVerified: true,
+            lastLogin: true,
+            createdAt: true,
+            updatedAt: true,
+            country: true,
+            phoneNumber: true,
+          },
+        },
+        reviewedBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!reactivationRequest) {
+      return res.status(404).json({
+        success: false,
+        message: "Reactivation request not found",
+      });
+    }
+
+    const userActivity = await prisma.activity.findMany({
+      where: { userId: reactivationRequest.userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        action: true,
+        details: true,
+        createdAt: true,
+        ipAddress: true,
+      },
+    });
+
+    const userSessions = await prisma.session.findMany({
+      where: { userId: reactivationRequest.userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        createdAt: true,
+        expiresAt: true,
+        device: true,
+        ipAddress: true,
+      },
+    });
+
+    const previousReactivationRequests =
+      await prisma.reactivationRequest.findMany({
+        where: {
+          userId: reactivationRequest.userId,
+          id: { not: reactivationRequestId },
+        },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          reason: true,
+          status: true,
+          createdAt: true,
+          reviewedAt: true,
+          rejectionReason: true,
+        },
+      });
+
+    const enrichedRequest = {
+      ...reactivationRequest,
+      requestAge: Math.floor(
+        (new Date() - new Date(reactivationRequest.createdAt)) /
+          (1000 * 60 * 60 * 24)
+      ),
+      userInfo: {
+        ...reactivationRequest.user,
+        accountAge: Math.floor(
+          (new Date() - new Date(reactivationRequest.user.createdAt)) /
+            (1000 * 60 * 60 * 24)
+        ),
+        daysSinceLastLogin: reactivationRequest.user.lastLogin
+          ? Math.floor(
+              (new Date() - new Date(reactivationRequest.user.lastLogin)) /
+                (1000 * 60 * 60 * 24)
+            )
+          : null,
+      },
+      userActivity,
+      userSessions,
+      previousRequests: previousReactivationRequests,
+      riskAssessment: {
+        accountAge: Math.floor(
+          (new Date() - new Date(reactivationRequest.user.createdAt)) /
+            (1000 * 60 * 60 * 24)
+        ),
+        previousRequests: previousReactivationRequests.length,
+        lastLoginDays: reactivationRequest.user.lastLogin
+          ? Math.floor(
+              (new Date() - new Date(reactivationRequest.user.lastLogin)) /
+                (1000 * 60 * 60 * 24)
+            )
+          : null,
+        recentActivity: userActivity.length,
+        riskLevel: assessReactivationRisk({
+          accountAge: Math.floor(
+            (new Date() - new Date(reactivationRequest.user.createdAt)) /
+              (1000 * 60 * 60 * 24)
+          ),
+          previousRequests: previousReactivationRequests.length,
+          recentActivity: userActivity.length,
+          verified: reactivationRequest.user.isVerified,
+        }),
+      },
+    };
+
+    educademyLogger.logBusinessOperation(
+      "GET_REACTIVATION_REQUEST_DETAILS",
+      "REACTIVATION_REQUEST",
+      reactivationRequestId,
+      "SUCCESS",
+      {
+        userId: reactivationRequest.userId,
+        status: reactivationRequest.status,
+        adminId: req.userAuthId,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        reactivationRequest: enrichedRequest,
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Get reactivation request details failed", error, {
+      userId: req.userAuthId,
+      reactivationRequestId,
+      business: {
+        operation: "GET_REACTIVATION_REQUEST_DETAILS",
+        entity: "REACTIVATION_REQUEST",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve reactivation request details",
+      requestId,
+    });
+  }
+});
+
+function assessReactivationRisk({
+  accountAge,
+  previousRequests,
+  recentActivity,
+  verified,
+}) {
+  let riskScore = 0;
+
+  if (accountAge < 30) riskScore += 2;
+  else if (accountAge < 90) riskScore += 1;
+
+  if (previousRequests > 2) riskScore += 3;
+  else if (previousRequests > 0) riskScore += 1;
+
+  if (recentActivity < 2) riskScore += 2;
+  else if (recentActivity < 5) riskScore += 1;
+
+  if (!verified) riskScore += 2;
+
+  if (riskScore >= 6) return "HIGH";
+  if (riskScore >= 3) return "MEDIUM";
+  return "LOW";
+}
+
 export const updateUserStatus = asyncHandler(async (req, res) => {
   const requestId = Math.random().toString(36).substr(2, 9);
   const { userId } = req.params;
@@ -1960,11 +2501,13 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
       req.userAuthId
     );
 
+    // Handle account activation/deactivation
     if (isActive !== undefined && isActive !== currentUser.isActive) {
       const statusMessage = isActive
         ? "Your account has been activated"
         : "Your account has been deactivated";
 
+      // Create in-app notification
       await prisma.notification.create({
         data: {
           type: "SYSTEM_ANNOUNCEMENT",
@@ -1978,6 +2521,124 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
           },
         },
       });
+
+      // Send email notification (CRITICAL for deactivated accounts)
+      if (isActive) {
+        // Account activated - user can now login
+        emailService
+          .sendAccountActivationEmail({
+            email: currentUser.email,
+            firstName: currentUser.firstName,
+            reason: reason || "Administrative review completed",
+            loginUrl: `${process.env.FRONTEND_URL}/login`,
+          })
+          .catch((err) => {
+            educademyLogger.error(
+              "Failed to send account activation email",
+              err,
+              {
+                userId: currentUser.id,
+                email: currentUser.email,
+              }
+            );
+          });
+      } else {
+        // Account deactivated - user needs to know why
+        emailService
+          .sendAccountDeactivationEmail({
+            email: currentUser.email,
+            firstName: currentUser.firstName,
+            reason: reason || "Administrative action",
+            supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+            appealUrl: `${process.env.FRONTEND_URL}/appeal`,
+          })
+          .catch((err) => {
+            educademyLogger.error(
+              "Failed to send account deactivation email",
+              err,
+              {
+                userId: currentUser.id,
+                email: currentUser.email,
+              }
+            );
+          });
+      }
+    }
+
+    // Handle email verification status change
+    if (isVerified !== undefined && isVerified !== currentUser.isVerified) {
+      if (isVerified) {
+        // Email verified by admin
+        emailService
+          .sendEmailVerificationConfirmation({
+            email: currentUser.email,
+            firstName: currentUser.firstName,
+            verifiedBy: "administrator",
+            loginUrl: `${process.env.FRONTEND_URL}/login`,
+          })
+          .catch((err) => {
+            educademyLogger.error(
+              "Failed to send email verification confirmation",
+              err,
+              {
+                userId: currentUser.id,
+                email: currentUser.email,
+              }
+            );
+          });
+      } else {
+        // Email verification revoked
+        emailService
+          .sendEmailVerificationRevoked({
+            email: currentUser.email,
+            firstName: currentUser.firstName,
+            reason: reason || "Administrative action",
+            supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+          })
+          .catch((err) => {
+            educademyLogger.error(
+              "Failed to send email verification revocation notice",
+              err,
+              {
+                userId: currentUser.id,
+                email: currentUser.email,
+              }
+            );
+          });
+      }
+    }
+
+    // If both status and verification changed, send combined notification
+    if (
+      isActive !== undefined &&
+      isVerified !== undefined &&
+      isActive !== currentUser.isActive &&
+      isVerified !== currentUser.isVerified
+    ) {
+      emailService
+        .sendAccountStatusUpdate({
+          email: currentUser.email,
+          firstName: currentUser.firstName,
+          changes: {
+            accountActivated: isActive && !currentUser.isActive,
+            accountDeactivated: !isActive && currentUser.isActive,
+            emailVerified: isVerified && !currentUser.isVerified,
+            emailUnverified: !isVerified && currentUser.isVerified,
+          },
+          reason: reason || "Administrative action",
+          loginUrl: `${process.env.FRONTEND_URL}/login`,
+          supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+        })
+        .catch((err) => {
+          educademyLogger.error(
+            "Failed to send combined account status update email",
+            err,
+            {
+              userId: currentUser.id,
+              email: currentUser.email,
+            }
+          );
+        });
     }
 
     educademyLogger.logBusinessOperation(
@@ -1989,15 +2650,27 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
         changes: updateData,
         reason,
         adminId: req.userAuthId,
+        emailSent: true,
       }
     );
 
     res.status(200).json({
       success: true,
-      message: "User status updated successfully",
+      message:
+        "User status updated successfully. Email notification sent to user.",
       data: {
         user: updatedUser,
         changes: updateData,
+        emailNotification: {
+          sent: true,
+          recipient: currentUser.email,
+          type:
+            isActive !== undefined
+              ? isActive
+                ? "activation"
+                : "deactivation"
+              : "verification_update",
+        },
       },
     });
   } catch (error) {

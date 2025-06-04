@@ -816,4 +816,341 @@ export const emailTemplates = {
     </body>
     </html>
   `,
+
+  reactivationRequestConfirmation: ({
+    firstName,
+    requestId,
+    submittedAt,
+    supportEmail,
+    statusCheckUrl,
+  }) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Request Received</h1>
+        <p style="color: #e3f2fd; margin: 10px 0 0 0;">We've got your reactivation request</p>
+      </div>
+      
+      <div style="padding: 30px; background: white; margin: 0;">
+        <h2 style="color: #333; margin-top: 0;">Hello ${firstName},</h2>
+        
+        <p style="color: #666; line-height: 1.6; font-size: 16px;">
+          Thank you for submitting your account reactivation request. We've received your request and our team will review it shortly.
+        </p>
+        
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #007bff;">
+          <h3 style="margin: 0 0 10px 0; color: #1565c0;">Request Details</h3>
+          <p style="margin: 5px 0; color: #1565c0;"><strong>Request ID:</strong> ${requestId}</p>
+          <p style="margin: 5px 0; color: #1565c0;"><strong>Submitted:</strong> ${submittedAt}</p>
+          <p style="margin: 5px 0; color: #1565c0;"><strong>Status:</strong> Under Review</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">What happens next?</h3>
+          <div style="color: #666; line-height: 1.8;">
+            <div style="margin-bottom: 10px;">
+              <span style="color: #28a745; font-weight: bold;">1.</span> Our team reviews your request (1-3 business days)
+            </div>
+            <div style="margin-bottom: 10px;">
+              <span style="color: #ffc107; font-weight: bold;">2.</span> We'll email you with the decision
+            </div>
+            <div style="margin-bottom: 10px;">
+              <span style="color: #007bff; font-weight: bold;">3.</span> If approved, your account will be reactivated immediately
+            </div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${statusCheckUrl}" 
+             style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            Check Request Status
+          </a>
+        </div>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 25px 0;">
+          <p style="margin: 0; color: #856404; font-size: 14px;">
+            <strong>Need help?</strong> Contact our support team at 
+            <a href="mailto:${supportEmail}" style="color: #856404;">${supportEmail}</a>
+          </p>
+        </div>
+      </div>
+      
+      <div style="background: #343a40; color: white; padding: 20px; text-align: center;">
+        <p style="margin: 0; font-size: 14px;">© 2024 Educademy. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  // NEW TEMPLATE 2: Account Activation
+  accountActivation: ({ firstName, reason, loginUrl, supportEmail }) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 32px;">🎉 Welcome Back!</h1>
+        <p style="color: #d4edda; margin: 10px 0 0 0; font-size: 18px;">Your account is now active</p>
+      </div>
+      
+      <div style="padding: 30px; background: white; margin: 0;">
+        <h2 style="color: #333; margin-top: 0;">Great news, ${firstName}!</h2>
+        
+        <p style="color: #666; line-height: 1.6; font-size: 16px;">
+          Your Educademy account has been successfully activated and you now have full access to all platform features.
+        </p>
+        
+        <div style="background: #d4edda; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #28a745;">
+          <h3 style="margin: 0 0 10px 0; color: #155724;">✅ Account Activated</h3>
+          <p style="margin: 0; color: #155724;"><strong>Reason:</strong> ${reason}</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${loginUrl}" 
+             style="background: #28a745; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
+            Login to Your Account
+          </a>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">You can now enjoy:</h3>
+          <div style="color: #666; line-height: 1.8;">
+            <div style="margin-bottom: 8px;">✅ Access to all your enrolled courses</div>
+            <div style="margin-bottom: 8px;">✅ Continue your learning progress</div>
+            <div style="margin-bottom: 8px;">✅ Interact with instructors and students</div>
+            <div style="margin-bottom: 8px;">✅ Download certificates and resources</div>
+            <div style="margin-bottom: 8px;">✅ Participate in discussions and Q&A</div>
+          </div>
+        </div>
+        
+        <p style="color: #666; line-height: 1.6; text-align: center; font-style: italic;">
+          Thank you for being part of the Educademy community!
+        </p>
+        
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 25px 0; text-align: center;">
+          <p style="margin: 0; color: #1565c0; font-size: 14px;">
+            Questions? Contact us at <a href="mailto:${supportEmail}" style="color: #1565c0;">${supportEmail}</a>
+          </p>
+        </div>
+      </div>
+      
+      <div style="background: #343a40; color: white; padding: 20px; text-align: center;">
+        <p style="margin: 0; font-size: 14px;">© 2024 Educademy. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  // NEW TEMPLATE 3: Account Deactivation
+  accountDeactivation: ({
+    firstName,
+    reason,
+    supportEmail,
+    appealUrl,
+    contactUrl,
+  }) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Account Status Update</h1>
+        <p style="color: #f8d7da; margin: 10px 0 0 0;">Important information about your account</p>
+      </div>
+      
+      <div style="padding: 30px; background: white; margin: 0;">
+        <h2 style="color: #333; margin-top: 0;">Hello ${firstName},</h2>
+        
+        <p style="color: #666; line-height: 1.6; font-size: 16px;">
+          We're writing to inform you that your Educademy account has been temporarily deactivated.
+        </p>
+        
+        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ffc107;">
+          <h3 style="margin: 0 0 10px 0; color: #856404;">⚠️ Account Deactivated</h3>
+          <p style="margin: 0; color: #856404;"><strong>Reason:</strong> ${reason}</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">What this means:</h3>
+          <div style="color: #666; line-height: 1.8;">
+            <div style="margin-bottom: 8px;">❌ You cannot currently access your account</div>
+            <div style="margin-bottom: 8px;">💾 Your courses and progress are safely preserved</div>
+            <div style="margin-bottom: 8px;">📝 You can submit a reactivation request</div>
+            <div style="margin-bottom: 8px;">📧 We'll review your request within 1-3 business days</div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${appealUrl}" 
+             style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 0 10px 10px 0;">
+            Request Reactivation
+          </a>
+          <a href="${contactUrl}" 
+             style="background: #6c757d; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 0 0 10px 10px;">
+            Contact Support
+          </a>
+        </div>
+        
+        <div style="background: #f8d7da; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 10px 0; color: #721c24;">Important Notes:</h3>
+          <div style="color: #721c24; line-height: 1.6; font-size: 14px;">
+            <p style="margin: 0 0 10px 0;">• This action was taken to maintain platform safety and quality</p>
+            <p style="margin: 0 0 10px 0;">• You can appeal this decision through the reactivation request process</p>
+            <p style="margin: 0;">• Your learning data and certificates remain secure during this time</p>
+          </div>
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 25px 0; text-align: center;">
+          <p style="margin: 0; color: #1565c0; font-size: 14px;">
+            <strong>Need assistance?</strong> Email us at 
+            <a href="mailto:${supportEmail}" style="color: #1565c0;">${supportEmail}</a>
+          </p>
+        </div>
+      </div>
+      
+      <div style="background: #343a40; color: white; padding: 20px; text-align: center;">
+        <p style="margin: 0; font-size: 14px;">© 2024 Educademy. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  // NEW TEMPLATE 4: Email Verification Confirmation
+  emailVerificationConfirmation: ({
+    firstName,
+    verifiedBy,
+    loginUrl,
+    dashboardUrl,
+  }) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 32px;">✅ Email Verified!</h1>
+        <p style="color: #bee5eb; margin: 10px 0 0 0; font-size: 18px;">Your email verification is confirmed</p>
+      </div>
+      
+      <div style="padding: 30px; background: white; margin: 0;">
+        <h2 style="color: #333; margin-top: 0;">Congratulations, ${firstName}!</h2>
+        
+        <p style="color: #666; line-height: 1.6; font-size: 16px;">
+          Your email address has been successfully verified ${
+            verifiedBy === "administrator"
+              ? "by our administrative team"
+              : "through the verification process"
+          }.
+        </p>
+        
+        <div style="background: #d1ecf1; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #17a2b8;">
+          <h3 style="margin: 0 0 10px 0; color: #0c5460;">✅ Verification Complete</h3>
+          <p style="margin: 0; color: #0c5460;">Your account now has full access to all Educademy features and services.</p>
+        </div>
+        
+        <div style="background: #d4edda; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #155724;">🎉 You now have access to:</h3>
+          <div style="color: #155724; line-height: 1.8;">
+            <div style="margin-bottom: 8px;">✅ Full course enrollment and access</div>
+            <div style="margin-bottom: 8px;">✅ Certificate downloads and verification</div>
+            <div style="margin-bottom: 8px;">✅ Community discussions and networking</div>
+            <div style="margin-bottom: 8px;">✅ Instructor messaging and support</div>
+            <div style="margin-bottom: 8px;">✅ Premium features and content</div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${loginUrl}" 
+             style="background: #17a2b8; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 0 10px 10px 0;">
+            Login Now
+          </a>
+          <a href="${dashboardUrl}" 
+             style="background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 0 0 10px 10px;">
+            Go to Dashboard
+          </a>
+        </div>
+        
+        <p style="color: #666; line-height: 1.6; text-align: center; font-style: italic; margin-top: 30px;">
+          Welcome to the verified Educademy community! Start exploring courses and connect with learners worldwide.
+        </p>
+      </div>
+      
+      <div style="background: #343a40; color: white; padding: 20px; text-align: center;">
+        <p style="margin: 0; font-size: 14px;">© 2024 Educademy. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  // NEW TEMPLATE 5: Email Verification Revoked
+  emailVerificationRevoked: ({
+    firstName,
+    reason,
+    supportEmail,
+    verifyUrl,
+    contactUrl,
+  }) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
+      <div style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); padding: 30px; text-align: center;">
+        <h1 style="color: #333; margin: 0; font-size: 28px;">⚠️ Verification Status Update</h1>
+        <p style="color: #664d03; margin: 10px 0 0 0;">Your email verification requires attention</p>
+      </div>
+      
+      <div style="padding: 30px; background: white; margin: 0;">
+        <h2 style="color: #333; margin-top: 0;">Hello ${firstName},</h2>
+        
+        <p style="color: #666; line-height: 1.6; font-size: 16px;">
+          We're writing to inform you that your email verification status has been updated and requires re-verification to maintain full account access.
+        </p>
+        
+        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ffc107;">
+          <h3 style="margin: 0 0 10px 0; color: #856404;">⚠️ Verification Status Changed</h3>
+          <p style="margin: 0; color: #856404;"><strong>Reason:</strong> ${reason}</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">What this means:</h3>
+          <div style="color: #666; line-height: 1.8;">
+            <div style="margin-bottom: 8px;">📧 Your email verification has been reset</div>
+            <div style="margin-bottom: 8px;">🔒 Some account features may be temporarily limited</div>
+            <div style="margin-bottom: 8px;">✅ You can re-verify your email address</div>
+            <div style="margin-bottom: 8px;">📱 Your account and data remain secure</div>
+          </div>
+        </div>
+        
+        <div style="background: #e2e3e5; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">Currently restricted features:</h3>
+          <div style="color: #6c757d; line-height: 1.8;">
+            <div style="margin-bottom: 8px;">• Certificate downloads may be limited</div>
+            <div style="margin-bottom: 8px;">• Some premium features may be restricted</div>
+            <div style="margin-bottom: 8px;">• Course completion notifications may be paused</div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verifyUrl}" 
+             style="background: #ffc107; color: #333; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 0 10px 10px 0;">
+            Verify Email Now
+          </a>
+          <a href="${contactUrl}" 
+             style="background: #6c757d; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 0 0 10px 10px;">
+            Contact Support
+          </a>
+        </div>
+        
+        <div style="background: #d1ecf1; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="margin: 0 0 10px 0; color: #0c5460;">📋 Next Steps:</h3>
+          <div style="color: #0c5460; line-height: 1.6; font-size: 14px;">
+            <p style="margin: 0 0 10px 0;"><strong>1.</strong> Click "Verify Email Now" to start the re-verification process</p>
+            <p style="margin: 0 0 10px 0;"><strong>2.</strong> Check your inbox for the verification email</p>
+            <p style="margin: 0 0 10px 0;"><strong>3.</strong> Complete the verification to restore full access</p>
+            <p style="margin: 0;"><strong>4.</strong> Contact support if you need assistance</p>
+          </div>
+        </div>
+        
+        <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 25px 0;">
+          <p style="margin: 0; color: #721c24; font-size: 14px;">
+            <strong>Important:</strong> This change was made to ensure account security and platform integrity. 
+            If you believe this was done in error, please contact our support team immediately.
+          </p>
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 25px 0; text-align: center;">
+          <p style="margin: 0; color: #1565c0; font-size: 14px;">
+            <strong>Need help?</strong> Our support team is here to assist you at 
+            <a href="mailto:${supportEmail}" style="color: #1565c0;">${supportEmail}</a>
+          </p>
+        </div>
+      </div>
+      
+      <div style="background: #343a40; color: white; padding: 20px; text-align: center;">
+        <p style="margin: 0; font-size: 14px;">© 2024 Educademy. All rights reserved.</p>
+      </div>
+    </div>
+     `,
 };

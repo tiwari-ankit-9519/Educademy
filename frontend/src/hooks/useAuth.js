@@ -10,9 +10,17 @@ import {
   selectResetPasswordStep,
   selectProfileLoading,
   selectImageUploadLoading,
+  selectDeactivatedUserData,
+  selectNeedsReactivation,
+  selectReactivationLoading,
+  selectReactivationStatus,
+  selectReactivationStatusLoading,
+  selectReactivationRequestData,
   registerUser,
   verifyOTP,
   loginUser,
+  requestAccountReactivation,
+  checkReactivationStatus,
   requestPasswordReset,
   resetPassword,
   exchangeAuthCode,
@@ -26,6 +34,10 @@ import {
   setRegistrationStep,
   setResetPasswordStep,
   updateUserData,
+  clearDeactivatedUserData,
+  setDeactivatedUserData,
+  clearReactivationStatus,
+  setReactivationRequestData,
 } from "@/features/authSlice";
 
 export const useAuth = () => {
@@ -40,6 +52,14 @@ export const useAuth = () => {
   const resetPasswordStep = useSelector(selectResetPasswordStep);
   const profileLoading = useSelector(selectProfileLoading);
   const imageUploadLoading = useSelector(selectImageUploadLoading);
+  const deactivatedUserData = useSelector(selectDeactivatedUserData);
+  const needsReactivation = useSelector(selectNeedsReactivation);
+  const reactivationLoading = useSelector(selectReactivationLoading);
+  const reactivationStatus = useSelector(selectReactivationStatus);
+  const reactivationStatusLoading = useSelector(
+    selectReactivationStatusLoading
+  );
+  const reactivationRequestData = useSelector(selectReactivationRequestData);
 
   const register = useCallback(
     (userData) => {
@@ -58,6 +78,20 @@ export const useAuth = () => {
   const login = useCallback(
     (credentials) => {
       return dispatch(loginUser(credentials));
+    },
+    [dispatch]
+  );
+
+  const requestReactivation = useCallback(
+    (reactivationData) => {
+      return dispatch(requestAccountReactivation(reactivationData));
+    },
+    [dispatch]
+  );
+
+  const checkReactivationRequestStatus = useCallback(
+    (userId) => {
+      return dispatch(checkReactivationStatus(userId));
     },
     [dispatch]
   );
@@ -138,6 +172,28 @@ export const useAuth = () => {
     [dispatch]
   );
 
+  const handleClearDeactivatedUserData = useCallback(() => {
+    dispatch(clearDeactivatedUserData());
+  }, [dispatch]);
+
+  const handleSetDeactivatedUserData = useCallback(
+    (userData) => {
+      dispatch(setDeactivatedUserData(userData));
+    },
+    [dispatch]
+  );
+
+  const handleClearReactivationStatus = useCallback(() => {
+    dispatch(clearReactivationStatus());
+  }, [dispatch]);
+
+  const handleSetReactivationRequestData = useCallback(
+    (requestData) => {
+      dispatch(setReactivationRequestData(requestData));
+    },
+    [dispatch]
+  );
+
   const initiateGoogleAuth = useCallback(() => {
     const authUrl = `${
       import.meta.env.VITE_API_URL || "http://localhost:3000/api"
@@ -167,22 +223,73 @@ export const useAuth = () => {
   );
 
   const isEmailVerified = useCallback(() => {
-    return user?.emailVerified || false;
+    return user?.isVerified || false;
+  }, [user]);
+
+  const isAccountActive = useCallback(() => {
+    return user?.isActive || false;
   }, [user]);
 
   const getInitials = useCallback(() => {
-    if (!user?.name) return "U";
-    return user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    if (!user?.firstName && !user?.lastName) return "U";
+    const firstName = user?.firstName || "";
+    const lastName = user?.lastName || "";
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   }, [user]);
 
   const getDisplayName = useCallback(() => {
-    return user?.name || user?.email?.split("@")[0] || "User";
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return user?.firstName || user?.email?.split("@")[0] || "User";
   }, [user]);
+
+  const getFullUserData = useCallback(() => {
+    if (!user) return null;
+    return {
+      ...user,
+      displayName: getDisplayName(),
+      initials: getInitials(),
+      isEmailVerified: isEmailVerified(),
+      isAccountActive: isAccountActive(),
+    };
+  }, [user, getDisplayName, getInitials, isEmailVerified, isAccountActive]);
+
+  const getReactivationStatusInfo = useCallback(() => {
+    if (!reactivationStatus) return null;
+
+    return {
+      ...reactivationStatus,
+      isApproved: reactivationStatus.status === "APPROVED",
+      isRejected: reactivationStatus.status === "REJECTED",
+      isPending: reactivationStatus.status === "PENDING",
+      canRequestAgain: reactivationStatus.status === "REJECTED",
+      statusText:
+        {
+          PENDING: "Under Review",
+          APPROVED: "Approved",
+          REJECTED: "Rejected",
+        }[reactivationStatus.status] || "Unknown",
+    };
+  }, [reactivationStatus]);
+
+  const hasExistingReactivationRequest = useCallback(() => {
+    return !!(reactivationRequestData || deactivatedUserData?.existingRequest);
+  }, [reactivationRequestData, deactivatedUserData]);
+
+  const getExistingRequestInfo = useCallback(() => {
+    const existingRequest =
+      reactivationRequestData || deactivatedUserData?.existingRequest;
+    if (!existingRequest) return null;
+
+    return {
+      id: existingRequest.id,
+      submittedAt: existingRequest.submittedAt || existingRequest.createdAt,
+      status: existingRequest.status,
+      hasPendingRequest: existingRequest.status === "PENDING",
+      canSubmitNew: existingRequest.status !== "PENDING",
+    };
+  }, [reactivationRequestData, deactivatedUserData]);
 
   return {
     authState,
@@ -194,9 +301,17 @@ export const useAuth = () => {
     resetPasswordStep,
     profileLoading,
     imageUploadLoading,
+    deactivatedUserData,
+    needsReactivation,
+    reactivationLoading,
+    reactivationStatus,
+    reactivationStatusLoading,
+    reactivationRequestData,
     register,
     verifyOtp,
     login,
+    requestReactivation,
+    checkReactivationRequestStatus,
     requestReset,
     resetPass,
     exchangeCode,
@@ -210,12 +325,21 @@ export const useAuth = () => {
     setRegistrationStep: handleSetRegistrationStep,
     setResetPasswordStep: handleSetResetPasswordStep,
     updateUserData: handleUpdateUserData,
+    clearDeactivatedUserData: handleClearDeactivatedUserData,
+    setDeactivatedUserData: handleSetDeactivatedUserData,
+    clearReactivationStatus: handleClearReactivationStatus,
+    setReactivationRequestData: handleSetReactivationRequestData,
     initiateGoogleAuth,
     initiateGitHubAuth,
     hasRole,
     hasPermission,
     isEmailVerified,
+    isAccountActive,
     getInitials,
     getDisplayName,
+    getFullUserData,
+    getReactivationStatusInfo,
+    hasExistingReactivationRequest,
+    getExistingRequestInfo,
   };
 };

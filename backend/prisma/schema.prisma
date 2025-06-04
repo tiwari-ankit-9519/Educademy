@@ -8,51 +8,53 @@ datasource db {
 }
 
 model User {
-  id                   String                @id @default(cuid())
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  email                String                @unique
-  passwordHash         String?
-  salt                 String?
-  firstName            String
-  lastName             String
-  profileImage         String?
-  bio                  String?               @db.Text
-  role                 UserRole              @default(STUDENT)
-  isVerified           Boolean               @default(false)
-  isActive             Boolean               @default(true)
-  lastLogin            DateTime?
-  timezone             String                @default("UTC")
-  language             String                @default("en")
-  country              String?
-  phoneNumber          String?
-  dateOfBirth          DateTime?
-  website              String?
-  linkedinProfile      String?
-  twitterProfile       String?
-  githubProfile        String?
-  socialLogins         SocialLogin[]
-  studentProfile       Student?
-  instructorProfile    Instructor?
-  adminProfile         Admin?
-  notifications        Notification[]
-  activities           Activity[]
-  sessions             Session[]
-  userActivities       UserActivity[]
-  deviceSessions       DeviceSession[]
-  notificationSettings NotificationSettings?
-  discussions          Discussion[]
-  discussionReplies    DiscussionReply[]
-  reviews              Review[]
-  reviewReplies        ReviewReply[]
-  messages             Message[]             @relation("MessageSender")
-  receivedMessages     Message[]             @relation("MessageReceiver")
-  followers            Follow[]              @relation("UserFollowing")
-  following            Follow[]              @relation("UserFollowers")
-  bookmarks            Bookmark[]
-  notes                Note[]
-  couponsCreated       Coupon[]
-  couponUsages         CouponUsage[]
+  id                           String                @id @default(cuid())
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
+  email                        String                @unique
+  passwordHash                 String?
+  salt                         String?
+  firstName                    String
+  lastName                     String
+  profileImage                 String?
+  bio                          String?               @db.Text
+  role                         UserRole              @default(STUDENT)
+  isVerified                   Boolean               @default(false)
+  isActive                     Boolean               @default(true)
+  lastLogin                    DateTime?
+  timezone                     String                @default("UTC")
+  language                     String                @default("en")
+  country                      String?
+  phoneNumber                  String?
+  dateOfBirth                  DateTime?
+  website                      String?
+  linkedinProfile              String?
+  twitterProfile               String?
+  githubProfile                String?
+  socialLogins                 SocialLogin[]
+  studentProfile               Student?
+  instructorProfile            Instructor?
+  adminProfile                 Admin?
+  notifications                Notification[]
+  activities                   Activity[]
+  sessions                     Session[]
+  userActivities               UserActivity[]
+  deviceSessions               DeviceSession[]
+  notificationSettings         NotificationSettings?
+  discussions                  Discussion[]
+  discussionReplies            DiscussionReply[]
+  reviews                      Review[]
+  reviewReplies                ReviewReply[]
+  messages                     Message[]             @relation("MessageSender")
+  receivedMessages             Message[]             @relation("MessageReceiver")
+  followers                    Follow[]              @relation("UserFollowing")
+  following                    Follow[]              @relation("UserFollowers")
+  bookmarks                    Bookmark[]
+  notes                        Note[]
+  couponsCreated               Coupon[]
+  couponUsages                 CouponUsage[]
+  reactivationRequests         ReactivationRequest[]
+  reviewedReactivationRequests ReactivationRequest[] @relation("ReviewedReactivationRequests")
 
   @@index([email])
   @@index([role])
@@ -167,6 +169,38 @@ model Admin {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model ReactivationRequest {
+  id              String                    @id @default(cuid())
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  userEmail       String
+  userName        String
+  reason          String                    @db.Text
+  additionalInfo  String?                   @db.Text
+  status          ReactivationRequestStatus @default(PENDING)
+  reviewedAt      DateTime?
+  adminNotes      String?                   @db.Text
+  rejectionReason String?                   @db.Text
+
+  // Foreign keys
+  userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewedById String?
+  reviewedBy   User?   @relation("ReviewedReactivationRequests", fields: [reviewedById], references: [id])
+
+  @@index([userId])
+  @@index([reviewedById])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userEmail])
+}
+
+enum ReactivationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Course {

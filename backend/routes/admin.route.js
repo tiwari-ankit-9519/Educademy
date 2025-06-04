@@ -35,6 +35,10 @@ import {
   getAllDiscussions,
   getPlatformMessages,
   generateReport,
+  // ADD THESE NEW IMPORTS
+  getReactivationRequests,
+  reviewReactivationRequest,
+  getReactivationRequestDetails,
 } from "../controllers/admin/admin.controller.js";
 
 const router = Router();
@@ -54,6 +58,19 @@ router.get("/users/:userId", requireAdmin, getUserDetails);
 router.delete("/users/:userId", requireAdmin, deleteUser);
 router.patch("/users/:userId/status", requireAdmin, updateUserStatus);
 router.patch("/users/bulk-update", requireAdmin, bulkUpdateUsers);
+
+// NEW REACTIVATION ROUTES FOR ADMIN
+router.get("/reactivation-requests", requireAdmin, getReactivationRequests);
+router.get(
+  "/reactivation-requests/:reactivationRequestId",
+  requireAdmin,
+  getReactivationRequestDetails
+);
+router.patch(
+  "/reactivation-requests/:reactivationRequestId/review",
+  requireAdmin,
+  reviewReactivationRequest
+);
 
 router.get("/courses", requireAdmin, getAllCourses);
 router.delete("/courses/:courseId", requireAdmin, deleteCourse);

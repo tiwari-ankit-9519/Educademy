@@ -9942,3 +9942,2011 @@ SYSTEM CONTEXT:
 }
 ====================================================================================================
 
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:49:59.081
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:49:59.148
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58785792,
+    "heapTotal": 32718848,
+    "heapUsed": 16587504,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:49:59.613
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 91635712,
+    "heapTotal": 64737280,
+    "heapUsed": 37978112,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:49:59.616
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 91762688,
+    "heapTotal": 64737280,
+    "heapUsed": 38086776,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:49:59.655
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 103903232,
+    "heapTotal": 64999424,
+    "heapUsed": 38383536,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:49:59.656
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 103931904,
+    "heapTotal": 64999424,
+    "heapUsed": 38407368,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:00.552
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 107585536,
+    "heapTotal": 65417216,
+    "heapUsed": 39187312,
+    "external": 4558154,
+    "arrayBuffers": 786608
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:05.846
+LEVEL: HTTP
+PID: 19516
+REQUEST_ID: cy9h7ehn1
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP REQUEST: GET /api/admin/users
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/admin/users
+  Status Code: INCOMING
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "2080afe3-c789-416d-951b-8030b488d5d4",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 108040192,
+    "heapTotal": 65417216,
+    "heapUsed": 39295432,
+    "external": 4558233,
+    "arrayBuffers": 786687
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:11.331
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: user
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: user
+  Duration: 457msms
+
+SQL QUERY:
+SELECT COUNT(*) AS "_count._all" 
+      FROM (
+      SELECT "public"."User"."id" 
+      FROM "public"."User" 
+      WHERE 1=1 
+      OFFSET $1) AS "sub"
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:12.961
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: user
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: user
+  Duration: 491msms
+
+SQL QUERY:
+SELECT "public"."User"."id",
+        "public"."User"."createdAt",
+        "public"."User"."updatedAt",
+        "public"."User"."email",
+        "public"."User"."firstName",
+        "public"."User"."lastName",
+        "public"."User"."profileImage",
+        "public"."User"."bio",
+        "public"."User"."role"::text,
+        "public"."User"."isVerified",
+        "public"."User"."isActive",
+        "public"."User"."lastLogin",
+        "public"."User"."timezone",
+        "public"."User"."language",
+        "public"."User"."country",
+        "public"."User"."phoneNumber",
+        "public"."User"."dateOfBirth",
+        "public"."User"."website",
+        "public"."User"."linkedinProfile",
+        "public"."User"."twitterProfile",
+        "public"."User"."githubProfile",
+        COALESCE("aggr_selection_0_Session"."_aggr_count_sessions",
+        0) AS "_aggr_count_sessions",
+        COALESCE("aggr_selection_1_Activity"."_aggr_count_activities",
+        0) AS "_aggr_count_activities",
+        COALESCE("aggr_selection_2_Notification"."_aggr_count_notifications",
+        0) AS "_aggr_count_notifications" 
+      FROM "public"."User" 
+      LEFT JOIN (
+      SELECT "public"."Session"."userId",
+        COUNT(*) AS "_aggr_count_sessions" 
+      FROM "public"."Session" 
+      WHERE 1=1 
+      GROUP BY "public"."Session"."userId") AS "aggr_selection_0_Session" 
+        ON ("public"."User"."id" = "aggr_selection_0_Session"."userId") 
+      LEFT JOIN (
+      SELECT "public"."Activity"."userId",
+        COUNT(*) AS "_aggr_count_activities" 
+      FROM "public"."Activity" 
+      WHERE 1=1 
+      GROUP BY "public"."Activity"."userId") AS "aggr_selection_1_Activity" 
+        ON ("public"."User"."id" = "aggr_selection_1_Activity"."userId") 
+      LEFT JOIN (
+      SELECT "public"."Notification"."userId",
+        COUNT(*) AS "_aggr_count_notifications" 
+      FROM "public"."Notification" 
+      WHERE 1=1 
+      GROUP BY "public"."Notification"."userId") AS "aggr_selection_2_Notification" 
+        ON ("public"."User"."id" = "aggr_selection_2_Notification"."userId") 
+      WHERE 1=1 
+      ORDER BY "public"."User"."createdAt" DESC 
+      LIMIT $1 
+      OFFSET $2
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:13.444
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: student
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: student
+  Duration: 483msms
+
+SQL QUERY:
+SELECT "public"."Student"."id",
+        "public"."Student"."skillLevel"::text,
+        "public"."Student"."totalLearningTime",
+        "public"."Student"."userId",
+        COALESCE("aggr_selection_0_Enrollment"."_aggr_count_enrollments",
+        0) AS "_aggr_count_enrollments",
+        COALESCE("aggr_selection_1_Review"."_aggr_count_reviews",
+        0) AS "_aggr_count_reviews" 
+      FROM "public"."Student" 
+      LEFT JOIN (
+      SELECT "public"."Enrollment"."studentId",
+        COUNT(*) AS "_aggr_count_enrollments" 
+      FROM "public"."Enrollment" 
+      WHERE 1=1 
+      GROUP BY "public"."Enrollment"."studentId") AS "aggr_selection_0_Enrollment" 
+        ON ("public"."Student"."id" = "aggr_selection_0_Enrollment"."studentId") 
+      LEFT JOIN (
+      SELECT "public"."Review"."studentId",
+        COUNT(*) AS "_aggr_count_reviews" 
+      FROM "public"."Review" 
+      WHERE 1=1 
+      GROUP BY "public"."Review"."studentId") AS "aggr_selection_1_Review" 
+        ON ("public"."Student"."id" = "aggr_selection_1_Review"."studentId") 
+      WHERE "public"."Student"."userId" IN ($1,
+        $2,
+        $3) 
+      OFFSET $4
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:13.895
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: instructor
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: instructor
+  Duration: 450msms
+
+SQL QUERY:
+SELECT "public"."Instructor"."id",
+        "public"."Instructor"."rating",
+        "public"."Instructor"."totalStudents",
+        "public"."Instructor"."totalCourses",
+        "public"."Instructor"."totalRevenue",
+        "public"."Instructor"."isVerified",
+        "public"."Instructor"."userId" 
+      FROM "public"."Instructor" 
+      WHERE "public"."Instructor"."userId" IN ($1,
+        $2,
+        $3) 
+      OFFSET $4
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:14.346
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: admin
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: admin
+  Duration: 450msms
+
+SQL QUERY:
+SELECT "public"."Admin"."id",
+        "public"."Admin"."department",
+        "public"."Admin"."permissions",
+        "public"."Admin"."userId" 
+      FROM "public"."Admin" 
+      WHERE "public"."Admin"."userId" IN ($1,
+        $2,
+        $3) 
+      OFFSET $4
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:50:14.350
+LEVEL: HTTP
+PID: 19516
+REQUEST_ID: srotf8otv
+CLASS.METHOD: AdminController.getAllUsers
+MESSAGE: HTTP SUCCESS: GET /api/admin/users [200]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/admin/users
+  Status Code: 200
+  Duration: 8505ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "2080afe3-c789-416d-951b-8030b488d5d4",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 116449280,
+    "heapTotal": 65679360,
+    "heapUsed": 40291584,
+    "external": 4574617,
+    "arrayBuffers": 803071
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:13.442
+LEVEL: HTTP
+PID: 19516
+REQUEST_ID: hhnrks3zv
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP REQUEST: GET /api/admin/users/activities
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/admin/users/activities
+  Status Code: INCOMING
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "f7d5c559-b59e-4bba-bab1-ce0558092eef",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 88498176,
+    "heapTotal": 31399936,
+    "heapUsed": 29394768,
+    "external": 4229314,
+    "arrayBuffers": 460927
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:14.572
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: unknown
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: unknown
+  Duration: 222msms
+
+SQL QUERY:
+SELECT 1
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:14.573
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: unknown
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: unknown
+  Duration: 223msms
+
+SQL QUERY:
+SELECT 1
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:15.020
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: activity
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: activity
+  Duration: 447msms
+
+SQL QUERY:
+SELECT "public"."Activity"."id",
+        "public"."Activity"."createdAt",
+        "public"."Activity"."action",
+        "public"."Activity"."details",
+        "public"."Activity"."ipAddress",
+        "public"."Activity"."userAgent",
+        "public"."Activity"."location",
+        "public"."Activity"."sessionId",
+        "public"."Activity"."userId" 
+      FROM "public"."Activity" 
+      WHERE 1=1 
+      ORDER BY "public"."Activity"."createdAt" DESC 
+      LIMIT $1 
+      OFFSET $2
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:15.021
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: activity
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: activity
+  Duration: 447msms
+
+SQL QUERY:
+SELECT COUNT(*) AS "_count._all" 
+      FROM (
+      SELECT "public"."Activity"."id" 
+      FROM "public"."Activity" 
+      WHERE 1=1 
+      OFFSET $1) AS "sub"
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:16.424
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: useractivity
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: useractivity
+  Duration: 465msms
+
+SQL QUERY:
+SELECT "public"."UserActivity"."id",
+        "public"."UserActivity"."createdAt",
+        "public"."UserActivity"."action",
+        "public"."UserActivity"."metadata",
+        "public"."UserActivity"."sessionTime",
+        "public"."UserActivity"."page",
+        "public"."UserActivity"."referrer",
+        "public"."UserActivity"."userId" 
+      FROM "public"."UserActivity" 
+      WHERE 1=1 
+      ORDER BY "public"."UserActivity"."createdAt" DESC 
+      LIMIT $1 
+      OFFSET $2
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:51:16.426
+LEVEL: HTTP
+PID: 19516
+REQUEST_ID: w9w0flh2e
+CLASS.METHOD: AdminController.getUserActivities
+MESSAGE: HTTP SUCCESS: GET /api/admin/users/activities [200]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/admin/users/activities
+  Status Code: 200
+  Duration: 2984ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "f7d5c559-b59e-4bba-bab1-ce0558092eef",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 89522176,
+    "heapTotal": 31662080,
+    "heapUsed": 30324304,
+    "external": 4237506,
+    "arrayBuffers": 469119
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:02.525
+LEVEL: HTTP
+PID: 19516
+REQUEST_ID: youbyefra
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP REQUEST: GET /api/admin/users/activities?userId=cmb68gy040000im7w7wndn3bu
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/admin/users/activities?userId=cmb68gy040000im7w7wndn3bu
+  Status Code: INCOMING
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Query: {
+    "userId": "cmb68gy040000im7w7wndn3bu"
+}
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "089d3476-15f6-454b-9a89-cc4f22e6ae59",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 89358336,
+    "heapTotal": 31662080,
+    "heapUsed": 30425088,
+    "external": 4237506,
+    "arrayBuffers": 469119
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:03.656
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: unknown
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: unknown
+  Duration: 226msms
+
+SQL QUERY:
+SELECT 1
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:03.657
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: unknown
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: unknown
+  Duration: 227msms
+
+SQL QUERY:
+SELECT 1
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:03.659
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: unknown
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: unknown
+  Duration: 229msms
+
+SQL QUERY:
+SELECT 1
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:04.103
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: useractivity
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: useractivity
+  Duration: 446msms
+
+SQL QUERY:
+SELECT "public"."UserActivity"."id",
+        "public"."UserActivity"."createdAt",
+        "public"."UserActivity"."action",
+        "public"."UserActivity"."metadata",
+        "public"."UserActivity"."sessionTime",
+        "public"."UserActivity"."page",
+        "public"."UserActivity"."referrer",
+        "public"."UserActivity"."userId" 
+      FROM "public"."UserActivity" 
+      WHERE "public"."UserActivity"."userId" = $1 
+      ORDER BY "public"."UserActivity"."createdAt" DESC 
+      LIMIT $2 
+      OFFSET $3
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:04.108
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: activity
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: activity
+  Duration: 450msms
+
+SQL QUERY:
+SELECT "public"."Activity"."id",
+        "public"."Activity"."createdAt",
+        "public"."Activity"."action",
+        "public"."Activity"."details",
+        "public"."Activity"."ipAddress",
+        "public"."Activity"."userAgent",
+        "public"."Activity"."location",
+        "public"."Activity"."sessionId",
+        "public"."Activity"."userId" 
+      FROM "public"."Activity" 
+      WHERE "public"."Activity"."userId" = $1 
+      ORDER BY "public"."Activity"."createdAt" DESC 
+      LIMIT $2 
+      OFFSET $3
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:04.115
+LEVEL: INFO
+PID: 19516
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: activity
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: activity
+  Duration: 455msms
+
+SQL QUERY:
+SELECT COUNT(*) AS "_count._all" 
+      FROM (
+      SELECT "public"."Activity"."id" 
+      FROM "public"."Activity" 
+      WHERE "public"."Activity"."userId" = $1 
+      OFFSET $2) AS "sub"
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 12:53:04.117
+LEVEL: HTTP
+PID: 19516
+REQUEST_ID: 03h8wfcdd
+CLASS.METHOD: AdminController.getUserActivities
+MESSAGE: HTTP SUCCESS: GET /api/admin/users/activities?userId=cmb68gy040000im7w7wndn3bu [200]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/admin/users/activities?userId=cmb68gy040000im7w7wndn3bu
+  Status Code: 200
+  Duration: 1598ms
+  Client IP: ::1
+  User Agent: PostmanRuntime/7.44.0
+
+REQUEST CONTEXT:
+  Query: {
+    "userId": "cmb68gy040000im7w7wndn3bu"
+}
+  Headers: {
+    "authorization": "[MASKED]",
+    "user-agent": "PostmanRuntime/7.44.0",
+    "accept": "*/*",
+    "postman-token": "089d3476-15f6-454b-9a89-cc4f22e6ae59",
+    "host": "localhost:5000",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+}
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 90206208,
+    "heapTotal": 32710656,
+    "heapUsed": 30061632,
+    "external": 4245698,
+    "arrayBuffers": 477311
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:01.958
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:02.010
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 58552320,
+    "heapTotal": 33243136,
+    "heapUsed": 16806968,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:02.452
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 91832320,
+    "heapTotal": 64737280,
+    "heapUsed": 37693360,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:02.455
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 91906048,
+    "heapTotal": 64999424,
+    "heapUsed": 38064328,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:02.489
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 103813120,
+    "heapTotal": 64999424,
+    "heapUsed": 38328408,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:02.490
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 103841792,
+    "heapTotal": 64999424,
+    "heapUsed": 38352368,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:05:03.407
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 107290624,
+    "heapTotal": 65679360,
+    "heapUsed": 39232176,
+    "external": 4558156,
+    "arrayBuffers": 786610
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:03.642
+LEVEL: HTTP
+PID: 5568
+REQUEST_ID: jabsxmgfy
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP REQUEST: POST /api/auth/logout
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/logout
+  Status Code: INCOMING
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "authorization": "[MASKED]",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 13398016,
+    "heapTotal": 30875648,
+    "heapUsed": 29327560,
+    "external": 4221122,
+    "arrayBuffers": 452735
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:05.871
+LEVEL: TRACE
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: ENTERING AuthController.logoutUser()
+
+REQUEST CONTEXT:
+  Params: {
+    "userId": "cmbdd7ig2000oimo8go9s2ogk",
+    "clientIp": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+}
+
+BUSINESS OPERATION:
+  Operation: METHOD_ENTRY
+  Entity: AuthController
+  Entity ID: N/A
+  Status: STARTED
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 30830592,
+    "heapTotal": 30875648,
+    "heapUsed": 29550784,
+    "external": 4221122,
+    "arrayBuffers": 452735
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:05.872
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: Deleting user sessions from database
+
+BUSINESS OPERATION:
+  Operation: SESSION_DELETION
+  Entity: SESSION
+  Entity ID: cmbdd7ig2000oimo8go9s2ogk
+  Status: DELETING
+
+DATABASE OPERATION:
+  Operation: DELETE
+  Table: sessions
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 30883840,
+    "heapTotal": 30875648,
+    "heapUsed": 29577280,
+    "external": 4221122,
+    "arrayBuffers": 452735
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:07.916
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE DELETE: session
+
+DATABASE OPERATION:
+  Operation: DELETE
+  Table: session
+  Duration: 454msms
+
+SQL QUERY:
+DELETE 
+      FROM "public"."Session" 
+      WHERE ("public"."Session"."token" = $1 
+        AND "public"."Session"."userId" = $2)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:07.918
+LEVEL: AUTH
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: AUTHENTICATION LOGOUT: SUCCESS
+
+BUSINESS OPERATION:
+  Operation: AUTHENTICATION
+  Entity: USER
+  Entity ID: N/A
+  Status: SUCCESS
+
+AUTHENTICATION:
+  Action: LOGOUT
+  Success: true
+  Failure Reason: Valid credentials
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 32718848,
+    "heapTotal": 31137792,
+    "heapUsed": 29988568,
+    "external": 4229314,
+    "arrayBuffers": 460927
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:07.919
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: PERFORMANCE: USER_LOGOUT completed in 2049ms
+
+USER CONTEXT:
+  User ID: cmbdd7ig2000oimo8go9s2ogk
+  Email: N/A
+  Session ID: N/A
+
+PERFORMANCE:
+  Operation: USER_LOGOUT
+  Duration: 2049ms
+  Memory Usage: {
+    "rss": 32731136,
+    "heapTotal": 31137792,
+    "heapUsed": 30011384,
+    "external": 4229314,
+    "arrayBuffers": 460927
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 32735232,
+    "heapTotal": 31137792,
+    "heapUsed": 30013552,
+    "external": 4229314,
+    "arrayBuffers": 460927
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:07.920
+LEVEL: TRACE
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: EXITING AuthController.logoutUser()
+
+BUSINESS OPERATION:
+  Operation: METHOD_EXIT
+  Entity: AuthController
+  Entity ID: N/A
+  Status: COMPLETED
+
+PERFORMANCE:
+  Operation: AuthController.logoutUser
+  Duration: 2049.3354999999283ms
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 32841728,
+    "heapTotal": 31137792,
+    "heapUsed": 30035288,
+    "external": 4229314,
+    "arrayBuffers": 460927
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:07.924
+LEVEL: HTTP
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.logoutUser
+MESSAGE: HTTP SUCCESS: POST /api/auth/logout [200]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/logout
+  Status Code: 200
+  Duration: 4290ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "authorization": "[MASKED]",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 33128448,
+    "heapTotal": 31137792,
+    "heapUsed": 30070384,
+    "external": 4229314,
+    "arrayBuffers": 460927
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:14.070
+LEVEL: HTTP
+PID: 5568
+REQUEST_ID: ku7gz94uc
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP REQUEST: POST /api/auth/login
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/login
+  Status Code: INCOMING
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Body: {
+    "email": "m24ankit@gmail.com",
+    "password": "[MASKED]"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "52",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "content-type": "application/json",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 39260160,
+    "heapTotal": 32448512,
+    "heapUsed": 30231560,
+    "external": 4229373,
+    "arrayBuffers": 460986
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:14.072
+LEVEL: TRACE
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: ENTERING AuthController.loginUser()
+
+REQUEST CONTEXT:
+  Params: {
+    "email": "m24ankit@gmail.com",
+    "hasPassword": "true",
+    "clientIp": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+}
+
+BUSINESS OPERATION:
+  Operation: METHOD_ENTRY
+  Entity: AuthController
+  Entity ID: N/A
+  Status: STARTED
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 39305216,
+    "heapTotal": 32448512,
+    "heapUsed": 30284488,
+    "external": 4229373,
+    "arrayBuffers": 460986
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:14.519
+LEVEL: INFO
+PID: 5568
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: DATABASE SELECT: user
+
+DATABASE OPERATION:
+  Operation: SELECT
+  Table: user
+  Duration: 438msms
+
+SQL QUERY:
+SELECT "public"."User"."id",
+        "public"."User"."firstName",
+        "public"."User"."lastName",
+        "public"."User"."email",
+        "public"."User"."passwordHash",
+        "public"."User"."role"::text,
+        "public"."User"."profileImage",
+        "public"."User"."bio",
+        "public"."User"."isVerified",
+        "public"."User"."isActive",
+        "public"."User"."timezone",
+        "public"."User"."language",
+        "public"."User"."country",
+        "public"."User"."phoneNumber",
+        "public"."User"."dateOfBirth",
+        "public"."User"."website",
+        "public"."User"."linkedinProfile",
+        "public"."User"."twitterProfile",
+        "public"."User"."githubProfile",
+        "public"."User"."lastLogin",
+        "public"."User"."createdAt",
+        "public"."User"."updatedAt" 
+      FROM "public"."User" 
+      WHERE ("public"."User"."email" = $1 
+        AND 1=1) 
+      LIMIT $2 
+      OFFSET $3
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:14.804
+LEVEL: WARN
+PID: 5568
+REQUEST_ID: 1fnmdygmp
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: AUTHENTICATION LOGIN: FAILED
+
+USER CONTEXT:
+  User ID: cmb68gy040000im7w7wndn3bu
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: AUTHENTICATION
+  Entity: USER
+  Entity ID: cmb68gy040000im7w7wndn3bu
+  Status: FAILED
+
+AUTHENTICATION:
+  Action: LOGIN
+  Success: false
+  User: {
+    "id": "cmb68gy040000im7w7wndn3bu",
+    "email": "m24ankit@gmail.com",
+    "role": "STUDENT"
+}
+  Failure Reason: Account deactivated
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 40247296,
+    "heapTotal": 32186368,
+    "heapUsed": 30884696,
+    "external": 4233482,
+    "arrayBuffers": 465095
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:21:14.806
+LEVEL: WARN
+PID: 5568
+REQUEST_ID: 1fnmdygmp
+CLASS.METHOD: AuthController.loginUser
+MESSAGE: HTTP CLIENT ERROR: POST /api/auth/login [403]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/login
+  Status Code: 403
+  Duration: 737ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Body: {
+    "email": "m24ankit@gmail.com",
+    "password": "[MASKED]"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "52",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "content-type": "application/json",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+USER CONTEXT:
+  User ID: cmb68gy040000im7w7wndn3bu
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 40259584,
+    "heapTotal": 32186368,
+    "heapUsed": 30920544,
+    "external": 4233482,
+    "arrayBuffers": 465095
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:43.367
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:43.453
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 59273216,
+    "heapTotal": 33517568,
+    "heapUsed": 16008360,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:44.550
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 91271168,
+    "heapTotal": 65273856,
+    "heapUsed": 36967208,
+    "external": 4413140,
+    "arrayBuffers": 660781
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:44.555
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 91299840,
+    "heapTotal": 65273856,
+    "heapUsed": 37307000,
+    "external": 4413140,
+    "arrayBuffers": 660781
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:44.627
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 103030784,
+    "heapTotal": 65273856,
+    "heapUsed": 37570968,
+    "external": 4432327,
+    "arrayBuffers": 660781
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:44.628
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 103108608,
+    "heapTotal": 65273856,
+    "heapUsed": 37595152,
+    "external": 4432327,
+    "arrayBuffers": 660781
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:31:45.567
+LEVEL: INFO
+PID: 6796
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 106500096,
+    "heapTotal": 65691648,
+    "heapUsed": 38314688,
+    "external": 4438538,
+    "arrayBuffers": 666992
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:26.621
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: WINSTON INFO TEST
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:26.673
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Gmail transporter created
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 56918016,
+    "heapTotal": 33267712,
+    "heapUsed": 18015344,
+    "external": 3711710,
+    "arrayBuffers": 16811
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:27.218
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: STARTING: Educademy Backend Server
+
+BUSINESS OPERATION:
+  Operation: SYSTEM_STARTUP
+  Entity: Educademy Backend Server
+  Entity ID: N/A
+  Status: STARTING
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 92606464,
+    "heapTotal": 65024000,
+    "heapUsed": 39012752,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:27.222
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Socket.IO server initialized
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 92684288,
+    "heapTotal": 65024000,
+    "heapUsed": 39121560,
+    "external": 4532757,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:27.302
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🚀 Educademy Server running on port 5000
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 104734720,
+    "heapTotal": 65024000,
+    "heapUsed": 39385480,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:27.303
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: 🔌 Socket.IO server ready for connections
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 104775680,
+    "heapTotal": 65024000,
+    "heapUsed": 39409264,
+    "external": 4551944,
+    "arrayBuffers": 780398
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-04 13:36:28.283
+LEVEL: INFO
+PID: 7200
+REQUEST_ID: N/A
+CLASS.METHOD: Unknown.unknown
+MESSAGE: Email transporter verified successfully
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 108171264,
+    "heapTotal": 65441792,
+    "heapUsed": 40096120,
+    "external": 4558154,
+    "arrayBuffers": 786608
+}
+====================================================================================================
+

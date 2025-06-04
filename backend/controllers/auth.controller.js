@@ -239,7 +239,6 @@ export const loginUser = asyncHandler(async (req, res) => {
       { email: normalizedEmail, loginAttempt: true }
     );
 
-    // OPTIMIZATION 1: Simplified user lookup - only essential fields for authentication
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       select: {
@@ -300,43 +299,6 @@ export const loginUser = asyncHandler(async (req, res) => {
       });
     }
 
-    // Account status checks
-    if (!user.isActive) {
-      educademyLogger.auth("LOGIN", false, user, {
-        reason: "Account deactivated",
-      });
-
-      return res.status(401).json({
-        success: false,
-        message: "Account has been deactivated. Please contact support.",
-      });
-    }
-
-    if (!user.isVerified) {
-      const otp = otpService.generateOTP();
-      await otpService.storeOTP(normalizedEmail, otp, 10);
-
-      // Fire and forget email sending (don't wait for it)
-      emailService
-        .sendOTPVerification({
-          email: normalizedEmail,
-          firstName: user.firstName,
-          otp,
-          expiresIn: 10,
-        })
-        .catch((err) => {
-          educademyLogger.error("Failed to send OTP email", err);
-        });
-
-      return res.status(403).json({
-        success: false,
-        message: "Please verify your email first. A new OTP has been sent.",
-        needsVerification: true,
-        userId: user.id,
-      });
-    }
-
-    // Password verification
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
@@ -352,18 +314,56 @@ export const loginUser = asyncHandler(async (req, res) => {
       });
     }
 
-    // Generate token
+    if (!user.isActive) {
+      educademyLogger.auth("LOGIN", false, user, {
+        reason: "Account deactivated",
+        clientIp: req.ip,
+        userAgent: req.get("User-Agent"),
+      });
+
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been deactivated by an administrator.",
+        errorType: "ACCOUNT_DEACTIVATED",
+        needsReactivation: true,
+        userId: user.id,
+        userEmail: user.email,
+        userName: `${user.firstName} ${user.lastName}`,
+      });
+    }
+
+    if (!user.isVerified) {
+      const otp = otpService.generateOTP();
+      await otpService.storeOTP(normalizedEmail, otp, 10);
+
+      emailService
+        .sendOTPVerification({
+          email: normalizedEmail,
+          firstName: user.firstName,
+          otp,
+          expiresIn: 10,
+        })
+        .catch((err) => {
+          educademyLogger.error("Failed to send OTP email", err);
+        });
+
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email first. A new OTP has been sent.",
+        errorType: "EMAIL_NOT_VERIFIED",
+        needsVerification: true,
+        userId: user.id,
+      });
+    }
+
     const token = generateToken(user.id);
 
-    // OPTIMIZATION 2: Run parallel operations for non-critical updates
     const parallelOperations = [
-      // Update last login
       prisma.user.update({
         where: { id: user.id },
         data: { lastLogin: new Date() },
       }),
 
-      // Create session
       prisma.session.create({
         data: {
           token,
@@ -377,7 +377,6 @@ export const loginUser = asyncHandler(async (req, res) => {
 
     const [updatedUser, session] = await Promise.all(parallelOperations);
 
-    // OPTIMIZATION 3: Send login alert asynchronously (don't wait)
     const loginInfo = {
       timestamp: new Date().toISOString(),
       ipAddress: req.ip,
@@ -395,8 +394,6 @@ export const loginUser = asyncHandler(async (req, res) => {
         educademyLogger.error("Failed to send login alert", err);
       });
 
-    // OPTIMIZATION 4: Basic response without heavy profile data
-    // Profile data will be loaded separately via dedicated API endpoints
     const endTime = performance.now();
     educademyLogger.performance("USER_LOGIN", startTime, {
       userId: user.id,
@@ -410,7 +407,6 @@ export const loginUser = asyncHandler(async (req, res) => {
       endTime - startTime
     );
 
-    // FAST RESPONSE - Essential user data only
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -437,8 +433,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         lastLogin: updatedUser.lastLogin,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        // Profile and dashboard stats will be loaded via separate endpoints
-        needsProfileData: true, // Flag to indicate client should load profile data
+        needsProfileData: true,
       },
     });
   } catch (error) {
@@ -467,6 +462,181 @@ export const loginUser = asyncHandler(async (req, res) => {
       success: false,
       message: "Internal server error",
       requestId: requestId,
+    });
+  }
+});
+
+export const requestAccountReactivation = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+  const { userId, reason, additionalInfo } = req.body;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: userId,
+    className: "AuthController",
+    methodName: "requestAccountReactivation",
+  });
+
+  try {
+    // Validate input
+    if (!userId || !reason) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID and reason are required",
+      });
+    }
+
+    if (reason.trim().length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Reason must be at least 10 characters long",
+      });
+    }
+
+    if (reason.trim().length > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "Reason cannot exceed 1000 characters",
+      });
+    }
+
+    // Verify user exists and is inactive
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        isVerified: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: "Account is already active",
+      });
+    }
+
+    // Check for existing pending request
+    const existingRequest = await prisma.reactivationRequest.findFirst({
+      where: {
+        userId: userId,
+        status: "PENDING",
+      },
+    });
+
+    if (existingRequest) {
+      return res.status(400).json({
+        success: false,
+        message: "You already have a pending reactivation request",
+        existingRequest: {
+          id: existingRequest.id,
+          submittedAt: existingRequest.createdAt,
+          status: existingRequest.status,
+        },
+      });
+    }
+
+    const reactivationRequest = await prisma.reactivationRequest.create({
+      data: {
+        userId: userId,
+        userEmail: user.email,
+        userName: `${user.firstName} ${user.lastName}`,
+        reason: reason.trim(),
+        additionalInfo: additionalInfo?.trim() || null,
+      },
+    });
+
+    emailService
+      .sendReactivationRequestConfirmation({
+        email: user.email,
+        firstName: user.firstName,
+        requestId: reactivationRequest.id,
+        submittedAt: reactivationRequest.createdAt,
+      })
+      .catch((err) => {
+        educademyLogger.error(
+          "Failed to send reactivation confirmation email",
+          err
+        );
+      });
+
+    const admins = await prisma.user.findMany({
+      where: {
+        role: "ADMIN",
+        isActive: true,
+      },
+      select: { id: true },
+    });
+
+    const adminNotifications = admins.map((admin) => ({
+      type: "SYSTEM_ANNOUNCEMENT",
+      title: "New Account Reactivation Request",
+      message: `${user.firstName} ${user.lastName} has requested account reactivation.`,
+      userId: admin.id,
+      priority: "NORMAL",
+      data: {
+        reactivationRequestId: reactivationRequest.id,
+        userId: user.id,
+        userEmail: user.email,
+        userName: `${user.firstName} ${user.lastName}`,
+      },
+    }));
+
+    if (adminNotifications.length > 0) {
+      await prisma.notification.createMany({
+        data: adminNotifications,
+      });
+    }
+
+    educademyLogger.logBusinessOperation(
+      "CREATE_REACTIVATION_REQUEST",
+      "REACTIVATION_REQUEST",
+      reactivationRequest.id,
+      "SUCCESS",
+      {
+        userId: userId,
+        userEmail: user.email,
+        requestSource: "USER_INITIATED",
+      }
+    );
+
+    res.status(201).json({
+      success: true,
+      message:
+        "Reactivation request submitted successfully. You will be notified once an admin reviews your request.",
+      data: {
+        requestId: reactivationRequest.id,
+        status: reactivationRequest.status,
+        submittedAt: reactivationRequest.createdAt,
+        expectedReviewTime: "1-3 business days",
+        confirmationEmailSent: true,
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Create reactivation request failed", error, {
+      userId: userId,
+      business: {
+        operation: "CREATE_REACTIVATION_REQUEST",
+        entity: "REACTIVATION_REQUEST",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit reactivation request",
+      requestId,
     });
   }
 });

@@ -248,6 +248,145 @@ class EmailService {
     });
   }
 
+  // NEW METHOD 1: Send reactivation request confirmation
+  async sendReactivationRequestConfirmation({
+    email,
+    firstName,
+    requestId,
+    submittedAt,
+  }) {
+    educademyLogger.info("Sending reactivation request confirmation", {
+      recipient: email,
+      firstName,
+      requestId,
+      isReactivationFlow: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "📝 Account Reactivation Request Received",
+      template: "reactivationRequestConfirmation",
+      templateData: {
+        firstName,
+        requestId,
+        submittedAt: new Date(submittedAt).toLocaleDateString(),
+        supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+        statusCheckUrl: `${process.env.FRONTEND_URL}/reactivation-status`,
+      },
+    });
+  }
+
+  // NEW METHOD 2: Send account activation email
+  async sendAccountActivationEmail({ email, firstName, reason, loginUrl }) {
+    educademyLogger.info("Sending account activation email", {
+      recipient: email,
+      firstName,
+      reason,
+      isAccountManagement: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "🎉 Your Account Has Been Activated - Welcome Back!",
+      template: "accountActivation",
+      templateData: {
+        firstName,
+        reason,
+        loginUrl: loginUrl || `${process.env.FRONTEND_URL}/login`,
+        supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+      },
+    });
+  }
+
+  // NEW METHOD 3: Send account deactivation email
+  async sendAccountDeactivationEmail({
+    email,
+    firstName,
+    reason,
+    supportEmail,
+    appealUrl,
+  }) {
+    educademyLogger.info("Sending account deactivation email", {
+      recipient: email,
+      firstName,
+      reason,
+      isAccountManagement: true,
+      isSecurityRelated: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "⚠️ Important: Your Account Status Update",
+      template: "accountDeactivation",
+      templateData: {
+        firstName,
+        reason,
+        supportEmail:
+          supportEmail || process.env.SUPPORT_EMAIL || "support@educademy.com",
+        appealUrl:
+          appealUrl || `${process.env.FRONTEND_URL}/reactivation-request`,
+        contactUrl: `${process.env.FRONTEND_URL}/contact`,
+      },
+    });
+  }
+
+  // NEW METHOD 4: Send email verification confirmation
+  async sendEmailVerificationConfirmation({
+    email,
+    firstName,
+    verifiedBy,
+    loginUrl,
+  }) {
+    educademyLogger.info("Sending email verification confirmation", {
+      recipient: email,
+      firstName,
+      verifiedBy,
+      isVerificationFlow: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "✅ Email Verification Confirmed",
+      template: "emailVerificationConfirmation",
+      templateData: {
+        firstName,
+        verifiedBy,
+        loginUrl: loginUrl || `${process.env.FRONTEND_URL}/login`,
+        dashboardUrl: `${process.env.FRONTEND_URL}/dashboard`,
+      },
+    });
+  }
+
+  // NEW METHOD 5: Send email verification revoked notification
+  async sendEmailVerificationRevoked({
+    email,
+    firstName,
+    reason,
+    supportEmail,
+  }) {
+    educademyLogger.info("Sending email verification revoked notification", {
+      recipient: email,
+      firstName,
+      reason,
+      isVerificationFlow: true,
+      isSecurityRelated: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "⚠️ Email Verification Status Update Required",
+      template: "emailVerificationRevoked",
+      templateData: {
+        firstName,
+        reason,
+        supportEmail:
+          supportEmail || process.env.SUPPORT_EMAIL || "support@educademy.com",
+        verifyUrl: `${process.env.FRONTEND_URL}/verify-email`,
+        contactUrl: `${process.env.FRONTEND_URL}/contact`,
+      },
+    });
+  }
+
   // Test email functionality (development helper)
   async sendTestEmail(toEmail) {
     if (process.env.NODE_ENV === "production") {
@@ -295,6 +434,17 @@ class EmailService {
       environment: process.env.NODE_ENV,
       realEmails: process.env.USE_TEST_EMAIL !== "true",
       configured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD),
+      supportedTemplates: [
+        "otpVerification",
+        "welcome",
+        "passwordReset",
+        "loginAlert",
+        "reactivationRequestConfirmation",
+        "accountActivation",
+        "accountDeactivation",
+        "emailVerificationConfirmation",
+        "emailVerificationRevoked",
+      ],
     };
   }
 }

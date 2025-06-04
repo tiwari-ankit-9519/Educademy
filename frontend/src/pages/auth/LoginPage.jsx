@@ -11,13 +11,17 @@ import {
   Loader2,
   Github,
   ArrowRight,
-  Sparkles,
   Shield,
   Zap,
+  AlertTriangle,
+  MessageSquare,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -30,6 +34,11 @@ const LoginPage = () => {
     initiateGoogleAuth,
     initiateGitHubAuth,
     setRegistrationStep,
+    deactivatedUserData,
+    needsReactivation,
+    reactivationLoading,
+    requestReactivation,
+    clearDeactivatedUserData,
   } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -39,6 +48,12 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [isVisible, setIsVisible] = useState(false);
+  const [showReactivationForm, setShowReactivationForm] = useState(false);
+  const [reactivationData, setReactivationData] = useState({
+    reason: "",
+    additionalInfo: "",
+  });
+  const [reactivationSuccess, setReactivationSuccess] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -53,6 +68,12 @@ const LoginPage = () => {
       return () => clearTimeout(timer);
     }
   }, [error, clearError]);
+
+  useEffect(() => {
+    if (needsReactivation && deactivatedUserData) {
+      setShowReactivationForm(true);
+    }
+  }, [needsReactivation, deactivatedUserData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,6 +92,14 @@ const LoginPage = () => {
     if (error) {
       clearError();
     }
+  };
+
+  const handleReactivationInputChange = (e) => {
+    const { name, value } = e.target;
+    setReactivationData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const validateForm = () => {
@@ -92,6 +121,10 @@ const LoginPage = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const validateReactivationForm = () => {
+    return reactivationData.reason.trim().length > 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -103,28 +136,22 @@ const LoginPage = () => {
       const result = await login(formData);
 
       if (result.type === "auth/loginUser/fulfilled") {
-        // Check if user needs email verification
         if (result.payload?.needsVerification) {
-          // Set registration step to verify-otp for navigation
           setRegistrationStep("verify-otp");
-
-          // Navigate to verification page with user data
           navigate("/auth/verify-user", {
             state: {
               email: formData.email,
               name: result.payload?.user?.firstName || "User",
-              fromLogin: true, // Flag to indicate this came from login
+              fromLogin: true,
             },
             replace: true,
           });
           return;
         }
 
-        // Normal login flow - get user data from the result
         const userData = result.payload?.user || result.payload;
         const userRole = userData?.role?.toLowerCase();
 
-        // Define role-based navigation routes
         const roleRoutes = {
           student: "/student/dashboard",
           instructor: "/instructor/dashboard",
@@ -166,7 +193,6 @@ const LoginPage = () => {
         };
 
         const intendedDestination = location.state?.from;
-
         let navigationTarget;
 
         if (
@@ -179,21 +205,17 @@ const LoginPage = () => {
         }
         navigate(navigationTarget, { replace: true });
       } else if (result.type === "auth/loginUser/rejected") {
-        // Check if the error response indicates need for verification
         const errorPayload = result.payload;
         if (
           errorPayload &&
           typeof errorPayload === "string" &&
           errorPayload.includes("verify your email")
         ) {
-          // Set registration step for verification flow
           setRegistrationStep("verify-otp");
-
-          // Navigate to verification page
           navigate("/auth/verify-user", {
             state: {
               email: formData.email,
-              name: "User", // Default name since we don't have user data
+              name: "User",
               fromLogin: true,
             },
             replace: true,
@@ -205,6 +227,43 @@ const LoginPage = () => {
     } catch (err) {
       console.error("Login error:", err);
     }
+  };
+
+  const handleReactivationSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateReactivationForm()) {
+      return;
+    }
+
+    try {
+      const result = await requestReactivation({
+        userId: deactivatedUserData.userId,
+        email: deactivatedUserData.userEmail,
+        userName: deactivatedUserData.userName,
+        reason: reactivationData.reason,
+        additionalInfo: reactivationData.additionalInfo,
+      });
+
+      if (result.type === "auth/requestAccountReactivation/fulfilled") {
+        setReactivationSuccess(true);
+        setTimeout(() => {
+          setShowReactivationForm(false);
+          setReactivationSuccess(false);
+          clearDeactivatedUserData();
+          setReactivationData({ reason: "", additionalInfo: "" });
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Reactivation request error:", err);
+    }
+  };
+
+  const handleCloseReactivationForm = () => {
+    setShowReactivationForm(false);
+    clearDeactivatedUserData();
+    setReactivationData({ reason: "", additionalInfo: "" });
+    clearError();
   };
 
   const handleSocialAuth = (provider) => {
@@ -259,6 +318,196 @@ const LoginPage = () => {
     },
   };
 
+  if (showReactivationForm) {
+    return (
+      <div className="min-h-screen flex relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
+        <motion.div
+          className="absolute inset-0 overflow-hidden pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        >
+          <motion.div
+            className="absolute top-20 left-20 w-32 h-32 bg-orange-500/10 rounded-full blur-xl"
+            variants={glowVariants}
+            animate="animate"
+          />
+          <motion.div
+            className="absolute top-40 right-32 w-24 h-24 bg-red-500/10 rounded-full blur-xl"
+            variants={glowVariants}
+            animate="animate"
+            style={{ animationDelay: "1s" }}
+          />
+          <motion.div
+            className="absolute bottom-32 left-1/4 w-40 h-40 bg-yellow-500/10 rounded-full blur-xl"
+            variants={glowVariants}
+            animate="animate"
+            style={{ animationDelay: "2s" }}
+          />
+        </motion.div>
+
+        <div className="flex-1 flex items-center justify-center px-4 py-4 sm:px-6 lg:px-8 lg:py-8 relative z-10">
+          <motion.div
+            className="w-full max-w-lg"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div
+              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 sm:p-8 relative overflow-hidden"
+              variants={itemVariants}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+
+              <motion.div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <motion.div
+                    className="flex items-center space-x-2"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                      Account Deactivated
+                    </span>
+                  </motion.div>
+                  <motion.button
+                    onClick={handleCloseReactivationForm}
+                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X className="w-5 h-5 text-slate-500" />
+                  </motion.button>
+                </div>
+
+                {reactivationSuccess ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8"
+                  >
+                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                      Request Sent Successfully!
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-300">
+                      Your reactivation request has been submitted. You will be
+                      notified once an administrator reviews your request.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <>
+                    <motion.div
+                      className="text-center mb-6"
+                      variants={itemVariants}
+                    >
+                      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                        Request Account Reactivation
+                      </h1>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base mb-4">
+                        Your account has been deactivated by an administrator.
+                        Please provide a reason for reactivation.
+                      </p>
+                      {deactivatedUserData && (
+                        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-left">
+                          <p className="text-sm text-orange-800 dark:text-orange-200">
+                            <strong>Account:</strong>{" "}
+                            {deactivatedUserData.userName} (
+                            {deactivatedUserData.userEmail})
+                          </p>
+                        </div>
+                      )}
+                    </motion.div>
+
+                    <form
+                      onSubmit={handleReactivationSubmit}
+                      className="space-y-6"
+                    >
+                      <motion.div variants={itemVariants}>
+                        <Label
+                          htmlFor="reason"
+                          className="text-slate-700 dark:text-slate-300 font-medium"
+                        >
+                          Reason for Reactivation *
+                        </Label>
+                        <div className="mt-2">
+                          <Input
+                            id="reason"
+                            name="reason"
+                            type="text"
+                            value={reactivationData.reason}
+                            onChange={handleReactivationInputChange}
+                            className="h-12 bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                            placeholder="Brief reason for requesting reactivation"
+                            required
+                          />
+                        </div>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants}>
+                        <Label
+                          htmlFor="additionalInfo"
+                          className="text-slate-700 dark:text-slate-300 font-medium"
+                        >
+                          Additional Information (Optional)
+                        </Label>
+                        <div className="mt-2">
+                          <Textarea
+                            id="additionalInfo"
+                            name="additionalInfo"
+                            value={reactivationData.additionalInfo}
+                            onChange={handleReactivationInputChange}
+                            className="min-h-[100px] bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 resize-none"
+                            placeholder="Any additional details that might help with your request..."
+                          />
+                        </div>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="space-y-4">
+                        <Button
+                          type="submit"
+                          disabled={
+                            reactivationLoading ||
+                            !reactivationData.reason.trim()
+                          }
+                          className="w-full h-12 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 group disabled:opacity-50"
+                        >
+                          {reactivationLoading ? (
+                            <div className="flex items-center justify-center">
+                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              Sending Request...
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center group-hover:space-x-2 transition-all duration-200">
+                              <MessageSquare className="mr-2 h-5 w-5" />
+                              <span>Send Reactivation Request</span>
+                            </div>
+                          )}
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleCloseReactivationForm}
+                          className="w-full h-12 border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-600/50 backdrop-blur-sm rounded-xl transition-all duration-200"
+                        >
+                          Back to Login
+                        </Button>
+                      </motion.div>
+                    </form>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
       <motion.div
@@ -300,21 +549,6 @@ const LoginPage = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
 
             <motion.div className="relative z-10">
-              {/* <div className="flex items-center justify-between mb-6 sm:mb-8">
-                <motion.div
-                  className="flex items-center space-x-2"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    Educademy
-                  </span>
-                </motion.div>
-              </div> */}
-
               <motion.div
                 className="text-center mb-6 sm:mb-8"
                 variants={itemVariants}
@@ -328,7 +562,7 @@ const LoginPage = () => {
               </motion.div>
 
               <AnimatePresence>
-                {error && (
+                {error && !needsReactivation && (
                   <motion.div
                     initial={{ opacity: 0, y: -10, height: 0 }}
                     animate={{ opacity: 1, y: 0, height: "auto" }}
@@ -371,7 +605,6 @@ const LoginPage = () => {
                         placeholder="Enter your email"
                       />
                     </div>
-                    {/* Fixed height container for error message */}
                     <div className="h-5">
                       <AnimatePresence>
                         {validationErrors.email && (
@@ -429,7 +662,6 @@ const LoginPage = () => {
                         )}
                       </motion.button>
                     </div>
-                    {/* Fixed height container for error message */}
                     <div className="h-5">
                       <AnimatePresence>
                         {validationErrors.password && (

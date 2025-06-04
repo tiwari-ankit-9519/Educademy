@@ -13,11 +13,11 @@ import { selectIsAuthenticated, selectUser } from "@/features/authSlice";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import VerifyOTPPage from "./pages/auth/VerifyOTPPage";
+import RequestReactivationPage from "./pages/auth/RequestReactivationPage";
 import LandingPage from "./pages/LandingPage";
 import ProfilePage from "./pages/user/ProfilePage";
 import Layout from "@/components/Layout";
 
-// Temporary dashboard components - replace with your actual components
 const StudentDashboard = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="text-center">
@@ -58,19 +58,16 @@ const GeneralDashboard = () => (
   </div>
 );
 
-// Pages that don't need sidebar (auth pages, landing page)
 const PublicLayout = ({ children }) => (
   <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
     {children}
   </div>
 );
 
-// Component to handle authenticated user redirects from landing page
 const LandingPageWrapper = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
 
-  // If user is authenticated, redirect to appropriate dashboard
   if (isAuthenticated && user) {
     const userRole = user.role?.toLowerCase();
 
@@ -86,11 +83,9 @@ const LandingPageWrapper = () => {
     }
   }
 
-  // If not authenticated, show landing page
   return <LandingPage />;
 };
 
-// Component to handle root dashboard redirect based on role
 const DashboardRedirect = () => {
   const user = useSelector(selectUser);
 
@@ -112,13 +107,34 @@ const DashboardRedirect = () => {
   }
 };
 
+const AuthenticatedRedirect = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectUser);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  const userRole = user?.role?.toLowerCase();
+
+  switch (userRole) {
+    case "student":
+      return <Navigate to="/student/dashboard" replace />;
+    case "instructor":
+      return <Navigate to="/instructor/dashboard" replace />;
+    case "admin":
+      return <Navigate to="/admin/dashboard" replace />;
+    default:
+      return <Navigate to="/dashboard" replace />;
+  }
+};
+
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Router>
         <div className="App">
           <Routes>
-            {/* Landing page with authentication redirect */}
             <Route
               path="/"
               element={
@@ -128,7 +144,6 @@ function App() {
               }
             />
 
-            {/* Public auth routes - redirect if already authenticated */}
             <Route
               path="/auth/login"
               element={
@@ -159,10 +174,17 @@ function App() {
                 </PublicLayout>
               }
             />
+            <Route
+              path="/auth/request-reactivation"
+              element={
+                <PublicLayout>
+                  <ProtectedRoute requireAuth={false}>
+                    <RequestReactivationPage />
+                  </ProtectedRoute>
+                </PublicLayout>
+              }
+            />
 
-            {/* Protected routes with sidebar layout */}
-
-            {/* General dashboard with role-based redirect */}
             <Route
               path="/dashboard"
               element={
@@ -174,7 +196,6 @@ function App() {
               }
             />
 
-            {/* Role-specific dashboards */}
             <Route
               path="/student/dashboard"
               element={
@@ -206,7 +227,6 @@ function App() {
               }
             />
 
-            {/* Profile Page - accessible to all authenticated users */}
             <Route
               path="/profile"
               element={
@@ -218,7 +238,6 @@ function App() {
               }
             />
 
-            {/* Role-specific profile routes (redirects to main profile) */}
             <Route
               path="/student/profile"
               element={<Navigate to="/profile" replace />}
@@ -232,7 +251,6 @@ function App() {
               element={<Navigate to="/profile" replace />}
             />
 
-            {/* Settings and account aliases */}
             <Route
               path="/settings"
               element={<Navigate to="/profile" replace />}
@@ -242,7 +260,6 @@ function App() {
               element={<Navigate to="/profile" replace />}
             />
 
-            {/* Cross-role access prevention */}
             <Route
               path="/student/*"
               element={
@@ -274,7 +291,6 @@ function App() {
               }
             />
 
-            {/* Catch all route - redirect based on authentication */}
             <Route path="*" element={<AuthenticatedRedirect />} />
           </Routes>
 
@@ -284,29 +300,5 @@ function App() {
     </ThemeProvider>
   );
 }
-
-// Component to handle 404 redirects based on authentication status
-const AuthenticatedRedirect = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const user = useSelector(selectUser);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
-  // If authenticated, redirect to appropriate dashboard
-  const userRole = user?.role?.toLowerCase();
-
-  switch (userRole) {
-    case "student":
-      return <Navigate to="/student/dashboard" replace />;
-    case "instructor":
-      return <Navigate to="/instructor/dashboard" replace />;
-    case "admin":
-      return <Navigate to="/admin/dashboard" replace />;
-    default:
-      return <Navigate to="/dashboard" replace />;
-  }
-};
 
 export default App;
