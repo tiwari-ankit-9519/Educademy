@@ -465,7 +465,28 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          profileImage: true,
+          bio: true,
+          role: true,
+          isVerified: true,
+          isActive: true,
+          lastLogin: true,
+          timezone: true,
+          language: true,
+          country: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          website: true,
+          linkedinProfile: true,
+          twitterProfile: true,
+          githubProfile: true,
           studentProfile: {
             select: {
               id: true,
@@ -534,6 +555,8 @@ export const getAllUsers = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         filters: { search, role, status },
+        viewedUsersCount: users.length,
+        adminId: req.userAuthId,
       }
     );
 
@@ -587,7 +610,28 @@ export const getUserDetails = asyncHandler(async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        profileImage: true,
+        bio: true,
+        role: true,
+        isVerified: true,
+        isActive: true,
+        lastLogin: true,
+        timezone: true,
+        language: true,
+        country: true,
+        phoneNumber: true,
+        dateOfBirth: true,
+        website: true,
+        linkedinProfile: true,
+        twitterProfile: true,
+        githubProfile: true,
         studentProfile: {
           include: {
             enrollments: {
@@ -824,9 +868,13 @@ export const getUserDetails = asyncHandler(async (req, res) => {
     educademyLogger.logBusinessOperation(
       "GET_USER_DETAILS",
       "USER",
-      userId,
+      req.userAuthId,
       "SUCCESS",
-      { targetUserId: userId, role: user.role }
+      {
+        targetUserId: userId,
+        role: user.role,
+        adminId: req.userAuthId,
+      }
     );
 
     res.status(200).json({
@@ -898,7 +946,28 @@ export const getStudents = asyncHandler(async (req, res) => {
     const [students, totalCount] = await Promise.all([
       prisma.user.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          profileImage: true,
+          bio: true,
+          role: true,
+          isVerified: true,
+          isActive: true,
+          lastLogin: true,
+          timezone: true,
+          language: true,
+          country: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          website: true,
+          linkedinProfile: true,
+          twitterProfile: true,
+          githubProfile: true,
           studentProfile: {
             where: studentWhere,
             include: {
@@ -1007,6 +1076,7 @@ export const getStudents = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         filters: { search, skillLevel, status },
+        adminId: req.userAuthId,
       }
     );
 
@@ -1107,7 +1177,28 @@ export const getInstructors = asyncHandler(async (req, res) => {
     const [instructors, totalCount] = await Promise.all([
       prisma.user.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          profileImage: true,
+          bio: true,
+          role: true,
+          isVerified: true,
+          isActive: true,
+          lastLogin: true,
+          timezone: true,
+          language: true,
+          country: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          website: true,
+          linkedinProfile: true,
+          twitterProfile: true,
+          githubProfile: true,
           instructorProfile: {
             where: instructorWhere,
             include: {
@@ -1215,6 +1306,7 @@ export const getInstructors = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         filters: { search, isVerified, status },
+        adminId: req.userAuthId,
       }
     );
 
@@ -1329,7 +1421,28 @@ export const getAdmins = asyncHandler(async (req, res) => {
     const [admins, totalCount] = await Promise.all([
       prisma.user.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          profileImage: true,
+          bio: true,
+          role: true,
+          isVerified: true,
+          isActive: true,
+          lastLogin: true,
+          timezone: true,
+          language: true,
+          country: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          website: true,
+          linkedinProfile: true,
+          twitterProfile: true,
+          githubProfile: true,
           adminProfile: {
             where: adminWhere,
             select: {
@@ -1406,6 +1519,7 @@ export const getAdmins = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         filters: { search, department, status },
+        adminId: req.userAuthId,
       }
     );
 
@@ -1514,7 +1628,15 @@ export const getUserSessions = asyncHandler(async (req, res) => {
     ]);
 
     const enrichedSessions = sessions.map((session) => ({
-      ...session,
+      id: session.id,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+      expiresAt: session.expiresAt,
+      tokenHash: session.token ? `${session.token.substring(0, 8)}...` : null,
+      device: session.device,
+      ipAddress: session.ipAddress,
+      userId: session.userId,
+      user: session.user,
       isExpired: new Date(session.expiresAt) < new Date(),
       duration: new Date(session.updatedAt) - new Date(session.createdAt),
       deviceInfo: {
@@ -1558,6 +1680,8 @@ export const getUserSessions = asyncHandler(async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         filters: { userId, device, active },
+        viewedUserId: userId,
+        adminId: req.userAuthId,
       }
     );
 

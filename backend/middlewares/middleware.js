@@ -9,12 +9,16 @@ const prisma = new PrismaClient();
 const isLoggedIn = async (req, res, next) => {
   const token = getTokenFromHeader(req);
 
+  console.log("Extracted Token: ", token);
+
   if (!token) {
     return res.status(403).json({ message: "No token provided" });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log("Decoded Token: ", decoded);
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
@@ -38,6 +42,8 @@ const isLoggedIn = async (req, res, next) => {
         },
       },
     });
+
+    console.log("User: ", user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

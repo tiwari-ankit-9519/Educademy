@@ -1,5 +1,3 @@
-import jwt from "jsonwebtoken";
-
 const getTokenFromHeader = (req) => {
   const bearerHeader = req.headers["authorization"];
   if (typeof bearerHeader !== "undefined") {
