@@ -478,7 +478,6 @@ export const requestAccountReactivation = asyncHandler(async (req, res) => {
   });
 
   try {
-    // Validate input
     if (!userId || !reason) {
       return res.status(400).json({
         success: false,
@@ -500,7 +499,6 @@ export const requestAccountReactivation = asyncHandler(async (req, res) => {
       });
     }
 
-    // Verify user exists and is inactive
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -527,7 +525,6 @@ export const requestAccountReactivation = asyncHandler(async (req, res) => {
       });
     }
 
-    // Check for existing pending request
     const existingRequest = await prisma.reactivationRequest.findFirst({
       where: {
         userId: userId,
@@ -636,6 +633,164 @@ export const requestAccountReactivation = asyncHandler(async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to submit reactivation request",
+      requestId,
+    });
+  }
+});
+
+export const checkReactivationStatus = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const requestId = Math.random().toString(36).substr(2, 9);
+
+  educademyLogger.setContext({
+    requestId,
+    userId: userId,
+    className: "AuthController",
+    methodName: "checkReactivationStatus",
+  });
+
+  try {
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    // Get the most recent reactivation request
+    const reactivationRequest = await prisma.reactivationRequest.findFirst({
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        reviewedAt: true,
+        rejectionReason: true,
+        adminNotes: true,
+        reviewedBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    if (!reactivationRequest) {
+      return res.status(404).json({
+        success: false,
+        message: "No reactivation request found for this user",
+      });
+    }
+
+    // Get user's current status
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        isActive: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    const statusInfo = {
+      requestId: reactivationRequest.id,
+      status: reactivationRequest.status,
+      submittedAt: reactivationRequest.createdAt,
+      reviewedAt: reactivationRequest.reviewedAt,
+      reviewedBy: reactivationRequest.reviewedBy
+        ? `${reactivationRequest.reviewedBy.firstName} ${reactivationRequest.reviewedBy.lastName}`
+        : null,
+      rejectionReason: reactivationRequest.rejectionReason,
+      adminNotes: reactivationRequest.adminNotes,
+      currentAccountStatus: {
+        isActive: user?.isActive || false,
+        canLogin: user?.isActive || false,
+      },
+      timeline: {
+        submitted: reactivationRequest.createdAt,
+        reviewed: reactivationRequest.reviewedAt,
+        estimatedReviewTime: "1-3 business days",
+        daysSinceSubmission: Math.floor(
+          (new Date() - new Date(reactivationRequest.createdAt)) /
+            (1000 * 60 * 60 * 24)
+        ),
+      },
+    };
+
+    // Add status-specific information
+    switch (reactivationRequest.status) {
+      case "PENDING":
+        statusInfo.message =
+          "Your reactivation request is being reviewed by our team.";
+        statusInfo.nextSteps = [
+          "Wait for admin review (typically 1-3 business days)",
+          "Check your email for updates",
+          "Contact support if urgent",
+        ];
+        break;
+
+      case "APPROVED":
+        statusInfo.message = user?.isActive
+          ? "Your account has been reactivated successfully!"
+          : "Your reactivation request was approved. Account activation is in progress.";
+        statusInfo.nextSteps = user?.isActive
+          ? [
+              "You can now login to your account",
+              "Access all your courses and progress",
+            ]
+          : [
+              "Your account will be activated shortly",
+              "You'll receive a confirmation email",
+            ];
+        break;
+
+      case "REJECTED":
+        statusInfo.message = "Your reactivation request was not approved.";
+        statusInfo.nextSteps = [
+          "Review the rejection reason provided",
+          "Address the concerns mentioned",
+          "Submit a new request if appropriate",
+          "Contact support for clarification",
+        ];
+        break;
+    }
+
+    educademyLogger.logBusinessOperation(
+      "CHECK_REACTIVATION_STATUS",
+      "REACTIVATION_REQUEST",
+      reactivationRequest.id,
+      "SUCCESS",
+      {
+        userId: userId,
+        status: reactivationRequest.status,
+        daysSinceSubmission: statusInfo.timeline.daysSinceSubmission,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: statusInfo,
+    });
+  } catch (error) {
+    educademyLogger.error("Check reactivation status failed", error, {
+      userId: userId,
+      business: {
+        operation: "CHECK_REACTIVATION_STATUS",
+        entity: "REACTIVATION_REQUEST",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to check reactivation status",
       requestId,
     });
   }

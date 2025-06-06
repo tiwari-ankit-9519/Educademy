@@ -130,6 +130,8 @@ export const checkReactivationStatus = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await api.get(`/auth/reactivation-status/${userId}`);
+      console.log(response);
+
       return response.data;
     } catch (error) {
       const message = handleApiError(
@@ -475,11 +477,22 @@ const authSlice = createSlice({
       .addCase(checkReactivationStatus.fulfilled, (state, action) => {
         state.reactivationStatusLoading = false;
         state.reactivationStatus = action.payload.data;
+        const backendData = action.payload.data;
+        if (backendData && backendData.status) {
+          const existingRequest = {
+            id: backendData.requestId,
+            status: backendData.status,
+            submittedAt: backendData.submittedAt,
+            reason: backendData.reason || "Reactivation requested",
+            additionalInfo: backendData.additionalInfo || "",
+          };
+
+          state.reactivationRequestData = existingRequest;
+        }
       })
       .addCase(checkReactivationStatus.rejected, (state, action) => {
         state.reactivationStatusLoading = false;
         state.error = action.payload;
-        toast.error(action.payload);
       })
 
       .addCase(requestPasswordReset.pending, (state) => {

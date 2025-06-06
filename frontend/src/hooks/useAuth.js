@@ -274,10 +274,29 @@ export const useAuth = () => {
   }, [reactivationStatus]);
 
   const hasExistingReactivationRequest = useCallback(() => {
-    return !!(reactivationRequestData || deactivatedUserData?.existingRequest);
-  }, [reactivationRequestData, deactivatedUserData]);
+    // Check if we have reactivation status data or request data
+    return !!(
+      reactivationRequestData ||
+      deactivatedUserData?.existingRequest ||
+      (reactivationStatus && reactivationStatus.status)
+    );
+  }, [reactivationRequestData, deactivatedUserData, reactivationStatus]);
 
   const getExistingRequestInfo = useCallback(() => {
+    // Try to get from reactivation status first (from API)
+    if (reactivationStatus && reactivationStatus.status) {
+      return {
+        id: reactivationStatus.requestId,
+        submittedAt: reactivationStatus.submittedAt,
+        status: reactivationStatus.status,
+        hasPendingRequest: reactivationStatus.status === "PENDING",
+        canSubmitNew: reactivationStatus.status !== "PENDING",
+        reason: reactivationStatus.reason || "Reactivation requested",
+        additionalInfo: reactivationStatus.additionalInfo || "",
+      };
+    }
+
+    // Fallback to existing logic
     const existingRequest =
       reactivationRequestData || deactivatedUserData?.existingRequest;
     if (!existingRequest) return null;
@@ -288,8 +307,10 @@ export const useAuth = () => {
       status: existingRequest.status,
       hasPendingRequest: existingRequest.status === "PENDING",
       canSubmitNew: existingRequest.status !== "PENDING",
+      reason: existingRequest.reason,
+      additionalInfo: existingRequest.additionalInfo,
     };
-  }, [reactivationRequestData, deactivatedUserData]);
+  }, [reactivationRequestData, deactivatedUserData, reactivationStatus]);
 
   return {
     authState,

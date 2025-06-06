@@ -174,6 +174,7 @@ function App() {
                 </PublicLayout>
               }
             />
+            {/* Modified: Removed :userId parameter to match your navigation */}
             <Route
               path="/auth/request-reactivation"
               element={

@@ -35,7 +35,6 @@ import {
   getAllDiscussions,
   getPlatformMessages,
   generateReport,
-  // ADD THESE NEW IMPORTS
   getReactivationRequests,
   reviewReactivationRequest,
   getReactivationRequestDetails,
@@ -59,7 +58,6 @@ router.delete("/users/:userId", requireAdmin, deleteUser);
 router.patch("/users/:userId/status", requireAdmin, updateUserStatus);
 router.patch("/users/bulk-update", requireAdmin, bulkUpdateUsers);
 
-// NEW REACTIVATION ROUTES FOR ADMIN
 router.get("/reactivation-requests", requireAdmin, getReactivationRequests);
 router.get(
   "/reactivation-requests/:reactivationRequestId",

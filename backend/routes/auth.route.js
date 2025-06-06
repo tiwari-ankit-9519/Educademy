@@ -16,6 +16,7 @@ import {
   updateUserProfile,
   verifyOTP,
   requestAccountReactivation,
+  checkReactivationStatus,
 } from "../controllers/auth.controller.js";
 import isLoggedIn from "../middlewares/isLoggedIn.js";
 
@@ -29,6 +30,7 @@ router.post("/reset-password", resetPassword);
 
 // NEW REACTIVATION ROUTES
 router.post("/request-reactivation", requestAccountReactivation);
+router.get("/reactivation-status/:userId", checkReactivationStatus);
 
 router.get("/google", googleAuth);
 router.get("/github", gitHubAuth);

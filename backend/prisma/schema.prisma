@@ -183,12 +183,10 @@ model ReactivationRequest {
   reviewedAt      DateTime?
   adminNotes      String?                   @db.Text
   rejectionReason String?                   @db.Text
-
-  // Foreign keys
-  userId       String
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reviewedById String?
-  reviewedBy   User?   @relation("ReviewedReactivationRequests", fields: [reviewedById], references: [id])
+  userId          String
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewedById    String?
+  reviewedBy      User?                     @relation("ReviewedReactivationRequests", fields: [reviewedById], references: [id])
 
   @@index([userId])
   @@index([reviewedById])

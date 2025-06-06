@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -32,6 +32,10 @@ const RequestReactivationPage = () => {
     reactivationRequestData,
     hasExistingReactivationRequest,
     getExistingRequestInfo,
+    checkReactivationRequestStatus,
+    reactivationStatus,
+    reactivationStatusLoading,
+    clearDeactivatedUserData,
   } = useAuth();
 
   const [reactivationData, setReactivationData] = useState({
@@ -42,8 +46,10 @@ const RequestReactivationPage = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [reactivationSuccess, setReactivationSuccess] = useState(false);
 
+  const { userId } = useParams();
+
   const deactivatedUserData = location.state?.deactivatedUserData || {
-    userId: "",
+    userId: userId || "", // Get from URL params
     userEmail: "",
     userName: "User",
   };
@@ -51,14 +57,30 @@ const RequestReactivationPage = () => {
   const existingRequestInfo = getExistingRequestInfo();
   const hasExistingRequest = hasExistingReactivationRequest();
 
+  console.log("🔍 RequestReactivationPage Debug:");
+  console.log("deactivatedUserData:", deactivatedUserData);
+  console.log("hasExistingRequest:", hasExistingRequest);
+  console.log("existingRequestInfo:", existingRequestInfo);
+  console.log("reactivationStatus:", reactivationStatus);
+
   useEffect(() => {
     setIsVisible(true);
     clearError();
 
     if (!deactivatedUserData.userId) {
+      console.log("❌ No userId found, redirecting to login");
       navigate("/auth/login", { replace: true });
+      return;
     }
-  }, [clearError, deactivatedUserData.userId, navigate]);
+
+    console.log("✅ Making API call with userId:", deactivatedUserData.userId);
+    checkReactivationRequestStatus(deactivatedUserData.userId);
+  }, [
+    clearError,
+    deactivatedUserData.userId,
+    navigate,
+    checkReactivationRequestStatus,
+  ]);
 
   useEffect(() => {
     if (error) {
@@ -121,7 +143,7 @@ const RequestReactivationPage = () => {
       if (result.type === "auth/requestAccountReactivation/fulfilled") {
         setReactivationSuccess(true);
         setTimeout(() => {
-          navigate("/auth/login", { replace: true });
+          handleBackToLogin();
         }, 4000);
       }
     } catch (err) {
@@ -130,6 +152,12 @@ const RequestReactivationPage = () => {
   };
 
   const handleBackToLogin = () => {
+    console.log("🔄 Navigating back to login and clearing state");
+    // Clear the deactivated user data from Redux state
+    clearDeactivatedUserData();
+    // Clear any error states
+    clearError();
+    // Navigate back to login
     navigate("/auth/login", { replace: true });
   };
 
@@ -246,7 +274,8 @@ const RequestReactivationPage = () => {
                       <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                         <p>
                           <strong>Request ID:</strong>{" "}
-                          {reactivationRequestData.requestId}
+                          {reactivationRequestData.requestId ||
+                            reactivationRequestData.id}
                         </p>
                         <p>
                           <strong>Status:</strong>{" "}
@@ -254,7 +283,8 @@ const RequestReactivationPage = () => {
                         </p>
                         <p>
                           <strong>Expected Review Time:</strong>{" "}
-                          {reactivationRequestData.expectedReviewTime}
+                          {reactivationRequestData.expectedReviewTime ||
+                            "1-3 business days"}
                         </p>
                       </div>
                     </div>
@@ -402,37 +432,6 @@ const RequestReactivationPage = () => {
                     </div>
                   </div>
                 )}
-
-                {hasExistingRequest && existingRequestInfo && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                    <div className="flex items-start space-x-3">
-                      <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-blue-800 dark:text-blue-200 font-medium text-sm mb-2">
-                          Existing Request Found
-                        </p>
-                        <div className="text-blue-700 dark:text-blue-300 text-sm space-y-1">
-                          <p>
-                            <strong>Status:</strong>{" "}
-                            {existingRequestInfo.status}
-                          </p>
-                          <p>
-                            <strong>Submitted:</strong>{" "}
-                            {new Date(
-                              existingRequestInfo.submittedAt
-                            ).toLocaleDateString()}
-                          </p>
-                          {existingRequestInfo.hasPendingRequest && (
-                            <p className="text-orange-600 dark:text-orange-400 font-medium">
-                              You already have a pending request. Please wait
-                              for review.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </motion.div>
 
               <AnimatePresence>
@@ -451,8 +450,46 @@ const RequestReactivationPage = () => {
                 )}
               </AnimatePresence>
 
-              {!hasExistingRequest ||
-              !existingRequestInfo?.hasPendingRequest ? (
+              {hasExistingRequest && existingRequestInfo?.hasPendingRequest ? (
+                <motion.div
+                  variants={itemVariants}
+                  className="text-center space-y-4"
+                >
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
+                    <Clock className="w-12 h-12 text-yellow-600 dark:text-yellow-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                      Request Already Submitted
+                    </h3>
+                    <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-4">
+                      You already have a pending reactivation request submitted
+                      on{" "}
+                      {existingRequestInfo?.submittedAt &&
+                        new Date(
+                          existingRequestInfo.submittedAt
+                        ).toLocaleDateString()}
+                    </p>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                      <p className="text-blue-700 dark:text-blue-300 text-sm">
+                        <strong>Status:</strong>{" "}
+                        {existingRequestInfo?.status || "Pending"}
+                      </p>
+                      <p className="text-blue-700 dark:text-blue-300 text-sm">
+                        <strong>Request ID:</strong> {existingRequestInfo?.id}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBackToLogin}
+                    className="w-full h-12 border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-600/50 backdrop-blur-sm rounded-xl transition-all duration-200"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Login
+                  </Button>
+                </motion.div>
+              ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <motion.div variants={itemVariants}>
                     <Label
@@ -557,32 +594,6 @@ const RequestReactivationPage = () => {
                     </Button>
                   </motion.div>
                 </form>
-              ) : (
-                <motion.div
-                  variants={itemVariants}
-                  className="text-center space-y-4"
-                >
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
-                    <Clock className="w-12 h-12 text-yellow-600 dark:text-yellow-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                      Request Already Submitted
-                    </h3>
-                    <p className="text-yellow-700 dark:text-yellow-300 text-sm">
-                      You already have a pending reactivation request. Please
-                      wait for an administrator to review your request.
-                    </p>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBackToLogin}
-                    className="w-full h-12 border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-600/50 backdrop-blur-sm rounded-xl transition-all duration-200"
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Login
-                  </Button>
-                </motion.div>
               )}
             </motion.div>
           </motion.div>
