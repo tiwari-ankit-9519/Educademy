@@ -17,6 +17,7 @@ import RequestReactivationPage from "./pages/auth/RequestReactivationPage";
 import LandingPage from "./pages/LandingPage";
 import ProfilePage from "./pages/user/ProfilePage";
 import Layout from "@/components/Layout";
+import AuthCallbackPage from "./pages/auth/AuthCallBackPage";
 
 const StudentDashboard = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -143,7 +144,6 @@ function App() {
                 </PublicLayout>
               }
             />
-
             <Route
               path="/auth/login"
               element={
@@ -185,7 +185,15 @@ function App() {
                 </PublicLayout>
               }
             />
-
+            // Add this route in your Routes section
+            <Route
+              path="/auth/callback"
+              element={
+                <PublicLayout>
+                  <AuthCallbackPage />
+                </PublicLayout>
+              }
+            />
             <Route
               path="/dashboard"
               element={
@@ -196,7 +204,6 @@ function App() {
                 </Layout>
               }
             />
-
             <Route
               path="/student/dashboard"
               element={
@@ -227,7 +234,6 @@ function App() {
                 </Layout>
               }
             />
-
             <Route
               path="/profile"
               element={
@@ -238,7 +244,6 @@ function App() {
                 </Layout>
               }
             />
-
             <Route
               path="/student/profile"
               element={<Navigate to="/profile" replace />}
@@ -251,7 +256,6 @@ function App() {
               path="/admin/profile"
               element={<Navigate to="/profile" replace />}
             />
-
             <Route
               path="/settings"
               element={<Navigate to="/profile" replace />}
@@ -260,7 +264,6 @@ function App() {
               path="/account"
               element={<Navigate to="/profile" replace />}
             />
-
             <Route
               path="/student/*"
               element={
@@ -291,7 +294,6 @@ function App() {
                 </Layout>
               }
             />
-
             <Route path="*" element={<AuthenticatedRedirect />} />
           </Routes>
 

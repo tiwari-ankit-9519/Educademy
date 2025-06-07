@@ -104,3 +104,544 @@ SYSTEM CONTEXT:
 }
 ====================================================================================================
 
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 13:56:58.381
+LEVEL: ERROR
+PID: 15028
+REQUEST_ID: bk1cljejn
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: Express Error Handler Caught Error
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: Cannot set properties of undefined (setting 'pendingRole')
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: Cannot set properties of undefined (setting 'pendingRole')
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:2484:27
+    at asyncUtilWrap (C:\WebDev\educademy-react\backend\node_modules\express-async-handler\index.js:3:20)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:117:3)
+    at handle (C:\WebDev\educademy-react\backend\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:295:15
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Function.handle (C:\WebDev\educademy-react\backend\node_modules\router\index.js:186:3)
+    at router (C:\WebDev\educademy-react\backend\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 19718144,
+    "heapTotal": 34344960,
+    "heapUsed": 32526560,
+    "external": 4339978,
+    "arrayBuffers": 481479
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 13:56:58.387
+LEVEL: ERROR
+PID: 15028
+REQUEST_ID: bk1cljejn
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: HTTP SERVER ERROR: GET /api/auth/google?role=STUDENT [500]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/auth/google?role=STUDENT
+  Status Code: 500
+  Duration: 136ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Query: {
+    "role": "STUDENT"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-user": "?1",
+    "sec-fetch-dest": "document",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 20287488,
+    "heapTotal": 34344960,
+    "heapUsed": 32589312,
+    "external": 4323594,
+    "arrayBuffers": 489671
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 13:56:58.520
+LEVEL: ERROR
+PID: 15028
+REQUEST_ID: b7acmmgij
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: Express Error Handler Caught Error
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Route /.well-known/appspecific/com.chrome.devtools.json not found
+  Error Code: UNKNOWN
+  Stack Trace:
+Error: Route /.well-known/appspecific/com.chrome.devtools.json not found
+    at notFound (file:///C:/WebDev/educademy-react/backend/middlewares/errorHandler.js:55:15)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:147:12)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:147:12)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 21041152,
+    "heapTotal": 34344960,
+    "heapUsed": 32768624,
+    "external": 4331786,
+    "arrayBuffers": 497863
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 13:56:59.295
+LEVEL: ERROR
+PID: 15028
+REQUEST_ID: hw5c9vca5
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: Express Error Handler Caught Error
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Route /favicon.ico not found
+  Error Code: UNKNOWN
+  Stack Trace:
+Error: Route /favicon.ico not found
+    at notFound (file:///C:/WebDev/educademy-react/backend/middlewares/errorHandler.js:55:15)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:147:12)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:147:12)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 21282816,
+    "heapTotal": 34344960,
+    "heapUsed": 32975208,
+    "external": 4348170,
+    "arrayBuffers": 514247
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 14:03:59.936
+LEVEL: ERROR
+PID: 23624
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.googleAuth
+MESSAGE: Express Error Handler Caught Error
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Unknown authentication strategy "google"
+  Error Code: UNKNOWN
+  Stack Trace:
+Error: Unknown authentication strategy "google"
+    at attempt (C:\WebDev\educademy-react\backend\node_modules\passport\lib\middleware\authenticate.js:193:39)
+    at authenticate (C:\WebDev\educademy-react\backend\node_modules\passport\lib\middleware\authenticate.js:379:7)
+    at file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:2522:5
+    at asyncUtilWrap (C:\WebDev\educademy-react\backend\node_modules\express-async-handler\index.js:3:20)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\WebDev\educademy-react\backend\node_modules\router\lib\route.js:117:3)
+    at handle (C:\WebDev\educademy-react\backend\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:295:15
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Function.handle (C:\WebDev\educademy-react\backend\node_modules\router\index.js:186:3)
+    at router (C:\WebDev\educademy-react\backend\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 110047232,
+    "heapTotal": 66002944,
+    "heapUsed": 42512320,
+    "external": 4631982,
+    "arrayBuffers": 794900
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 14:03:59.942
+LEVEL: ERROR
+PID: 23624
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.googleAuth
+MESSAGE: HTTP SERVER ERROR: GET /api/auth/google?role=STUDENT [500]
+
+HTTP DETAILS:
+  Method: GET
+  Endpoint: /api/auth/google?role=STUDENT
+  Status Code: 500
+  Duration: 23ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Query: {
+    "role": "STUDENT"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-user": "?1",
+    "sec-fetch-dest": "document",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "__clerk_db_jwt_WUnD2SBr=dvb_2uFFAlNQzQPkRWhRWDNcFPrhF3J; __clerk_db_jwt_CUNjQZ-M=dvb_2uFFqPpTBtLIIk7sJYCRwPNKim3; __client_uat_WUnD2SBr=0; __clerk_db_jwt_9YlWl_FZ=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __clerk_db_jwt=dvb_2wE9va53ndJLhIL5YGRQg6rT8Vz; __refresh_9YlWl_FZ=gvH9J02MGiGatqqY32nf; __client_uat_9YlWl_FZ=0; __client_uat=0"
+}
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 110198784,
+    "heapTotal": 66002944,
+    "heapUsed": 42579264,
+    "external": 4631982,
+    "arrayBuffers": 794900
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 14:04:00.076
+LEVEL: ERROR
+PID: 23624
+REQUEST_ID: 3zvhghm7r
+CLASS.METHOD: HttpMiddleware.processRequest
+MESSAGE: Express Error Handler Caught Error
+
+REQUEST CONTEXT:
+
+BUSINESS OPERATION:
+  Operation: ERROR_HANDLING
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: Error
+  Error Message: Route /.well-known/appspecific/com.chrome.devtools.json not found
+  Error Code: UNKNOWN
+  Stack Trace:
+Error: Route /.well-known/appspecific/com.chrome.devtools.json not found
+    at notFound (file:///C:/WebDev/educademy-react/backend/middlewares/errorHandler.js:55:15)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:147:12)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+    at Layer.handleRequest (C:\WebDev\educademy-react\backend\node_modules\router\lib\layer.js:147:12)
+    at trimPrefix (C:\WebDev\educademy-react\backend\node_modules\router\index.js:342:13)
+    at C:\WebDev\educademy-react\backend\node_modules\router\index.js:297:9
+    at processParams (C:\WebDev\educademy-react\backend\node_modules\router\index.js:582:12)
+    at next (C:\WebDev\educademy-react\backend\node_modules\router\index.js:291:5)
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 110616576,
+    "heapTotal": 66002944,
+    "heapUsed": 42822104,
+    "external": 4640174,
+    "arrayBuffers": 803092
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 14:13:46.494
+LEVEL: ERROR
+PID: 4048
+REQUEST_ID: N/A
+CLASS.METHOD: AuthController.handleOAuthProfileImage
+MESSAGE: Failed to process OAuth profile image
+
+USER CONTEXT:
+  User ID: temp_1749199426135
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: PROCESS_OAUTH_IMAGE
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: TypeError
+  Error Message: response.buffer is not a function
+  Error Code: UNKNOWN
+  Stack Trace:
+TypeError: response.buffer is not a function
+    at handleOAuthProfileImage (file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:2423:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:2813:13
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 51134464,
+    "heapTotal": 33558528,
+    "heapUsed": 32510688,
+    "external": 5460931,
+    "arrayBuffers": 547595
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 14:23:09.787
+LEVEL: ERROR
+PID: 8952
+REQUEST_ID: 4m9x1qzkv
+CLASS.METHOD: AuthController.exchangeAuthCode
+MESSAGE: Auth code exchange failed
+
+REQUEST CONTEXT:
+  Body: {
+    "code": "bb98914049f66ba2b967b5016b53e90d47497b2ce2b6992a47a2267918467a3f"
+}
+
+USER CONTEXT:
+  User ID: cmbkk6bic0000im4gin7xferu
+  Email: N/A
+  Session ID: N/A
+
+BUSINESS OPERATION:
+  Operation: EXCHANGE_AUTH_CODE
+  Entity: N/A
+  Entity ID: N/A
+  Status: ERROR
+
+ERROR DETAILS:
+  Error Name: PrismaClientKnownRequestError
+  Error Message: 
+[31mInvalid [1m`prisma.session.delete()`[22m invocation:[39m
+
+
+An operation failed because it depends on one or more records that were required but not found. No record was found for a delete.
+  Error Code: P2025
+  Stack Trace:
+PrismaClientKnownRequestError: 
+[31mInvalid [1m`prisma.session.delete()`[22m invocation:[39m
+
+
+An operation failed because it depends on one or more records that were required but not found. No record was found for a delete.
+    at Zn.handleRequestError (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:7459)
+    at Zn.handleAndLogRequestError (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:6784)
+    at Zn.request (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:121:6491)
+    at async l (C:\WebDev\educademy-react\backend\node_modules\@prisma\client\runtime\library.js:130:9778)
+    at async file:///C:/WebDev/educademy-react/backend/controllers/auth.controller.js:2184:5
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 77680640,
+    "heapTotal": 33296384,
+    "heapUsed": 31688136,
+    "external": 4315050,
+    "arrayBuffers": 481127
+}
+====================================================================================================
+
+
+====================================================================================================
+TIMESTAMP: 2025-06-06 14:23:09.789
+LEVEL: ERROR
+PID: 8952
+REQUEST_ID: 4m9x1qzkv
+CLASS.METHOD: AuthController.exchangeAuthCode
+MESSAGE: HTTP SERVER ERROR: POST /api/auth/exchange-code [500]
+
+HTTP DETAILS:
+  Method: POST
+  Endpoint: /api/auth/exchange-code
+  Status Code: 500
+  Duration: 4226ms
+  Client IP: ::1
+  User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+
+REQUEST CONTEXT:
+  Body: {
+    "code": "bb98914049f66ba2b967b5016b53e90d47497b2ce2b6992a47a2267918467a3f"
+}
+  Headers: {
+    "host": "localhost:5000",
+    "connection": "keep-alive",
+    "content-length": "75",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+    "content-type": "application/json",
+    "sec-ch-ua-mobile": "?0",
+    "origin": "http://localhost:5173",
+    "sec-fetch-site": "same-site",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-dest": "empty",
+    "referer": "http://localhost:5173/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "cookie": "connect.sid=s%3AG4weNqNqZbHAVPAPltq9rA8_dRU48IXa.fXBTY9vdP8qMroEB%2BKzZSQlqV2BiIl299PBump724uE"
+}
+
+USER CONTEXT:
+  User ID: cmbkk6bic0000im4gin7xferu
+  Email: N/A
+  Session ID: N/A
+
+SYSTEM CONTEXT:
+  Environment: development
+  Hostname: Kratos
+  Platform: win32
+  Node Version: v20.16.0
+  Memory Usage: {
+    "rss": 77701120,
+    "heapTotal": 33296384,
+    "heapUsed": 31764672,
+    "external": 4323242,
+    "arrayBuffers": 489319
+}
+====================================================================================================
+

@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import session from "express-session";
+import passport from "passport";
 import { createServer } from "http";
 import { config } from "dotenv";
 import socketManager from "./utils/socket-io.js";
@@ -15,6 +17,7 @@ import {
 } from "./middlewares/errorHandler.js";
 import { httpLoggerMiddleware } from "./utils/logger.js";
 import educademyLogger from "./utils/logger.js";
+import "./utils/passport.js";
 
 config();
 
@@ -66,6 +69,24 @@ app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+app.use(
+  session({
+    secret:
+      process.env.SESSION_SECRET ||
+      "educademy-session-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(httpLoggerMiddleware);
 

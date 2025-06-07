@@ -1,3 +1,5 @@
+import { config } from "dotenv";
+config();
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
 import generateToken from "../utils/generateToken.js";
@@ -11,6 +13,8 @@ import { uploadImage, deleteFromCloudinary } from "../config/upload.js";
 import { performance } from "perf_hooks";
 import { v2 as cloudinary } from "cloudinary";
 import getTokenFromHeader from "../utils/getTokenFromHeader.js";
+
+console.log(process.env.FRONTEND_URL);
 
 const prisma = new PrismaClient({
   log: [

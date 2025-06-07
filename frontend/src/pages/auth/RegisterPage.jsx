@@ -219,10 +219,10 @@ const RegisterPage = () => {
         [provider]: true,
       }));
 
-      // Construct the auth URL with the selected role
-      const authUrl = `${window.location.origin}/auth/${provider}?role=${formData.role}`;
+      const authUrl = `${
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+      }/auth/${provider}?role=${formData.role}`;
 
-      // Redirect to the auth URL
       window.location.href = authUrl;
     } catch (error) {
       console.error(`${provider} auth error:`, error);
