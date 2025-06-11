@@ -880,7 +880,7 @@ export const emailTemplates = {
     </div>
   `,
 
-  // NEW TEMPLATE 2: Account Activation
+  // Account Activation Template
   accountActivation: ({ firstName, reason, loginUrl, supportEmail }) => `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
       <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 30px; text-align: center;">
@@ -935,7 +935,7 @@ export const emailTemplates = {
     </div>
   `,
 
-  // NEW TEMPLATE 3: Account Deactivation
+  // Account Deactivation Template
   accountDeactivation: ({
     firstName,
     reason,
@@ -1005,7 +1005,7 @@ export const emailTemplates = {
     </div>
   `,
 
-  // NEW TEMPLATE 4: Email Verification Confirmation
+  // Email Verification Confirmation Template
   emailVerificationConfirmation: ({
     firstName,
     verifiedBy,
@@ -1067,7 +1067,7 @@ export const emailTemplates = {
     </div>
   `,
 
-  // NEW TEMPLATE 5: Email Verification Revoked
+  // Email Verification Revoked Template
   emailVerificationRevoked: ({
     firstName,
     reason,
@@ -1152,5 +1152,1484 @@ export const emailTemplates = {
         <p style="margin: 0; font-size: 14px;">© 2024 Educademy. All rights reserved.</p>
       </div>
     </div>
-     `,
+  `,
+
+  courseSubmittedForReview: ({
+    firstName,
+    courseTitle,
+    submissionDate,
+    instructorName,
+    reviewDashboardUrl,
+    supportEmail,
+  }) => `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Course Submitted for Review - Educademy</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                padding: 20px;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .logo {
+                font-size: 32px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+            .header p {
+                opacity: 0.9;
+                font-size: 16px;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .submission-icon {
+                text-align: center;
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+            .greeting {
+                font-size: 24px;
+                color: #1f2937;
+                margin-bottom: 20px;
+                font-weight: 600;
+            }
+            .message {
+                color: #4b5563;
+                font-size: 16px;
+                margin-bottom: 30px;
+                line-height: 1.7;
+            }
+            .course-details {
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                border-radius: 12px;
+                padding: 30px;
+                margin: 30px 0;
+                border: 2px solid #e2e8f0;
+            }
+            .course-title {
+                font-size: 20px;
+                font-weight: bold;
+                color: #7c3aed;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            .detail-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .detail-label {
+                color: #64748b;
+                font-weight: 500;
+            }
+            .detail-value {
+                color: #1e293b;
+                font-weight: 600;
+            }
+            .review-process {
+                background: #ede9fe;
+                border-left: 4px solid #8b5cf6;
+                padding: 20px;
+                margin: 30px 0;
+                border-radius: 0 8px 8px 0;
+            }
+            .review-process h3 {
+                color: #5b21b6;
+                margin-bottom: 15px;
+                font-size: 18px;
+            }
+            .process-step {
+                color: #5b21b6;
+                font-size: 14px;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .step-number {
+                background: #8b5cf6;
+                color: white;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+                flex-shrink: 0;
+            }
+            .cta-button {
+                text-align: center;
+                margin: 40px 0;
+            }
+            .cta-button a {
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 16px;
+                display: inline-block;
+                box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            }
+            .guidelines {
+                background: #fef3c7;
+                border: 1px solid #fde68a;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 25px 0;
+            }
+            .guidelines h3 {
+                color: #92400e;
+                margin-bottom: 10px;
+                font-size: 16px;
+            }
+            .guidelines p {
+                color: #78350f;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .footer {
+                background: #f9fafb;
+                padding: 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }
+            .footer p {
+                color: #6b7280;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            .divider {
+                height: 1px;
+                background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+                margin: 30px 0;
+            }
+            @media (max-width: 600px) {
+                .container {
+                    margin: 10px;
+                }
+                .header, .content, .footer {
+                    padding: 25px 20px;
+                }
+                .detail-item {
+                    flex-direction: column;
+                    gap: 5px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">
+                    🎓 Educademy
+                </div>
+                <p>Course Review System</p>
+            </div>
+            
+            <div class="content">
+                <div class="submission-icon">📚</div>
+                
+                <div class="greeting">
+                    Hello ${firstName}! 👋
+                </div>
+                
+                <div class="message">
+                    Great news! Your course has been successfully submitted to our review team. 
+                    We're excited to review your content and help you share your knowledge with learners worldwide.
+                </div>
+                
+                <div class="course-details">
+                    <div class="course-title">"${courseTitle}"</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Instructor:</span>
+                        <span class="detail-value">${instructorName}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Submission Date:</span>
+                        <span class="detail-value">${submissionDate}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">Under Review</span>
+                    </div>
+                </div>
+                
+                <div class="review-process">
+                    <h3>📋 Review Process</h3>
+                    <div class="process-step">
+                        <span class="step-number">1</span>
+                        <span>Content quality assessment (2-3 business days)</span>
+                    </div>
+                    <div class="process-step">
+                        <span class="step-number">2</span>
+                        <span>Educational value evaluation</span>
+                    </div>
+                    <div class="process-step">
+                        <span class="step-number">3</span>
+                        <span>Technical review and compliance check</span>
+                    </div>
+                    <div class="process-step">
+                        <span class="step-number">4</span>
+                        <span>Final approval and course publication</span>
+                    </div>
+                </div>
+                
+                <div class="cta-button">
+                    <a href="${reviewDashboardUrl || "#"}">
+                        📊 Track Review Status
+                    </a>
+                </div>
+                
+                <div class="guidelines">
+                    <h3>💡 Review Guidelines</h3>
+                    <p>
+                        Our review team evaluates courses based on content quality, educational value, 
+                        technical standards, and community guidelines. You'll receive detailed feedback 
+                        via email once the review is complete.
+                    </p>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div class="message">
+                    <strong>Questions about the review process?</strong> Our instructor support team is here to help! 
+                    Contact us anytime for assistance with your course submission.
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p><strong>Educademy Course Review Team</strong></p>
+                <p>Supporting instructors in creating exceptional learning experiences 🌟</p>
+                
+                <div class="divider"></div>
+                
+                <p style="font-size: 12px; color: #9ca3af;">
+                    This notification was sent regarding your course submission.
+                    <br>© 2025 Educademy. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `,
+
+  courseCreated: ({
+    firstName,
+    courseTitle,
+    courseUrl,
+    instructorName,
+    publicationDate,
+    dashboardUrl,
+    supportEmail,
+  }) => `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Course Published - Educademy</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                padding: 20px;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .logo {
+                font-size: 32px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+            .header p {
+                opacity: 0.9;
+                font-size: 16px;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .celebration {
+                text-align: center;
+                margin: 30px 0;
+            }
+            .celebration-icon {
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+            .greeting {
+                font-size: 28px;
+                color: #1f2937;
+                margin-bottom: 20px;
+                font-weight: 600;
+                text-align: center;
+            }
+            .message {
+                color: #4b5563;
+                font-size: 16px;
+                margin-bottom: 30px;
+                line-height: 1.7;
+                text-align: center;
+            }
+            .course-showcase {
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                border-radius: 12px;
+                padding: 30px;
+                margin: 30px 0;
+                border: 2px solid #a7f3d0;
+                text-align: center;
+            }
+            .course-title {
+                font-size: 24px;
+                font-weight: bold;
+                color: #065f46;
+                margin-bottom: 15px;
+            }
+            .course-badge {
+                background: #10b981;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                display: inline-block;
+                margin-bottom: 20px;
+            }
+            .course-details {
+                background: #f8fafc;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+            }
+            .detail-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .detail-label {
+                color: #64748b;
+                font-weight: 500;
+            }
+            .detail-value {
+                color: #1e293b;
+                font-weight: 600;
+            }
+            .cta-buttons {
+                text-align: center;
+                margin: 40px 0;
+            }
+            .cta-buttons a {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 16px;
+                display: inline-block;
+                margin: 0 10px 10px 0;
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            }
+            .secondary-btn {
+                background: #6b7280 !important;
+                box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3) !important;
+            }
+            .success-features {
+                background: #f0fdf4;
+                border-left: 4px solid #10b981;
+                padding: 20px;
+                margin: 30px 0;
+                border-radius: 0 8px 8px 0;
+            }
+            .success-features h3 {
+                color: #14532d;
+                margin-bottom: 15px;
+                font-size: 18px;
+            }
+            .feature-item {
+                color: #166534;
+                font-size: 14px;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .feature-icon {
+                color: #10b981;
+                font-weight: bold;
+            }
+            .next-steps {
+                background: #eff6ff;
+                border: 1px solid #bfdbfe;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 25px 0;
+            }
+            .next-steps h3 {
+                color: #1e40af;
+                margin-bottom: 10px;
+                font-size: 16px;
+            }
+            .next-steps p {
+                color: #1e3a8a;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .footer {
+                background: #f9fafb;
+                padding: 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }
+            .footer p {
+                color: #6b7280;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            .divider {
+                height: 1px;
+                background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+                margin: 30px 0;
+            }
+            @media (max-width: 600px) {
+                .container {
+                    margin: 10px;
+                }
+                .header, .content, .footer {
+                    padding: 25px 20px;
+                }
+                .cta-buttons a {
+                    display: block;
+                    margin: 10px 0;
+                }
+                .detail-item {
+                    flex-direction: column;
+                    gap: 5px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">
+                    🎓 Educademy
+                </div>
+                <p>Course Publishing Platform</p>
+            </div>
+            
+            <div class="content">
+                <div class="celebration">
+                    <div class="celebration-icon">🎉</div>
+                </div>
+                
+                <div class="greeting">
+                    Congratulations, ${firstName}!
+                </div>
+                
+                <div class="message">
+                    🚀 <strong>Your course is now live!</strong> After a thorough review process, 
+                    we're excited to announce that your course has been approved and published 
+                    on the Educademy platform.
+                </div>
+                
+                <div class="course-showcase">
+                    <div class="course-badge">✅ PUBLISHED</div>
+                    <div class="course-title">"${courseTitle}"</div>
+                    
+                    <div class="course-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Instructor:</span>
+                            <span class="detail-value">${instructorName}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Publication Date:</span>
+                            <span class="detail-value">${publicationDate}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">Live & Available</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cta-buttons">
+                    <a href="${courseUrl || "#"}">
+                        👀 View Your Course
+                    </a>
+                    <a href="${dashboardUrl || "#"}" class="secondary-btn">
+                        📊 Instructor Dashboard
+                    </a>
+                </div>
+                
+                <div class="success-features">
+                    <h3>🌟 What's Next?</h3>
+                    <div class="feature-item">
+                        <span class="feature-icon">📈</span>
+                        <span>Monitor your course analytics and student engagement</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">💬</span>
+                        <span>Respond to student questions and feedback</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔄</span>
+                        <span>Update course content and add new materials</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">💰</span>
+                        <span>Track your earnings and payout schedule</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <span>Promote your course to reach more students</span>
+                    </div>
+                </div>
+                
+                <div class="next-steps">
+                    <h3>💡 Pro Tips for Success</h3>
+                    <p>
+                        Share your course on social media, engage with your students regularly, 
+                        and consider creating additional courses to build your instructor profile. 
+                        Our instructor success team is here to support your teaching journey!
+                    </p>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div class="message">
+                    <strong>Thank you for contributing to the Educademy community!</strong> 
+                    Your expertise helps learners worldwide achieve their goals. If you need any 
+                    assistance, our instructor support team is always ready to help.
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p><strong>Educademy Instructor Success Team</strong></p>
+                <p>Empowering educators to share knowledge worldwide 🌍</p>
+                
+                <div style="margin: 20px 0;">
+                    <a href="mailto:${
+                      supportEmail || "instructor-support@educademy.com"
+                    }" 
+                       style="color: #10b981; text-decoration: none; font-weight: 500;">
+                        📧 Instructor Support
+                    </a>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p style="font-size: 12px; color: #9ca3af;">
+                    This notification was sent regarding your course publication.
+                    <br>© 2025 Educademy. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `,
+
+  courseApproval: ({
+    firstName,
+    courseTitle,
+    courseId,
+    feedback,
+    courseUrl,
+    dashboardUrl,
+  }) => `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Course Approved - Educademy</title>
+      <style>
+          * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+          }
+          body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              padding: 20px;
+              line-height: 1.6;
+          }
+          .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 15px;
+              overflow: hidden;
+              box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          }
+          .header {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+              padding: 40px 30px;
+              text-align: center;
+          }
+          .logo {
+              font-size: 32px;
+              font-weight: bold;
+              margin-bottom: 10px;
+          }
+          .content {
+              padding: 40px 30px;
+          }
+          .celebration {
+              text-align: center;
+              margin: 30px 0;
+          }
+          .celebration-icon {
+              font-size: 64px;
+              margin-bottom: 20px;
+          }
+          .greeting {
+              font-size: 28px;
+              color: #1f2937;
+              margin-bottom: 20px;
+              font-weight: 600;
+              text-align: center;
+          }
+          .message {
+              color: #4b5563;
+              font-size: 16px;
+              margin-bottom: 30px;
+              line-height: 1.7;
+              text-align: center;
+          }
+          .course-showcase {
+              background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+              border-radius: 12px;
+              padding: 30px;
+              margin: 30px 0;
+              border: 2px solid #a7f3d0;
+              text-align: center;
+          }
+          .course-title {
+              font-size: 24px;
+              font-weight: bold;
+              color: #065f46;
+              margin-bottom: 15px;
+          }
+          .course-badge {
+              background: #10b981;
+              color: white;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 600;
+              display: inline-block;
+              margin-bottom: 20px;
+          }
+          .feedback-section {
+              background: #f0fdf4;
+              border-left: 4px solid #10b981;
+              padding: 20px;
+              margin: 30px 0;
+              border-radius: 0 8px 8px 0;
+          }
+          .feedback-section h3 {
+              color: #14532d;
+              margin-bottom: 15px;
+              font-size: 18px;
+          }
+          .feedback-content {
+              color: #166534;
+              font-size: 14px;
+              line-height: 1.6;
+              font-style: italic;
+          }
+          .cta-buttons {
+              text-align: center;
+              margin: 40px 0;
+          }
+          .cta-buttons a {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+              padding: 15px 25px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 16px;
+              display: inline-block;
+              margin: 0 10px 10px 0;
+              box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+          }
+          .secondary-btn {
+              background: #6b7280 !important;
+              box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3) !important;
+          }
+          .footer {
+              background: #f9fafb;
+              padding: 30px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+          }
+          @media (max-width: 600px) {
+              .container {
+                  margin: 10px;
+              }
+              .header, .content, .footer {
+                  padding: 25px 20px;
+              }
+              .cta-buttons a {
+                  display: block;
+                  margin: 10px 0;
+              }
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <div class="header">
+              <div class="logo">🎓 Educademy</div>
+              <p>Course Approved!</p>
+          </div>
+          
+          <div class="content">
+              <div class="celebration">
+                  <div class="celebration-icon">🎉</div>
+              </div>
+              
+              <div class="greeting">
+                  Congratulations, ${firstName}!
+              </div>
+              
+              <div class="message">
+                  🚀 <strong>Your course is now live!</strong> After our review process, 
+                  we're excited to announce that your course has been approved and published 
+                  on the Educademy platform.
+              </div>
+              
+              <div class="course-showcase">
+                  <div class="course-badge">✅ APPROVED & PUBLISHED</div>
+                  <div class="course-title">"${courseTitle}"</div>
+              </div>
+              
+              ${
+                feedback
+                  ? `
+              <div class="feedback-section">
+                  <h3>📝 Admin Feedback</h3>
+                  <div class="feedback-content">"${feedback}"</div>
+              </div>
+              `
+                  : ""
+              }
+              
+              <div class="cta-buttons">
+                  <a href="${courseUrl || "#"}">
+                      👀 View Your Course
+                  </a>
+                  <a href="${dashboardUrl || "#"}" class="secondary-btn">
+                      📊 Dashboard
+                  </a>
+              </div>
+              
+              <div class="message">
+                  <strong>Thank you for contributing to the Educademy community!</strong> 
+                  Your course is now available to learners worldwide. Monitor your analytics 
+                  and engage with your students to maximize success.
+              </div>
+          </div>
+          
+          <div class="footer">
+              <p><strong>Educademy Course Review Team</strong></p>
+              <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+                  © 2025 Educademy. All rights reserved.
+              </p>
+          </div>
+      </div>
+  </body>
+  </html>
+`,
+
+  courseRejection: ({
+    firstName,
+    courseTitle,
+    courseId,
+    rejectionReason,
+    feedback,
+    editCourseUrl,
+    supportEmail,
+  }) => `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Course Review Decision - Educademy</title>
+      <style>
+          * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+          }
+          body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+              padding: 20px;
+              line-height: 1.6;
+          }
+          .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 15px;
+              overflow: hidden;
+              box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          }
+          .header {
+              background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+              color: white;
+              padding: 40px 30px;
+              text-align: center;
+          }
+          .logo {
+              font-size: 32px;
+              font-weight: bold;
+              margin-bottom: 10px;
+          }
+          .content {
+              padding: 40px 30px;
+          }
+          .alert-icon {
+              text-align: center;
+              font-size: 64px;
+              margin-bottom: 20px;
+          }
+          .greeting {
+              font-size: 24px;
+              color: #1f2937;
+              margin-bottom: 20px;
+              font-weight: 600;
+          }
+          .message {
+              color: #4b5563;
+              font-size: 16px;
+              margin-bottom: 30px;
+              line-height: 1.7;
+          }
+          .course-info {
+              background: #fef2f2;
+              border: 2px solid #fecaca;
+              border-radius: 12px;
+              padding: 30px;
+              margin: 30px 0;
+              text-align: center;
+          }
+          .course-title {
+              font-size: 20px;
+              font-weight: bold;
+              color: #7f1d1d;
+              margin-bottom: 15px;
+          }
+          .status-badge {
+              background: #dc2626;
+              color: white;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 600;
+              display: inline-block;
+              margin-bottom: 20px;
+          }
+          .rejection-details {
+              background: #fff3cd;
+              border-left: 4px solid #ffc107;
+              padding: 20px;
+              margin: 30px 0;
+              border-radius: 0 8px 8px 0;
+          }
+          .rejection-details h3 {
+              color: #92400e;
+              margin-bottom: 15px;
+              font-size: 18px;
+          }
+          .reason-content {
+              color: #78350f;
+              font-size: 14px;
+              line-height: 1.6;
+              margin-bottom: 15px;
+          }
+          .feedback-section {
+              background: #e0f2fe;
+              border-left: 4px solid #0891b2;
+              padding: 20px;
+              margin: 30px 0;
+              border-radius: 0 8px 8px 0;
+          }
+          .feedback-section h3 {
+              color: #0c4a6e;
+              margin-bottom: 15px;
+              font-size: 18px;
+          }
+          .feedback-content {
+              color: #0c4a6e;
+              font-size: 14px;
+              line-height: 1.6;
+              font-style: italic;
+          }
+          .next-steps {
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 25px 0;
+          }
+          .next-steps h3 {
+              color: #1e293b;
+              margin-bottom: 15px;
+              font-size: 16px;
+          }
+          .step-item {
+              color: #475569;
+              font-size: 14px;
+              margin-bottom: 8px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+          }
+          .step-number {
+              background: #0891b2;
+              color: white;
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: bold;
+              flex-shrink: 0;
+          }
+          .cta-buttons {
+              text-align: center;
+              margin: 40px 0;
+          }
+          .cta-buttons a {
+              background: #0891b2;
+              color: white;
+              padding: 15px 25px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 16px;
+              display: inline-block;
+              margin: 0 10px 10px 0;
+              box-shadow: 0 4px 15px rgba(8, 145, 178, 0.3);
+          }
+          .secondary-btn {
+              background: #6b7280 !important;
+              box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3) !important;
+          }
+          .footer {
+              background: #f9fafb;
+              padding: 30px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+          }
+          @media (max-width: 600px) {
+              .container {
+                  margin: 10px;
+              }
+              .header, .content, .footer {
+                  padding: 25px 20px;
+              }
+              .cta-buttons a {
+                  display: block;
+                  margin: 10px 0;
+              }
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <div class="header">
+              <div class="logo">🎓 Educademy</div>
+              <p>Course Review Update</p>
+          </div>
+          
+          <div class="content">
+              <div class="alert-icon">📋</div>
+              
+              <div class="greeting">
+                  Hello ${firstName},
+              </div>
+              
+              <div class="message">
+                  Thank you for submitting your course for review. After careful evaluation, 
+                  we need to request some improvements before we can approve your course for publication.
+              </div>
+              
+              <div class="course-info">
+                  <div class="status-badge">🔄 REQUIRES REVISION</div>
+                  <div class="course-title">"${courseTitle}"</div>
+              </div>
+              
+              ${
+                rejectionReason
+                  ? `
+              <div class="rejection-details">
+                  <h3>📝 Areas for Improvement</h3>
+                  <div class="reason-content">${rejectionReason}</div>
+              </div>
+              `
+                  : ""
+              }
+              
+              ${
+                feedback
+                  ? `
+              <div class="feedback-section">
+                  <h3>💬 Detailed Feedback</h3>
+                  <div class="feedback-content">"${feedback}"</div>
+              </div>
+              `
+                  : ""
+              }
+              
+              <div class="next-steps">
+                  <h3>🚀 Next Steps</h3>
+                  <div class="step-item">
+                      <span class="step-number">1</span>
+                      <span>Review the feedback and areas for improvement</span>
+                  </div>
+                  <div class="step-item">
+                      <span class="step-number">2</span>
+                      <span>Edit your course content addressing the concerns</span>
+                  </div>
+                  <div class="step-item">
+                      <span class="step-number">3</span>
+                      <span>Resubmit your course for review</span>
+                  </div>
+                  <div class="step-item">
+                      <span class="step-number">4</span>
+                      <span>Our team will prioritize your resubmission</span>
+                  </div>
+              </div>
+              
+              <div class="cta-buttons">
+                  <a href="${editCourseUrl || "#"}">
+                      ✏️ Edit Course
+                  </a>
+                  <a href="mailto:${
+                    supportEmail || "support@educademy.com"
+                  }" class="secondary-btn">
+                      📧 Contact Support
+                  </a>
+              </div>
+              
+              <div class="message">
+                  <strong>Don't be discouraged!</strong> This feedback is designed to help you create 
+                  the best possible learning experience. Many successful courses go through revisions 
+                  before publication. We're here to support you throughout the process.
+              </div>
+          </div>
+          
+          <div class="footer">
+              <p><strong>Educademy Course Review Team</strong></p>
+              <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+                  We're committed to helping you succeed. © 2025 Educademy. All rights reserved.
+              </p>
+          </div>
+      </div>
+  </body>
+  </html>
+`,
+
+  courseSuspension: ({
+    firstName,
+    courseTitle,
+    courseId,
+    suspensionReason,
+    feedback,
+    appealUrl,
+    supportEmail,
+  }) => `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Course Suspended - Educademy</title>
+      <style>
+          * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+          }
+          body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+              padding: 20px;
+              line-height: 1.6;
+          }
+          .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 15px;
+              overflow: hidden;
+              box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          }
+          .header {
+              background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+              color: white;
+              padding: 40px 30px;
+              text-align: center;
+          }
+          .logo {
+              font-size: 32px;
+              font-weight: bold;
+              margin-bottom: 10px;
+          }
+          .content {
+              padding: 40px 30px;
+          }
+          .warning-icon {
+              text-align: center;
+              font-size: 64px;
+              margin-bottom: 20px;
+          }
+          .greeting {
+              font-size: 24px;
+              color: #1f2937;
+              margin-bottom: 20px;
+              font-weight: 600;
+          }
+          .message {
+              color: #4b5563;
+              font-size: 16px;
+              margin-bottom: 30px;
+              line-height: 1.7;
+          }
+          .course-info {
+              background: #fef3c7;
+              border: 2px solid #fde68a;
+              border-radius: 12px;
+              padding: 30px;
+              margin: 30px 0;
+              text-align: center;
+          }
+          .course-title {
+              font-size: 20px;
+              font-weight: bold;
+              color: #92400e;
+              margin-bottom: 15px;
+          }
+          .status-badge {
+              background: #f59e0b;
+              color: #1f2937;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 600;
+              display: inline-block;
+              margin-bottom: 20px;
+          }
+          .suspension-details {
+              background: #fee2e2;
+              border-left: 4px solid #ef4444;
+              padding: 20px;
+              margin: 30px 0;
+              border-radius: 0 8px 8px 0;
+          }
+          .suspension-details h3 {
+              color: #7f1d1d;
+              margin-bottom: 15px;
+              font-size: 18px;
+          }
+          .reason-content {
+              color: #7f1d1d;
+              font-size: 14px;
+              line-height: 1.6;
+              margin-bottom: 15px;
+          }
+          .feedback-section {
+              background: #e0f2fe;
+              border-left: 4px solid #0891b2;
+              padding: 20px;
+              margin: 30px 0;
+              border-radius: 0 8px 8px 0;
+          }
+          .feedback-section h3 {
+              color: #0c4a6e;
+              margin-bottom: 15px;
+              font-size: 18px;
+          }
+          .feedback-content {
+              color: #0c4a6e;
+              font-size: 14px;
+              line-height: 1.6;
+              font-style: italic;
+          }
+          .impact-notice {
+              background: #fff3cd;
+              border: 1px solid #fde68a;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 25px 0;
+          }
+          .impact-notice h3 {
+              color: #92400e;
+              margin-bottom: 10px;
+              font-size: 16px;
+          }
+          .impact-item {
+              color: #78350f;
+              font-size: 14px;
+              margin-bottom: 8px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+          }
+          .appeal-process {
+              background: #f0fdf4;
+              border-left: 4px solid #10b981;
+              padding: 20px;
+              margin: 30px 0;
+              border-radius: 0 8px 8px 0;
+          }
+          .appeal-process h3 {
+              color: #14532d;
+              margin-bottom: 15px;
+              font-size: 18px;
+          }
+          .appeal-step {
+              color: #166534;
+              font-size: 14px;
+              margin-bottom: 8px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+          }
+          .step-number {
+              background: #10b981;
+              color: white;
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: bold;
+              flex-shrink: 0;
+          }
+          .cta-buttons {
+              text-align: center;
+              margin: 40px 0;
+          }
+          .cta-buttons a {
+              background: #f59e0b;
+              color: #1f2937;
+              padding: 15px 25px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 16px;
+              display: inline-block;
+              margin: 0 10px 10px 0;
+              box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+          }
+          .secondary-btn {
+              background: #6b7280 !important;
+              color: white !important;
+              box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3) !important;
+          }
+          .footer {
+              background: #f9fafb;
+              padding: 30px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+          }
+          @media (max-width: 600px) {
+              .container {
+                  margin: 10px;
+              }
+              .header, .content, .footer {
+                  padding: 25px 20px;
+              }
+              .cta-buttons a {
+                  display: block;
+                  margin: 10px 0;
+              }
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <div class="header">
+              <div class="logo">🎓 Educademy</div>
+              <p>Course Status Update</p>
+          </div>
+          
+          <div class="content">
+              <div class="warning-icon">⚠️</div>
+              
+              <div class="greeting">
+                  Hello ${firstName},
+              </div>
+              
+              <div class="message">
+                  We're writing to inform you that your course has been temporarily suspended 
+                  from the Educademy platform. This action was taken to maintain our community 
+                  standards and platform quality.
+              </div>
+              
+              <div class="course-info">
+                  <div class="status-badge">⏸️ SUSPENDED</div>
+                  <div class="course-title">"${courseTitle}"</div>
+              </div>
+              
+              ${
+                suspensionReason
+                  ? `
+              <div class="suspension-details">
+                  <h3>📋 Suspension Reason</h3>
+                  <div class="reason-content">${suspensionReason}</div>
+              </div>
+              `
+                  : ""
+              }
+              
+              ${
+                feedback
+                  ? `
+              <div class="feedback-section">
+                  <h3>💬 Additional Information</h3>
+                  <div class="feedback-content">"${feedback}"</div>
+              </div>
+              `
+                  : ""
+              }
+              
+              <div class="impact-notice">
+                  <h3>📊 What This Means</h3>
+                  <div class="impact-item">
+                      <span style="color: #f59e0b;">•</span>
+                      <span>Your course is no longer visible to students</span>
+                  </div>
+                  <div class="impact-item">
+                      <span style="color: #f59e0b;">•</span>
+                      <span>Enrolled students cannot access course content</span>
+                  </div>
+                  <div class="impact-item">
+                      <span style="color: #f59e0b;">•</span>
+                      <span>New enrollments are prevented</span>
+                  </div>
+                  <div class="impact-item">
+                      <span style="color: #f59e0b;">•</span>
+                      <span>Course data and progress are preserved</span>
+                  </div>
+              </div>
+              
+              <div class="appeal-process">
+                  <h3>🔄 Appeal Process</h3>
+                  <div class="appeal-step">
+                      <span class="step-number">1</span>
+                      <span>Submit an appeal with your explanation</span>
+                  </div>
+                  <div class="appeal-step">
+                      <span class="step-number">2</span>
+                      <span>Our review team will reassess your case</span>
+                  </div>
+                  <div class="appeal-step">
+                      <span class="step-number">3</span>
+                      <span>We'll respond within 3-5 business days</span>
+                  </div>
+                  <div class="appeal-step">
+                      <span class="step-number">4</span>
+                      <span>If approved, your course will be restored</span>
+                  </div>
+              </div>
+              
+              <div class="cta-buttons">
+                  <a href="${appealUrl || "#"}">
+                      📝 Submit Appeal
+                  </a>
+                  <a href="mailto:${
+                    supportEmail || "support@educademy.com"
+                  }" class="secondary-btn">
+                      📧 Contact Support
+                  </a>
+              </div>
+              
+              <div class="message">
+                  <strong>We value your contribution to Educademy.</strong> If you believe this 
+                  suspension was made in error, please don't hesitate to submit an appeal. 
+                  Our team is committed to fair and thorough review processes.
+              </div>
+          </div>
+          
+          <div class="footer">
+              <p><strong>Educademy Policy Team</strong></p>
+              <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+                  Maintaining quality education standards. © 2025 Educademy. All rights reserved.
+              </p>
+          </div>
+      </div>
+  </body>
+  </html>
+`,
 };

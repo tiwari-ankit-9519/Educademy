@@ -38,6 +38,10 @@ import {
   getReactivationRequests,
   reviewReactivationRequest,
   getReactivationRequestDetails,
+  getPendingInstructors,
+  getInstructorDetails,
+  verifyInstructor,
+  bulkVerifyInstructors,
 } from "../controllers/admin/admin.controller.js";
 
 const router = Router();
@@ -72,10 +76,10 @@ router.patch(
 
 router.get("/courses", requireAdmin, getAllCourses);
 router.delete("/courses/:courseId", requireAdmin, deleteCourse);
-router.patch("/courses/:courseId/review", requireAdmin, reviewCourse);
+router.get("/courses/:courseId/review", requireAdmin, reviewCourse);
 router.patch("/courses/:courseId/status", requireAdmin, updateCourseStatus);
 
-router.get("/categories", requireAdmin, getAllCategories);
+router.get("/categories", getAllCategories);
 router.post("/categories", requireAdmin, createCategory);
 router.patch("/categories/:categoryId", requireAdmin, updateCategory);
 router.delete("/categories/:categoryId", requireAdmin, deleteCategory);
@@ -103,5 +107,14 @@ router.get(
   getCourseAnalyticsForAdmin
 );
 router.get("/instructor/discussions", requireAdmin, getAllDiscussions);
+
+router.get("/instructors/pending", requireAdmin, getPendingInstructors);
+router.put("/instructors/:instructorId/verify", requireAdmin, verifyInstructor);
+router.get(
+  "/instructors/:instructorId/details",
+  requireAdmin,
+  getInstructorDetails
+);
+router.put("/instructors/bulk-verify", requireAdmin, bulkVerifyInstructors);
 
 export default router;

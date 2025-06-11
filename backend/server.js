@@ -7,6 +7,7 @@ import { config } from "dotenv";
 import socketManager from "./utils/socket-io.js";
 import authRoutes from "./routes/auth.route.js";
 import adminRoutes from "./routes/admin.route.js";
+import instructorRoutes from "./routes/instructor.route.js";
 import {
   errorHandler,
   notFound,
@@ -96,6 +97,7 @@ app.set("socketManager", socketManager);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/instructors", instructorRoutes);
 
 app.get("/health", (req, res) => {
   const healthData = {

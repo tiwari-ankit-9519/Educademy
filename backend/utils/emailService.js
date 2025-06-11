@@ -161,7 +161,6 @@ class EmailService {
     }
   }
 
-  // Send OTP verification email
   async sendOTPVerification({ email, firstName, otp, expiresIn = 10 }) {
     educademyLogger.info("Sending OTP verification email", {
       recipient: email,
@@ -184,7 +183,6 @@ class EmailService {
     });
   }
 
-  // Send welcome email after successful verification
   async sendWelcomeEmail({ email, firstName, lastName }) {
     educademyLogger.info("Sending welcome email", {
       recipient: email,
@@ -205,7 +203,6 @@ class EmailService {
     });
   }
 
-  // Send password reset OTP
   async sendPasswordResetOTP({ email, firstName, otp, expiresIn = 15 }) {
     educademyLogger.info("Sending password reset OTP", {
       recipient: email,
@@ -227,7 +224,6 @@ class EmailService {
     });
   }
 
-  // Send login alert
   async sendLoginAlert({ email, firstName, loginInfo }) {
     educademyLogger.info("Sending login alert", {
       recipient: email,
@@ -248,7 +244,6 @@ class EmailService {
     });
   }
 
-  // NEW METHOD 1: Send reactivation request confirmation
   async sendReactivationRequestConfirmation({
     email,
     firstName,
@@ -276,7 +271,6 @@ class EmailService {
     });
   }
 
-  // NEW METHOD 2: Send account activation email
   async sendAccountActivationEmail({ email, firstName, reason, loginUrl }) {
     educademyLogger.info("Sending account activation email", {
       recipient: email,
@@ -298,7 +292,6 @@ class EmailService {
     });
   }
 
-  // NEW METHOD 3: Send account deactivation email
   async sendAccountDeactivationEmail({
     email,
     firstName,
@@ -330,7 +323,6 @@ class EmailService {
     });
   }
 
-  // NEW METHOD 4: Send email verification confirmation
   async sendEmailVerificationConfirmation({
     email,
     firstName,
@@ -357,7 +349,6 @@ class EmailService {
     });
   }
 
-  // NEW METHOD 5: Send email verification revoked notification
   async sendEmailVerificationRevoked({
     email,
     firstName,
@@ -387,7 +378,184 @@ class EmailService {
     });
   }
 
-  // Test email functionality (development helper)
+  async sendCourseSubmittedForReview({
+    email,
+    firstName,
+    courseTitle,
+    instructorName,
+    submissionDate,
+    reviewDashboardUrl,
+  }) {
+    educademyLogger.info("Sending course submitted for review email", {
+      recipient: email,
+      firstName,
+      courseTitle,
+      instructorName,
+      isCourseFlow: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "📚 Course Submitted for Review - Educademy",
+      template: "courseSubmittedForReview",
+      templateData: {
+        firstName,
+        courseTitle,
+        submissionDate: new Date(submissionDate).toLocaleDateString(),
+        instructorName,
+        reviewDashboardUrl:
+          reviewDashboardUrl ||
+          `${process.env.FRONTEND_URL}/instructor/dashboard`,
+        supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+      },
+    });
+  }
+
+  async sendCourseCreated({
+    email,
+    firstName,
+    courseTitle,
+    courseUrl,
+    instructorName,
+    publicationDate,
+    dashboardUrl,
+  }) {
+    educademyLogger.info("Sending course created email", {
+      recipient: email,
+      firstName,
+      courseTitle,
+      instructorName,
+      isCourseFlow: true,
+      isPublicationNotification: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "🎉 Your Course is Now Live - Educademy",
+      template: "courseCreated",
+      templateData: {
+        firstName,
+        courseTitle,
+        courseUrl,
+        instructorName,
+        publicationDate: new Date(publicationDate).toLocaleDateString(),
+        dashboardUrl:
+          dashboardUrl || `${process.env.FRONTEND_URL}/instructor/dashboard`,
+        supportEmail:
+          process.env.SUPPORT_EMAIL || "instructor-support@educademy.com",
+      },
+    });
+  }
+
+  async sendCourseApprovalEmail({
+    email,
+    firstName,
+    courseTitle,
+    courseId,
+    feedback,
+    courseUrl,
+    dashboardUrl,
+  }) {
+    educademyLogger.info("Sending course approval email", {
+      recipient: email,
+      firstName,
+      courseTitle,
+      courseId,
+      isCourseFlow: true,
+      isApprovalNotification: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "🎉 Course Approved - Your Course is Now Live!",
+      template: "courseApproval",
+      templateData: {
+        firstName,
+        courseTitle,
+        courseId,
+        feedback,
+        courseUrl:
+          courseUrl || `${process.env.FRONTEND_URL}/courses/${courseId}`,
+        dashboardUrl:
+          dashboardUrl || `${process.env.FRONTEND_URL}/instructor/dashboard`,
+      },
+    });
+  }
+
+  async sendCourseRejectionEmail({
+    email,
+    firstName,
+    courseTitle,
+    courseId,
+    rejectionReason,
+    feedback,
+    editCourseUrl,
+    supportEmail,
+  }) {
+    educademyLogger.info("Sending course rejection email", {
+      recipient: email,
+      firstName,
+      courseTitle,
+      courseId,
+      isCourseFlow: true,
+      isRejectionNotification: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "📝 Course Review Update - Action Required",
+      template: "courseRejection",
+      templateData: {
+        firstName,
+        courseTitle,
+        courseId,
+        rejectionReason,
+        feedback,
+        editCourseUrl:
+          editCourseUrl ||
+          `${process.env.FRONTEND_URL}/instructor/courses/${courseId}/edit`,
+        supportEmail:
+          supportEmail || process.env.SUPPORT_EMAIL || "support@educademy.com",
+      },
+    });
+  }
+
+  async sendCourseSuspensionEmail({
+    email,
+    firstName,
+    courseTitle,
+    courseId,
+    suspensionReason,
+    feedback,
+    appealUrl,
+    supportEmail,
+  }) {
+    educademyLogger.info("Sending course suspension email", {
+      recipient: email,
+      firstName,
+      courseTitle,
+      courseId,
+      isCourseFlow: true,
+      isSuspensionNotification: true,
+    });
+
+    return await this.sendEmail({
+      to: email,
+      subject: "⚠️ Course Suspended - Action Required",
+      template: "courseSuspension",
+      templateData: {
+        firstName,
+        courseTitle,
+        courseId,
+        suspensionReason,
+        feedback,
+        appealUrl: appealUrl || `${process.env.FRONTEND_URL}/instructor/appeal`,
+        supportEmail:
+          supportEmail || process.env.SUPPORT_EMAIL || "support@educademy.com",
+      },
+    });
+  }
+
   async sendTestEmail(toEmail) {
     if (process.env.NODE_ENV === "production") {
       educademyLogger.warn("Test email blocked in production", {
@@ -414,7 +582,6 @@ class EmailService {
     });
   }
 
-  // Convert HTML to plain text
   htmlToText(html) {
     return html
       .replace(/<[^>]*>/g, "")
@@ -427,7 +594,6 @@ class EmailService {
       .trim();
   }
 
-  // Get service status
   getServiceInfo() {
     return {
       service: process.env.USE_TEST_EMAIL === "true" ? "ethereal" : "gmail",
@@ -444,11 +610,15 @@ class EmailService {
         "accountDeactivation",
         "emailVerificationConfirmation",
         "emailVerificationRevoked",
+        "courseSubmittedForReview",
+        "courseCreated",
+        "courseApproval",
+        "courseRejection",
+        "courseSuspension",
       ],
     };
   }
 }
 
-// Create singleton instance
 const emailService = new EmailService();
 export default emailService;

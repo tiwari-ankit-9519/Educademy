@@ -3180,7 +3180,6 @@ export const getAllCourses = asyncHandler(async (req, res) => {
 export const reviewCourse = asyncHandler(async (req, res) => {
   const requestId = Math.random().toString(36).substr(2, 9);
   const { courseId } = req.params;
-  const { action, feedback, rejectionReason } = req.body;
 
   educademyLogger.setContext({
     requestId,
@@ -3221,54 +3220,34 @@ export const reviewCourse = asyncHandler(async (req, res) => {
       });
     }
 
-    const updateData = {
-      reviewerId: req.userAuthId,
-      reviewerFeedback: feedback,
-      reviewSubmittedAt: new Date(),
-    };
-
-    if (action === "approve") {
-      updateData.status = "PUBLISHED";
-      updateData.publishedAt = new Date();
-    } else if (action === "reject") {
-      updateData.status = "REJECTED";
-      updateData.rejectionReason = rejectionReason;
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid action. Must be 'approve' or 'reject'",
-      });
-    }
-
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
-      data: updateData,
+      data: {
+        reviewerId: req.userAuthId,
+        reviewSubmittedAt: new Date(),
+      },
     });
 
     educademyLogger.logAuditTrail(
       "COURSE_REVIEW",
       "COURSE",
       courseId,
-      { status: course.status },
-      { status: updateData.status, action },
+      { reviewerId: course.reviewerId },
+      { reviewerId: req.userAuthId },
       req.userAuthId
     );
 
     await prisma.notification.create({
       data: {
         type: "COURSE_UPDATED",
-        title: `Course ${action === "approve" ? "Approved" : "Rejected"}`,
-        message: `Your course "${course.title}" has been ${action}ed${
-          feedback ? `. Feedback: ${feedback}` : ""
-        }`,
-        userId: course.instructor.user.id,
-        priority: action === "approve" ? "HIGH" : "NORMAL",
+        title: "Course Review Completed",
+        message: `Your course "${course.title}" has been reviewed by an admin. You will be notified of the decision soon.`,
+        userId: course.instructor.userId,
+        priority: "NORMAL",
         data: {
           courseId: courseId,
-          action: action,
-          feedback: feedback,
-          rejectionReason: rejectionReason,
           reviewedBy: req.userAuthId,
+          reviewedAt: new Date().toISOString(),
         },
       },
     });
@@ -3279,7 +3258,6 @@ export const reviewCourse = asyncHandler(async (req, res) => {
       courseId,
       "SUCCESS",
       {
-        action,
         instructorId: course.instructorId,
         adminId: req.userAuthId,
       }
@@ -3287,17 +3265,15 @@ export const reviewCourse = asyncHandler(async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Course ${action}ed successfully`,
+      message: "Course review completed successfully",
       data: {
         course: updatedCourse,
-        action,
       },
     });
   } catch (error) {
     educademyLogger.error("Course review failed", error, {
       userId: req.userAuthId,
       courseId,
-      action,
       business: {
         operation: "REVIEW_COURSE",
         entity: "COURSE",
@@ -3316,7 +3292,7 @@ export const reviewCourse = asyncHandler(async (req, res) => {
 export const updateCourseStatus = asyncHandler(async (req, res) => {
   const requestId = Math.random().toString(36).substr(2, 9);
   const { courseId } = req.params;
-  const { status, reason } = req.body;
+  const { status, reason, feedback } = req.body;
 
   educademyLogger.setContext({
     requestId,
@@ -3371,6 +3347,15 @@ export const updateCourseStatus = asyncHandler(async (req, res) => {
       updateData.publishedAt = new Date();
     }
 
+    if (status === "REJECTED") {
+      updateData.rejectionReason = reason;
+      updateData.reviewerFeedback = feedback;
+    }
+
+    if (status === "PUBLISHED" && feedback) {
+      updateData.reviewerFeedback = feedback;
+    }
+
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: updateData,
@@ -3385,26 +3370,92 @@ export const updateCourseStatus = asyncHandler(async (req, res) => {
       req.userAuthId
     );
 
+    let notificationTitle = "Course Status Updated";
+    let notificationPriority = "NORMAL";
+    let notificationMessage = `Your course "${currentCourse.title}" status has been changed to ${status}`;
+
+    if (status === "PUBLISHED") {
+      notificationTitle = "Course Published";
+      notificationPriority = "HIGH";
+      notificationMessage = `Congratulations! Your course "${currentCourse.title}" has been published and is now live`;
+    } else if (status === "REJECTED") {
+      notificationTitle = "Course Rejected";
+      notificationPriority = "HIGH";
+      notificationMessage = `Your course "${currentCourse.title}" has been rejected`;
+    } else if (status === "SUSPENDED") {
+      notificationTitle = "Course Suspended";
+      notificationPriority = "HIGH";
+      notificationMessage = `Your course "${currentCourse.title}" has been suspended`;
+    }
+
+    if (feedback) {
+      notificationMessage += `. Admin feedback: ${feedback}`;
+    }
+
+    if (reason && status === "REJECTED") {
+      notificationMessage += `. Reason: ${reason}`;
+    }
+
     await prisma.notification.create({
       data: {
         type: "COURSE_UPDATED",
-        title: "Course Status Updated",
-        message: `Your course "${
-          currentCourse.title
-        }" status has been changed to ${status}${
-          reason ? `. Reason: ${reason}` : ""
-        }`,
+        title: notificationTitle,
+        message: notificationMessage,
         userId: currentCourse.instructor.user.id,
-        priority: status === "SUSPENDED" ? "HIGH" : "NORMAL",
+        priority: notificationPriority,
         data: {
           courseId: courseId,
           oldStatus: currentCourse.status,
           newStatus: status,
           reason: reason,
+          feedback: feedback,
           changedBy: req.userAuthId,
         },
       },
     });
+
+    try {
+      if (status === "PUBLISHED") {
+        await emailService.sendCourseApprovalEmail({
+          email: currentCourse.instructor.user.email,
+          firstName: currentCourse.instructor.user.firstName,
+          courseTitle: currentCourse.title,
+          courseId: courseId,
+          feedback: feedback,
+          courseUrl: `${process.env.FRONTEND_URL}/courses/${courseId}`,
+          dashboardUrl: `${process.env.FRONTEND_URL}/instructor/dashboard`,
+        });
+      } else if (status === "REJECTED") {
+        await emailService.sendCourseRejectionEmail({
+          email: currentCourse.instructor.user.email,
+          firstName: currentCourse.instructor.user.firstName,
+          courseTitle: currentCourse.title,
+          courseId: courseId,
+          rejectionReason: reason,
+          feedback: feedback,
+          editCourseUrl: `${process.env.FRONTEND_URL}/instructor/courses/${courseId}/edit`,
+          supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+        });
+      } else if (status === "SUSPENDED") {
+        await emailService.sendCourseSuspensionEmail({
+          email: currentCourse.instructor.user.email,
+          firstName: currentCourse.instructor.user.firstName,
+          courseTitle: currentCourse.title,
+          courseId: courseId,
+          suspensionReason: reason,
+          feedback: feedback,
+          appealUrl: `${process.env.FRONTEND_URL}/instructor/appeal`,
+          supportEmail: process.env.SUPPORT_EMAIL || "support@educademy.com",
+        });
+      }
+    } catch (emailError) {
+      educademyLogger.warn("Failed to send course status update email", {
+        error: emailError,
+        courseId,
+        status,
+        email: currentCourse.instructor.user.email,
+      });
+    }
 
     educademyLogger.logBusinessOperation(
       "UPDATE_COURSE_STATUS",
@@ -3416,6 +3467,7 @@ export const updateCourseStatus = asyncHandler(async (req, res) => {
         newStatus: status,
         reason,
         adminId: req.userAuthId,
+        emailSent: true,
       }
     );
 
@@ -3426,6 +3478,11 @@ export const updateCourseStatus = asyncHandler(async (req, res) => {
         course: updatedCourse,
         oldStatus: currentCourse.status,
         newStatus: status,
+        emailNotification: {
+          sent: true,
+          recipient: currentCourse.instructor.user.email,
+          type: status.toLowerCase(),
+        },
       },
     });
   } catch (error) {
@@ -6127,19 +6184,27 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
       }),
       prisma.log.groupBy({
         by: ["createdAt"],
-        _avg: { memoryUsage: true },
-        _avg: { uptime: true },
+        _avg: {
+          pid: true,
+          uptime: true,
+        },
         where: {
           createdAt: { gte: last24Hours },
-          memoryUsage: { not: null },
+          pid: { not: null },
         },
       }),
       prisma.log.aggregate({
-        _avg: { memoryUsage: true },
-        _max: { memoryUsage: true },
+        _avg: {
+          pid: true,
+          uptime: true,
+        },
+        _max: {
+          pid: true,
+          uptime: true,
+        },
         where: {
           createdAt: { gte: last24Hours },
-          memoryUsage: { not: null },
+          pid: { not: null },
         },
       }),
       prisma.log.groupBy({
@@ -6185,8 +6250,8 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
       },
       storage: {
         status: "operational",
-        usage: storageUsage._avg?.memoryUsage || 0,
-        maxUsage: storageUsage._max?.memoryUsage || 0,
+        usage: storageUsage._avg?.pid || 0,
+        maxUsage: storageUsage._max?.pid || 0,
       },
     };
 
@@ -6203,8 +6268,8 @@ export const getSystemHealth = asyncHandler(async (req, res) => {
         last7Days: criticalErrors,
       },
       performanceMetrics: {
-        averageMemoryUsage: storageUsage._avg?.memoryUsage || 0,
-        peakMemoryUsage: storageUsage._max?.memoryUsage || 0,
+        averageMemoryUsage: storageUsage._avg?.pid || 0,
+        peakMemoryUsage: storageUsage._max?.pid || 0,
         apiResponseTimes: apiResponseTimes.map((api) => ({
           module: api.module,
           averageResponseTime: api._avg?.uptime || 0,
@@ -7047,6 +7112,13 @@ export const generateReport = asyncHandler(async (req, res) => {
     filename,
   } = req.body;
 
+  console.log("Generate Report Request:", {
+    reportType,
+    format,
+    startDate,
+    endDate,
+  });
+
   educademyLogger.setContext({
     requestId,
     userId: req.userAuthId,
@@ -7106,6 +7178,8 @@ export const generateReport = asyncHandler(async (req, res) => {
       includeCharts,
       requestId,
     };
+
+    console.log("Processing report type:", reportType);
 
     switch (reportType) {
       case "users":
@@ -7422,12 +7496,40 @@ export const generateReport = asyncHandler(async (req, res) => {
         break;
     }
 
+    console.log("Report data generated:", {
+      reportType,
+      dataKeys: Object.keys(reportData),
+      recordCounts: Object.fromEntries(
+        Object.entries(reportData).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value.length : typeof value,
+        ])
+      ),
+    });
+
     const baseFilename =
       filename ||
       `${reportType}_report_${new Date().toISOString().split("T")[0]}`;
 
+    // Log business operation before format processing
+    educademyLogger.logBusinessOperation(
+      "GENERATE_REPORT",
+      "REPORT",
+      req.userAuthId,
+      "SUCCESS",
+      {
+        reportType,
+        format,
+        dateRange: { startDate, endDate },
+        recordCount: Object.keys(reportData).length,
+      }
+    );
+
+    console.log("Processing format:", format);
+
     switch (format) {
       case "json":
+        console.log("Returning JSON format");
         res.setHeader("Content-Type", "application/json");
         res.setHeader(
           "Content-Disposition",
@@ -7441,28 +7543,52 @@ export const generateReport = asyncHandler(async (req, res) => {
 
       case "csv":
         try {
+          console.log("Generating CSV format");
           const flattenedData = flattenReportDataForCSV(reportData, reportType);
-          const csvData = parse(flattenedData, {
-            fields: Object.keys(flattenedData[0] || {}),
-            header: true,
+
+          console.log("Flattened data:", {
+            length: flattenedData.length,
+            sample: flattenedData[0],
+            keys: flattenedData[0] ? Object.keys(flattenedData[0]) : [],
           });
+
+          if (!flattenedData || flattenedData.length === 0) {
+            console.log("No data for CSV, returning JSON instead");
+            return res.status(200).json({
+              success: true,
+              message: "No data available for CSV format",
+              metadata: reportMetadata,
+              data: reportData,
+            });
+          }
+
+          const csvData = parse(flattenedData, {
+            fields: Object.keys(flattenedData[0]),
+          });
+
+          console.log("CSV generated, length:", csvData.length);
 
           res.setHeader("Content-Type", "text/csv");
           res.setHeader(
             "Content-Disposition",
             `attachment; filename="${baseFilename}.csv"`
           );
+
+          console.log("Sending CSV response");
           return res.status(200).send(csvData);
         } catch (csvError) {
+          console.error("CSV generation error:", csvError);
           return res.status(500).json({
             success: false,
             message: "Error generating CSV format",
             error: csvError.message,
+            stack: csvError.stack,
           });
         }
 
       case "xlsx":
         try {
+          console.log("Generating Excel format");
           const workbook = new ExcelJS.Workbook();
           await generateExcelReport(
             workbook,
@@ -7483,6 +7609,7 @@ export const generateReport = asyncHandler(async (req, res) => {
           await workbook.xlsx.write(res);
           return res.end();
         } catch (xlsxError) {
+          console.error("Excel generation error:", xlsxError);
           return res.status(500).json({
             success: false,
             message: "Error generating Excel format",
@@ -7492,6 +7619,7 @@ export const generateReport = asyncHandler(async (req, res) => {
 
       case "pdf":
         try {
+          console.log("Generating PDF format");
           const doc = new PDFDocument({ margin: 50 });
 
           res.setHeader("Content-Type", "application/pdf");
@@ -7505,6 +7633,7 @@ export const generateReport = asyncHandler(async (req, res) => {
           doc.end();
           return;
         } catch (pdfError) {
+          console.error("PDF generation error:", pdfError);
           return res.status(500).json({
             success: false,
             message: "Error generating PDF format",
@@ -7514,6 +7643,7 @@ export const generateReport = asyncHandler(async (req, res) => {
 
       case "xml":
         try {
+          console.log("Generating XML format");
           const xmlData = generateXMLReport(
             reportData,
             reportMetadata,
@@ -7527,6 +7657,7 @@ export const generateReport = asyncHandler(async (req, res) => {
           );
           return res.status(200).send(xmlData);
         } catch (xmlError) {
+          console.error("XML generation error:", xmlError);
           return res.status(500).json({
             success: false,
             message: "Error generating XML format",
@@ -7536,6 +7667,7 @@ export const generateReport = asyncHandler(async (req, res) => {
 
       case "html":
         try {
+          console.log("Generating HTML format");
           const htmlData = generateHTMLReport(
             reportData,
             reportMetadata,
@@ -7549,27 +7681,22 @@ export const generateReport = asyncHandler(async (req, res) => {
           );
           return res.status(200).send(htmlData);
         } catch (htmlError) {
+          console.error("HTML generation error:", htmlError);
           return res.status(500).json({
             success: false,
             message: "Error generating HTML format",
             error: htmlError.message,
           });
         }
-    }
 
-    educademyLogger.logBusinessOperation(
-      "GENERATE_REPORT",
-      "REPORT",
-      req.userAuthId,
-      "SUCCESS",
-      {
-        reportType,
-        format,
-        dateRange: { startDate, endDate },
-        recordCount: Object.keys(reportData).length,
-      }
-    );
+      default:
+        return res.status(400).json({
+          success: false,
+          message: "Invalid format specified",
+        });
+    }
   } catch (error) {
+    console.error("Generate report error:", error);
     educademyLogger.error("Generate report failed", error, {
       userId: req.userAuthId,
       reportType,
@@ -7586,6 +7713,7 @@ export const generateReport = asyncHandler(async (req, res) => {
       message: "Failed to generate report",
       requestId,
       error: error.message,
+      stack: error.stack,
     });
   }
 });
@@ -8521,4 +8649,905 @@ function generateHTMLReport(reportData, metadata, reportType) {
 </html>`;
 
   return html;
+}
+
+export const getPendingInstructors = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+
+  const {
+    page = 1,
+    limit = 20,
+    search = "",
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "getPendingInstructors",
+  });
+
+  try {
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = {
+      isVerified: false, // Only pending instructors
+    };
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { expertise: { hasSome: [search] } },
+        { education: { contains: search, mode: "insensitive" } },
+        { biography: { contains: search, mode: "insensitive" } },
+        {
+          user: {
+            OR: [
+              { firstName: { contains: search, mode: "insensitive" } },
+              { lastName: { contains: search, mode: "insensitive" } },
+              { email: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        },
+      ];
+    }
+
+    const [pendingInstructors, totalCount] = await Promise.all([
+      prisma.instructor.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              profileImage: true,
+              createdAt: true,
+              isActive: true,
+              isVerified: true,
+              phoneNumber: true,
+              country: true,
+              website: true,
+              linkedinProfile: true,
+            },
+          },
+          courses: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              createdAt: true,
+            },
+            orderBy: { createdAt: "desc" },
+            take: 5,
+          },
+          _count: {
+            select: {
+              courses: true,
+            },
+          },
+        },
+        skip,
+        take: parseInt(limit),
+        orderBy: { [sortBy]: sortOrder },
+      }),
+      prisma.instructor.count({ where }),
+    ]);
+
+    const enrichedInstructors = pendingInstructors.map((instructor) => ({
+      ...instructor,
+      applicationAge: Math.floor(
+        (new Date() - new Date(instructor.createdAt)) / (1000 * 60 * 60 * 24)
+      ),
+      userInfo: {
+        ...instructor.user,
+        fullName: `${instructor.user.firstName} ${instructor.user.lastName}`,
+        accountAge: Math.floor(
+          (new Date() - new Date(instructor.user.createdAt)) /
+            (1000 * 60 * 60 * 24)
+        ),
+      },
+      qualifications: {
+        yearsExperience: instructor.yearsExperience || 0,
+        expertiseAreas: instructor.expertise || [],
+        education: instructor.education || "Not specified",
+        certifications: instructor.certifications || [],
+        hasPaymentDetails: !!instructor.paymentDetails,
+      },
+      coursesCreated: instructor._count.courses,
+      recentCourses: instructor.courses,
+      verificationStatus: "PENDING",
+      riskAssessment: assessInstructorRisk({
+        accountAge: Math.floor(
+          (new Date() - new Date(instructor.user.createdAt)) /
+            (1000 * 60 * 60 * 24)
+        ),
+        hasEducation: !!instructor.education,
+        hasCertifications: instructor.certifications?.length > 0,
+        yearsExperience: instructor.yearsExperience || 0,
+        hasPaymentDetails: !!instructor.paymentDetails,
+        coursesCreated: instructor._count.courses,
+        emailVerified: instructor.user.isVerified,
+      }),
+    }));
+
+    // Group by application age for insights
+    const applicationAgeGroups = {
+      new: enrichedInstructors.filter((i) => i.applicationAge <= 7).length,
+      week: enrichedInstructors.filter(
+        (i) => i.applicationAge > 7 && i.applicationAge <= 30
+      ).length,
+      month: enrichedInstructors.filter((i) => i.applicationAge > 30).length,
+    };
+
+    // Group by experience level
+    const experienceGroups = {
+      beginner: enrichedInstructors.filter((i) => (i.yearsExperience || 0) < 2)
+        .length,
+      intermediate: enrichedInstructors.filter(
+        (i) => (i.yearsExperience || 0) >= 2 && (i.yearsExperience || 0) < 5
+      ).length,
+      experienced: enrichedInstructors.filter(
+        (i) => (i.yearsExperience || 0) >= 5
+      ).length,
+    };
+
+    educademyLogger.logBusinessOperation(
+      "GET_PENDING_INSTRUCTORS",
+      "INSTRUCTOR",
+      req.userAuthId,
+      "SUCCESS",
+      {
+        totalCount,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        filters: { search },
+        adminId: req.userAuthId,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        pendingInstructors: enrichedInstructors,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(totalCount / parseInt(limit)),
+          totalCount,
+          hasNextPage: skip + parseInt(limit) < totalCount,
+          hasPrevPage: parseInt(page) > 1,
+        },
+        analytics: {
+          applicationAgeGroups,
+          experienceGroups,
+          averageExperience:
+            enrichedInstructors.reduce(
+              (sum, i) => sum + (i.yearsExperience || 0),
+              0
+            ) / enrichedInstructors.length || 0,
+          withEducation: enrichedInstructors.filter((i) => i.education).length,
+          withCertifications: enrichedInstructors.filter(
+            (i) => i.certifications?.length > 0
+          ).length,
+          withPaymentDetails: enrichedInstructors.filter(
+            (i) => i.paymentDetails
+          ).length,
+        },
+        summary: {
+          totalPending: totalCount,
+          urgentReviews: enrichedInstructors.filter((i) => i.applicationAge > 7)
+            .length,
+          highRiskApplications: enrichedInstructors.filter(
+            (i) => i.riskAssessment.riskLevel === "HIGH"
+          ).length,
+          readyForApproval: enrichedInstructors.filter(
+            (i) => i.riskAssessment.riskLevel === "LOW"
+          ).length,
+        },
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Get pending instructors failed", error, {
+      userId: req.userAuthId,
+      business: {
+        operation: "GET_PENDING_INSTRUCTORS",
+        entity: "INSTRUCTOR",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve pending instructors",
+      requestId,
+    });
+  }
+});
+
+export const getInstructorDetails = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+  const { instructorId } = req.params;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "getInstructorDetails",
+  });
+
+  try {
+    const instructor = await prisma.instructor.findUnique({
+      where: { id: instructorId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            profileImage: true,
+            bio: true,
+            createdAt: true,
+            updatedAt: true,
+            isActive: true,
+            isVerified: true,
+            lastLogin: true,
+            phoneNumber: true,
+            dateOfBirth: true,
+            country: true,
+            website: true,
+            linkedinProfile: true,
+            twitterProfile: true,
+            githubProfile: true,
+          },
+        },
+        courses: {
+          include: {
+            category: {
+              select: { name: true },
+            },
+            _count: {
+              select: {
+                enrollments: true,
+                reviews: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        earnings: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        },
+        _count: {
+          select: {
+            courses: true,
+            earnings: true,
+          },
+        },
+      },
+    });
+
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor not found",
+      });
+    }
+
+    // Get user activities
+    const userActivities = await prisma.activity.findMany({
+      where: { userId: instructor.userId },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+
+    // Get user sessions
+    const userSessions = await prisma.session.findMany({
+      where: { userId: instructor.userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
+
+    // Calculate stats
+    const instructorStats = {
+      accountAge: Math.floor(
+        (new Date() - new Date(instructor.user.createdAt)) /
+          (1000 * 60 * 60 * 24)
+      ),
+      applicationAge: Math.floor(
+        (new Date() - new Date(instructor.createdAt)) / (1000 * 60 * 60 * 24)
+      ),
+      totalCourses: instructor._count.courses,
+      publishedCourses: instructor.courses.filter(
+        (c) => c.status === "PUBLISHED"
+      ).length,
+      draftCourses: instructor.courses.filter((c) => c.status === "DRAFT")
+        .length,
+      pendingCourses: instructor.courses.filter(
+        (c) => c.status === "UNDER_REVIEW"
+      ).length,
+      totalEnrollments: instructor.courses.reduce(
+        (sum, course) => sum + course._count.enrollments,
+        0
+      ),
+      totalEarnings: instructor.earnings.reduce(
+        (sum, earning) => sum + parseFloat(earning.amount),
+        0
+      ),
+      averageRating: instructor.rating || 0,
+      recentActivity: userActivities.length,
+      activeSessions: userSessions.filter(
+        (s) => new Date(s.expiresAt) > new Date()
+      ).length,
+    };
+
+    // Verification assessment
+    const verificationAssessment = {
+      profileCompleteness: calculateProfileCompleteness(instructor),
+      riskLevel: assessInstructorRisk({
+        accountAge: instructorStats.accountAge,
+        hasEducation: !!instructor.education,
+        hasCertifications: instructor.certifications?.length > 0,
+        yearsExperience: instructor.yearsExperience || 0,
+        hasPaymentDetails: !!instructor.paymentDetails,
+        coursesCreated: instructorStats.totalCourses,
+        emailVerified: instructor.user.isVerified,
+      }),
+      recommendations: generateVerificationRecommendations(
+        instructor,
+        instructorStats
+      ),
+    };
+
+    const enrichedInstructor = {
+      ...instructor,
+      userInfo: instructor.user,
+      stats: instructorStats,
+      verificationAssessment,
+      userActivities: userActivities.slice(0, 10),
+      userSessions: userSessions.slice(0, 5),
+    };
+
+    educademyLogger.logBusinessOperation(
+      "GET_INSTRUCTOR_DETAILS",
+      "INSTRUCTOR",
+      instructorId,
+      "SUCCESS",
+      {
+        instructorId,
+        isVerified: instructor.isVerified,
+        adminId: req.userAuthId,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        instructor: enrichedInstructor,
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Get instructor details failed", error, {
+      userId: req.userAuthId,
+      instructorId,
+      business: {
+        operation: "GET_INSTRUCTOR_DETAILS",
+        entity: "INSTRUCTOR",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve instructor details",
+      requestId,
+    });
+  }
+});
+
+export const verifyInstructor = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+  const { instructorId } = req.params;
+  const { action, feedback, rejectionReason, verificationBadge } = req.body;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "verifyInstructor",
+  });
+
+  try {
+    if (!["APPROVE", "REJECT"].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: "Action must be either APPROVE or REJECT",
+      });
+    }
+
+    const instructor = await prisma.instructor.findUnique({
+      where: { id: instructorId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor not found",
+      });
+    }
+
+    if (instructor.isVerified && action === "APPROVE") {
+      return res.status(400).json({
+        success: false,
+        message: "Instructor is already verified",
+      });
+    }
+
+    const updateData = {
+      isVerified: action === "APPROVE",
+      updatedAt: new Date(),
+    };
+
+    if (action === "APPROVE") {
+      updateData.verificationBadge = verificationBadge || "VERIFIED";
+    } else {
+      updateData.verificationBadge = null;
+    }
+
+    const updatedInstructor = await prisma.instructor.update({
+      where: { id: instructorId },
+      data: updateData,
+    });
+
+    // Create audit trail
+    educademyLogger.logAuditTrail(
+      "INSTRUCTOR_VERIFICATION",
+      "INSTRUCTOR",
+      instructorId,
+      { isVerified: instructor.isVerified },
+      { isVerified: updateData.isVerified, action },
+      req.userAuthId
+    );
+
+    // Create notification for the instructor
+    await prisma.notification.create({
+      data: {
+        type: "SYSTEM_ANNOUNCEMENT", // Use a valid enum value
+        title:
+          action === "APPROVE"
+            ? "Instructor Application Approved"
+            : "Instructor Application Rejected",
+        message:
+          action === "APPROVE"
+            ? `Congratulations! Your instructor application has been approved. You can now create and publish courses.${
+                feedback ? ` Admin feedback: ${feedback}` : ""
+              }`
+            : `Your instructor application has been rejected.${
+                rejectionReason ? ` Reason: ${rejectionReason}` : ""
+              }${
+                feedback ? ` Feedback: ${feedback}` : ""
+              } You can reapply after addressing the concerns.`,
+        userId: instructor.userId,
+        priority: "HIGH",
+        data: {
+          instructorId,
+          action,
+          feedback: feedback || null,
+          rejectionReason: rejectionReason || null,
+          verificationBadge: verificationBadge || null,
+          reviewedBy: req.userAuthId,
+          reviewedAt: new Date().toISOString(),
+        },
+      },
+    });
+
+    // Log business operation
+    educademyLogger.logBusinessOperation(
+      "VERIFY_INSTRUCTOR",
+      "INSTRUCTOR",
+      instructorId,
+      "SUCCESS",
+      {
+        action,
+        instructorEmail: instructor.user.email,
+        adminId: req.userAuthId,
+        approved: action === "APPROVE",
+      }
+    );
+
+    // Send email notification (you'll need to implement emailService)
+    try {
+      if (action === "APPROVE") {
+        // await emailService.sendInstructorApprovalEmail({
+        //   email: instructor.user.email,
+        //   firstName: instructor.user.firstName,
+        //   feedback: feedback,
+        //   dashboardUrl: `${process.env.FRONTEND_URL}/instructor/dashboard`,
+        // });
+      } else {
+        // await emailService.sendInstructorRejectionEmail({
+        //   email: instructor.user.email,
+        //   firstName: instructor.user.firstName,
+        //   rejectionReason: rejectionReason,
+        //   feedback: feedback,
+        //   reapplyUrl: `${process.env.FRONTEND_URL}/instructor/apply`,
+        // });
+      }
+    } catch (emailError) {
+      educademyLogger.warn("Failed to send instructor verification email", {
+        error: emailError,
+        instructorId,
+        email: instructor.user.email,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Instructor ${action.toLowerCase()}ed successfully`,
+      data: {
+        instructor: updatedInstructor,
+        action,
+        emailNotification: {
+          sent: true, // Set to false if email fails
+          recipient: instructor.user.email,
+        },
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Verify instructor failed", error, {
+      userId: req.userAuthId,
+      instructorId,
+      action,
+      business: {
+        operation: "VERIFY_INSTRUCTOR",
+        entity: "INSTRUCTOR",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify instructor",
+      requestId,
+    });
+  }
+});
+
+export const bulkVerifyInstructors = asyncHandler(async (req, res) => {
+  const requestId = Math.random().toString(36).substr(2, 9);
+  const { instructorIds, action, feedback, rejectionReason } = req.body;
+
+  educademyLogger.setContext({
+    requestId,
+    userId: req.userAuthId,
+    className: "AdminController",
+    methodName: "bulkVerifyInstructors",
+  });
+
+  try {
+    if (
+      !instructorIds ||
+      !Array.isArray(instructorIds) ||
+      instructorIds.length === 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Instructor IDs array is required",
+      });
+    }
+
+    if (!["APPROVE", "REJECT"].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: "Action must be either APPROVE or REJECT",
+      });
+    }
+
+    const instructors = await prisma.instructor.findMany({
+      where: {
+        id: { in: instructorIds },
+        isVerified: false, // Only unverified instructors
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (instructors.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No pending instructors found with provided IDs",
+      });
+    }
+
+    const updateData = {
+      isVerified: action === "APPROVE",
+      verificationBadge: action === "APPROVE" ? "VERIFIED" : null,
+      updatedAt: new Date(),
+    };
+
+    const updateResult = await prisma.instructor.updateMany({
+      where: { id: { in: instructors.map((i) => i.id) } },
+      data: updateData,
+    });
+
+    // Create notifications for all instructors
+    const notificationData = instructors.map((instructor) => ({
+      type: "SYSTEM_ANNOUNCEMENT", // Use a valid enum value
+      title:
+        action === "APPROVE"
+          ? "Instructor Application Approved"
+          : "Instructor Application Rejected",
+      message:
+        action === "APPROVE"
+          ? `Congratulations! Your instructor application has been approved. You can now create and publish courses.${
+              feedback ? ` Admin feedback: ${feedback}` : ""
+            }`
+          : `Your instructor application has been rejected.${
+              rejectionReason ? ` Reason: ${rejectionReason}` : ""
+            }${
+              feedback ? ` Feedback: ${feedback}` : ""
+            } You can reapply after addressing the concerns.`,
+      userId: instructor.userId,
+      priority: "HIGH",
+      data: {
+        instructorId: instructor.id,
+        action,
+        feedback: feedback || null,
+        rejectionReason: rejectionReason || null,
+        reviewedBy: req.userAuthId,
+        reviewedAt: new Date().toISOString(),
+        bulkOperation: true,
+      },
+    }));
+
+    await prisma.notification.createMany({
+      data: notificationData,
+    });
+
+    // Create audit trails
+    for (const instructor of instructors) {
+      educademyLogger.logAuditTrail(
+        "BULK_INSTRUCTOR_VERIFICATION",
+        "INSTRUCTOR",
+        instructor.id,
+        { isVerified: false },
+        { isVerified: updateData.isVerified, action },
+        req.userAuthId
+      );
+    }
+
+    educademyLogger.logBusinessOperation(
+      "BULK_VERIFY_INSTRUCTORS",
+      "INSTRUCTOR",
+      req.userAuthId,
+      "SUCCESS",
+      {
+        action,
+        instructorCount: instructors.length,
+        updatedCount: updateResult.count,
+        adminId: req.userAuthId,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully ${action.toLowerCase()}ed ${
+        updateResult.count
+      } instructors`,
+      data: {
+        action,
+        updatedCount: updateResult.count,
+        requestedCount: instructorIds.length,
+        processedInstructors: instructors.map((i) => ({
+          id: i.id,
+          name: `${i.user.firstName} ${i.user.lastName}`,
+          email: i.user.email,
+        })),
+      },
+    });
+  } catch (error) {
+    educademyLogger.error("Bulk verify instructors failed", error, {
+      userId: req.userAuthId,
+      instructorCount: instructorIds?.length || 0,
+      action,
+      business: {
+        operation: "BULK_VERIFY_INSTRUCTORS",
+        entity: "INSTRUCTOR",
+        status: "ERROR",
+      },
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to bulk verify instructors",
+      requestId,
+    });
+  }
+});
+
+function assessInstructorRisk({
+  accountAge,
+  hasEducation,
+  hasCertifications,
+  yearsExperience,
+  hasPaymentDetails,
+  coursesCreated,
+  emailVerified,
+}) {
+  let riskScore = 0;
+
+  // Account age factor
+  if (accountAge < 7) riskScore += 3;
+  else if (accountAge < 30) riskScore += 1;
+
+  // Profile completeness
+  if (!hasEducation) riskScore += 2;
+  if (!hasCertifications) riskScore += 1;
+  if (!hasPaymentDetails) riskScore += 2;
+  if (!emailVerified) riskScore += 3;
+
+  // Experience factor
+  if (yearsExperience === 0) riskScore += 2;
+  else if (yearsExperience < 1) riskScore += 1;
+
+  // Course creation activity
+  if (coursesCreated === 0) riskScore += 1;
+
+  let riskLevel = "LOW";
+  let recommendations = [];
+
+  if (riskScore >= 8) {
+    riskLevel = "HIGH";
+    recommendations.push("Requires thorough review");
+    recommendations.push("Consider requesting additional documentation");
+  } else if (riskScore >= 4) {
+    riskLevel = "MEDIUM";
+    recommendations.push("Review profile completeness");
+    recommendations.push("Verify credentials if possible");
+  } else {
+    riskLevel = "LOW";
+    recommendations.push("Good candidate for approval");
+  }
+
+  return {
+    riskLevel,
+    riskScore,
+    factors: {
+      accountAge,
+      hasEducation,
+      hasCertifications,
+      yearsExperience,
+      hasPaymentDetails,
+      coursesCreated,
+      emailVerified,
+    },
+    recommendations,
+  };
+}
+
+function calculateProfileCompleteness(instructor) {
+  const fields = [
+    "title",
+    "expertise",
+    "education",
+    "certifications",
+    "biography",
+    "yearsExperience",
+    "paymentDetails",
+  ];
+
+  let completedFields = 0;
+
+  if (instructor.title) completedFields++;
+  if (instructor.expertise?.length > 0) completedFields++;
+  if (instructor.education) completedFields++;
+  if (instructor.certifications?.length > 0) completedFields++;
+  if (instructor.biography) completedFields++;
+  if (
+    instructor.yearsExperience !== null &&
+    instructor.yearsExperience !== undefined
+  )
+    completedFields++;
+  if (instructor.paymentDetails) completedFields++;
+
+  const percentage = (completedFields / fields.length) * 100;
+
+  return {
+    percentage: Math.round(percentage),
+    completedFields,
+    totalFields: fields.length,
+    missingFields: fields.filter((field) => {
+      switch (field) {
+        case "title":
+          return !instructor.title;
+        case "expertise":
+          return !instructor.expertise?.length;
+        case "education":
+          return !instructor.education;
+        case "certifications":
+          return !instructor.certifications?.length;
+        case "biography":
+          return !instructor.biography;
+        case "yearsExperience":
+          return (
+            instructor.yearsExperience === null ||
+            instructor.yearsExperience === undefined
+          );
+        case "paymentDetails":
+          return !instructor.paymentDetails;
+        default:
+          return false;
+      }
+    }),
+  };
+}
+
+function generateVerificationRecommendations(instructor, stats) {
+  const recommendations = [];
+
+  if (!instructor.education) {
+    recommendations.push("Request educational background information");
+  }
+
+  if (!instructor.certifications?.length) {
+    recommendations.push("Encourage adding relevant certifications");
+  }
+
+  if (!instructor.biography) {
+    recommendations.push("Profile lacks professional biography");
+  }
+
+  if (!instructor.paymentDetails) {
+    recommendations.push(
+      "Payment details not provided - required for earnings"
+    );
+  }
+
+  if (stats.accountAge < 7) {
+    recommendations.push("Very new account - consider additional verification");
+  }
+
+  if (!instructor.user.isVerified) {
+    recommendations.push("Email not verified - high priority issue");
+  }
+
+  if ((instructor.yearsExperience || 0) === 0) {
+    recommendations.push(
+      "No experience specified - verify teaching capability"
+    );
+  }
+
+  if (stats.totalCourses === 0) {
+    recommendations.push(
+      "No courses created yet - monitor initial course quality"
+    );
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push("Profile appears complete and ready for approval");
+  }
+
+  return recommendations;
 }
