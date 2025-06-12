@@ -1046,6 +1046,7 @@ export const getFAQ = asyncHandler(async (req, res) => {
     });
   }
 });
+a;
 
 export const reorderFAQs = asyncHandler(async (req, res) => {
   const startTime = performance.now();
