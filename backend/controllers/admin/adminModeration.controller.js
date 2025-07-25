@@ -612,7 +612,7 @@ export const getUserViolations = asyncHandler(async (req, res) => {
   const startTime = performance.now();
 
   try {
-    const { userId } = req.params;
+    let { searchTerm } = req.params;
     const {
       page = 1,
       limit = 20,
@@ -622,8 +622,97 @@ export const getUserViolations = asyncHandler(async (req, res) => {
       dateTo,
     } = req.query;
 
+    searchTerm = decodeURIComponent(searchTerm);
+
     const pageSize = Math.min(parseInt(limit), 100);
     const pageNumber = Math.max(parseInt(page), 1);
+
+    const searchTerms = searchTerm.trim().split(/\s+/);
+
+    let searchConditions;
+
+    if (searchTerms.length === 1) {
+      const singleTerm = searchTerms[0];
+      searchConditions = {
+        OR: [
+          { id: singleTerm },
+          { firstName: { contains: singleTerm, mode: "insensitive" } },
+          { lastName: { contains: singleTerm, mode: "insensitive" } },
+          { email: { contains: singleTerm, mode: "insensitive" } },
+        ],
+      };
+    } else {
+      const firstTerm = searchTerms[0];
+      const lastTerm = searchTerms[searchTerms.length - 1];
+      const fullTerm = searchTerms.join(" ");
+
+      searchConditions = {
+        OR: [
+          { id: fullTerm },
+          { email: { contains: fullTerm, mode: "insensitive" } },
+          {
+            AND: [
+              { firstName: { contains: firstTerm, mode: "insensitive" } },
+              { lastName: { contains: lastTerm, mode: "insensitive" } },
+            ],
+          },
+          { firstName: { contains: fullTerm, mode: "insensitive" } },
+          { lastName: { contains: fullTerm, mode: "insensitive" } },
+        ],
+      };
+    }
+
+    const users = await prisma.user.findMany({
+      where: searchConditions,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        isBanned: true,
+        bannedAt: true,
+        banReason: true,
+      },
+      take: 10,
+    });
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No users found matching the search criteria",
+        code: "USER_NOT_FOUND",
+        meta: {
+          executionTime: Math.round(performance.now() - startTime),
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+
+    if (users.length > 1) {
+      return res.status(200).json({
+        success: true,
+        message: "Multiple users found. Please select one.",
+        data: {
+          users: users.map((user) => ({
+            id: user.id,
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            role: user.role,
+            isBanned: user.isBanned,
+          })),
+          searchTerm,
+        },
+        meta: {
+          multipleResults: true,
+          executionTime: Math.round(performance.now() - startTime),
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+
+    const userId = users[0].id;
+    const userInfo = users[0];
 
     const cacheKey = `user_violations_list:${userId}:${JSON.stringify({
       page: pageNumber,
@@ -683,30 +772,16 @@ export const getUserViolations = asyncHandler(async (req, res) => {
     const skip = (pageNumber - 1) * pageSize;
     const paginatedViolations = violations.slice(skip, skip + pageSize);
 
-    const userInfo = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        firstName: true,
-        lastName: true,
-        email: true,
-        role: true,
-        isBanned: true,
-        bannedAt: true,
-        banReason: true,
-      },
-    });
-
     const result = {
-      userInfo: userInfo
-        ? {
-            name: `${userInfo.firstName} ${userInfo.lastName}`,
-            email: userInfo.email,
-            role: userInfo.role,
-            isBanned: userInfo.isBanned,
-            bannedAt: userInfo.bannedAt,
-            banReason: userInfo.banReason,
-          }
-        : null,
+      userInfo: {
+        id: userId,
+        name: `${userInfo.firstName} ${userInfo.lastName}`,
+        email: userInfo.email,
+        role: userInfo.role,
+        isBanned: userInfo.isBanned,
+        bannedAt: userInfo.bannedAt,
+        banReason: userInfo.banReason,
+      },
       violations: paginatedViolations,
       pagination: {
         page: pageNumber,
@@ -724,6 +799,14 @@ export const getUserViolations = asyncHandler(async (req, res) => {
         contentWarnings: violations.filter(
           (v) => v.violationType === "CONTENT_WARNING"
         ).length,
+        userWarnings: violations.filter(
+          (v) => v.violationType === "USER_WARNING"
+        ).length,
+        userSuspensions: violations.filter(
+          (v) => v.violationType === "USER_SUSPENSION"
+        ).length,
+        userBans: violations.filter((v) => v.violationType === "USER_BAN")
+          .length,
         severityBreakdown: {
           low: violations.filter((v) => v.severity === "LOW").length,
           medium: violations.filter((v) => v.severity === "MEDIUM").length,

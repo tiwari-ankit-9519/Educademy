@@ -4,8 +4,6 @@ import { toast } from "sonner";
 
 const initialState = {
   systemSettings: null,
-  coupons: [],
-  couponDetails: null,
   announcements: [],
   announcementDetails: null,
   systemHealth: null,
@@ -13,24 +11,12 @@ const initialState = {
   loading: false,
   systemSettingsLoading: false,
   updateSystemSettingsLoading: false,
-  couponsLoading: false,
-  createCouponLoading: false,
-  updateCouponLoading: false,
-  deleteCouponLoading: false,
   announcementsLoading: false,
   createAnnouncementLoading: false,
   updateAnnouncementLoading: false,
   deleteAnnouncementLoading: false,
   systemHealthLoading: false,
   needsRefresh: false,
-  couponsPagination: {
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0,
-    hasNext: false,
-    hasPrev: false,
-  },
   announcementsPagination: {
     page: 1,
     limit: 20,
@@ -38,13 +24,6 @@ const initialState = {
     totalPages: 0,
     hasNext: false,
     hasPrev: false,
-  },
-  couponsFilters: {
-    status: "",
-    type: "",
-    search: "",
-    sortBy: "createdAt",
-    sortOrder: "desc",
   },
   announcementsFilters: {
     type: "",

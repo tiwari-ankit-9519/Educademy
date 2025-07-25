@@ -1532,6 +1532,72 @@ export const getCourseReviewHistory = asyncHandler(async (req, res) => {
   try {
     const { courseId } = req.params;
 
+    if (!courseId) {
+      const allCoursesPattern = `course_review_history:*`;
+      const keys = await redisService.keys(allCoursesPattern);
+
+      if (!keys || keys.length === 0) {
+        return res.status(200).json({
+          success: true,
+          message: "No courses with review history found",
+          data: {
+            courses: [],
+            totalCourses: 0,
+          },
+          meta: {
+            executionTime: Math.round(performance.now() - startTime),
+            timestamp: new Date().toISOString(),
+          },
+        });
+      }
+
+      const coursesWithHistory = [];
+
+      for (const key of keys) {
+        const extractedCourseId = key.replace("course_review_history:", "");
+        const reviewHistory = await redisService.getJSON(key);
+
+        if (reviewHistory && reviewHistory.length > 0) {
+          const latestReview = reviewHistory[reviewHistory.length - 1];
+          const statusChanges =
+            (await redisService.getJSON(
+              `course_status_changes:${extractedCourseId}`
+            )) || [];
+
+          coursesWithHistory.push({
+            courseId: extractedCourseId,
+            courseName: latestReview.courseName,
+            instructorName: latestReview.instructorName,
+            instructorEmail: latestReview.instructorEmail,
+            totalReviews: reviewHistory.length,
+            totalStatusChanges: statusChanges.length,
+            lastReviewAction: latestReview.action,
+            lastReviewDate: latestReview.reviewedAt,
+            lastReviewerName: latestReview.reviewerName,
+          });
+        }
+      }
+
+      coursesWithHistory.sort(
+        (a, b) => new Date(b.lastReviewDate) - new Date(a.lastReviewDate)
+      );
+
+      const result = {
+        courses: coursesWithHistory,
+        totalCourses: coursesWithHistory.length,
+      };
+
+      return res.status(200).json({
+        success: true,
+        message: "Courses with review history retrieved successfully",
+        data: result,
+        meta: {
+          executionTime: Math.round(performance.now() - startTime),
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+
     const cacheKey = `course_review_history:${courseId}`;
     let reviewHistory = await redisService.getJSON(cacheKey);
 

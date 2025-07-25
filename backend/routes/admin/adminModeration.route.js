@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get("/reports", requireAdmin, getContentReports);
 router.put("/reports/:reportId/review", requireAdmin, reviewContentReport);
-router.get("/users/:userId/violations", requireAdmin, getUserViolations);
+router.get("/users/:searchTerm/violations", requireAdmin, getUserViolations);
 router.put("/users/:userId/moderate", requireAdmin, moderateUser);
 router.get("/stats", requireAdmin, getModerationStats);
 router.put("/reports/bulk", requireAdmin, bulkModeratecontent);

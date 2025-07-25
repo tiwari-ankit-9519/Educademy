@@ -6,6 +6,8 @@ import authReducer from "@/features/authSlice";
 import adminAnalyticsReducer from "@/features/adminSlice/adminAnalytics";
 import adminUserReducer from "@/features/adminSlice/adminUser";
 import adminSystemReducer from "@/features/adminSlice/adminSystem";
+import adminModerationReducer from "@/features/adminSlice/adminModeration";
+import adminCourseReducer from "@/features/adminSlice/adminCourse";
 
 const authPersistConfig = {
   key: "auth",
@@ -18,6 +20,8 @@ const rootReducer = combineReducers({
   adminAnalytics: adminAnalyticsReducer,
   adminUser: adminUserReducer,
   adminSystem: adminSystemReducer,
+  adminModeration: adminModerationReducer,
+  adminCourse: adminCourseReducer,
 });
 
 export const store = configureStore({

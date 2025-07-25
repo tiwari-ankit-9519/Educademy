@@ -25,6 +25,11 @@ router.get(
   getCourseStats
 );
 router.get(
+  "/history",
+  trackRoute("AdminCourse", "getAllCourseReviewHistory"),
+  getCourseReviewHistory
+);
+router.get(
   "/:courseId/review",
   trackRoute("AdminCourse", "getCourseReviewDetails"),
   getCourseReviewDetails
