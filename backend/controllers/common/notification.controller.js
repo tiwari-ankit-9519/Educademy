@@ -257,10 +257,10 @@ export const getNotifications = asyncHandler(async (req, res) => {
       });
     }
 
-    const result = await notificationService.getUserNotifications(
+    const result = await notificationService.getNotifications({
       userId,
-      filters
-    );
+      ...filters
+    });
 
     if (filters.page === 1 && result.notifications.length > 0) {
       await redisService.setJSON(cacheKey, result, { ex: 300 });
@@ -312,7 +312,7 @@ export const getUnreadCount = asyncHandler(async (req, res) => {
     const userId = validateUserAuthentication(req);
 
     const rateLimitResult = await redisService.rateLimitCheck(
-      `rate_limit:unread_count:${userId}`, // Different key for rate limiting
+      `rate_limit:unread_count:${userId}`,
       200,
       3600
     );
@@ -325,7 +325,7 @@ export const getUnreadCount = asyncHandler(async (req, res) => {
       });
     }
 
-    const cacheKey = `cache:unread_count:${userId}`; // Different key for caching
+    const cacheKey = `cache:unread_count:${userId}`;
     let unreadCount = await redisService.get(cacheKey);
 
     if (unreadCount === null) {
@@ -473,9 +473,11 @@ export const markNotificationsAsRead = asyncHandler(async (req, res) => {
     let markedCount = 0;
 
     if (markAll === true) {
-      await notificationService.markAllAsRead(userId);
-      const stats = await notificationService.getNotificationStats(userId);
-      markedCount = stats.unread;
+      const result = await notificationService.markNotificationsAsRead({
+        markAll: true,
+        userId
+      });
+      markedCount = result.count;
     } else {
       const validNotifications = await prisma.notification.findMany({
         where: {
@@ -495,8 +497,11 @@ export const markNotificationsAsRead = asyncHandler(async (req, res) => {
         });
       }
 
-      await notificationService.markAsRead(validIds, userId);
-      markedCount = validIds.length;
+      const result = await notificationService.markNotificationsAsRead({
+        notificationIds: validIds,
+        userId
+      });
+      markedCount = result.count;
     }
 
     await Promise.all([
@@ -594,7 +599,10 @@ export const deleteNotification = asyncHandler(async (req, res) => {
       });
     }
 
-    await notificationService.deleteNotification(notificationId, userId);
+    await notificationService.deleteNotification({
+      notificationId,
+      userId
+    });
 
     await Promise.all([
       redisService.del(`unread_count:${userId}`),
@@ -685,7 +693,7 @@ export const deleteAllReadNotifications = asyncHandler(async (req, res) => {
       });
     }
 
-    await notificationService.deleteAllRead(userId);
+    await notificationService.deleteAllReadNotifications(userId);
 
     await Promise.all([
       redisService.delPattern(`notifications:${userId}:*`),

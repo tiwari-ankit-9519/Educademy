@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTheme } from "@/components/ThemeProvider";
-import { loginUser, clearError } from "@/features/authSlice";
+import { loginUser, clearError } from "@/features/common/authSlice";
 import SocialLogin from "@/components/SocialLogin";
 
 const LoginPage = () => {

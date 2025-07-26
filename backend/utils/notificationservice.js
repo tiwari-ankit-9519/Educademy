@@ -11,6 +11,7 @@ class NotificationService {
 
   setSocketManager(socketManager) {
     this.socketManager = socketManager;
+    console.log("Socket manager set in NotificationService");
   }
 
   setEmailService(emailService) {
@@ -38,6 +39,7 @@ class NotificationService {
           priority,
           data,
           actionUrl,
+          isRead: false,
           isDelivered: false,
         },
       });
@@ -51,11 +53,16 @@ class NotificationService {
           priority: notification.priority,
           data: notification.data,
           actionUrl: notification.actionUrl,
+          isRead: notification.isRead,
           createdAt: notification.createdAt,
         });
 
         if (this.socketManager.isUserOnline(userId)) {
           await this.markAsDelivered(notification.id);
+        }
+
+        if (type === "SYSTEM_ANNOUNCEMENT" && data?.announcementId) {
+          await this.updateAnnouncementStats(data.announcementId);
         }
       }
 
@@ -86,63 +93,200 @@ class NotificationService {
     sendSocket = true,
   }) {
     try {
-      const notifications = [];
+      console.log(`Creating bulk notifications for ${userIds.length} users`);
 
-      for (const userId of userIds) {
-        const notification = await prisma.notification.create({
-          data: {
-            userId,
-            type,
-            title,
-            message,
-            priority,
-            data,
-            actionUrl,
-            isDelivered: false,
-          },
-        });
-        notifications.push(notification);
+      const notifications = [];
+      const batchSize = 100;
+
+      for (let i = 0; i < userIds.length; i += batchSize) {
+        const batch = userIds.slice(i, i + batchSize);
+
+        const batchNotifications = await Promise.allSettled(
+          batch.map(async (userId) => {
+            try {
+              const notification = await prisma.notification.create({
+                data: {
+                  userId,
+                  type,
+                  title,
+                  message,
+                  priority,
+                  data,
+                  actionUrl,
+                  isRead: false,
+                  isDelivered: false,
+                },
+              });
+              return notification;
+            } catch (error) {
+              console.error(
+                `Failed to create notification for user ${userId}:`,
+                error
+              );
+              return null;
+            }
+          })
+        );
+
+        const successfulBatchNotifications = batchNotifications
+          .filter((result) => result.status === "fulfilled" && result.value)
+          .map((result) => result.value);
+
+        notifications.push(...successfulBatchNotifications);
       }
 
-      if (sendSocket && this.socketManager) {
-        const notificationPromises = notifications.map(async (notification) => {
-          await this.socketManager.sendNotificationToUser(notification.userId, {
-            id: notification.id,
-            type: notification.type,
-            title: notification.title,
-            message: notification.message,
-            priority: notification.priority,
-            data: notification.data,
-            actionUrl: notification.actionUrl,
-            createdAt: notification.createdAt,
-          });
+      console.log(
+        `Created ${notifications.length} notifications out of ${userIds.length} attempts`
+      );
 
-          if (this.socketManager.isUserOnline(notification.userId)) {
-            await this.markAsDelivered(notification.id);
+      if (sendSocket && this.socketManager && notifications.length > 0) {
+        const notificationsByUser = notifications.reduce(
+          (acc, notification) => {
+            if (!acc[notification.userId]) {
+              acc[notification.userId] = [];
+            }
+            acc[notification.userId].push({
+              id: notification.id,
+              type: notification.type,
+              title: notification.title,
+              message: notification.message,
+              priority: notification.priority,
+              data: notification.data,
+              actionUrl: notification.actionUrl,
+              isRead: notification.isRead,
+              createdAt: notification.createdAt,
+            });
+            return acc;
+          },
+          {}
+        );
+
+        const socketPromises = Object.entries(notificationsByUser).map(
+          async ([userId, userNotifications]) => {
+            try {
+              if (userNotifications.length === 1) {
+                await this.socketManager.sendNotificationToUser(
+                  userId,
+                  userNotifications[0]
+                );
+              } else {
+                await this.socketManager.sendBulkNotificationsToUser(
+                  userId,
+                  userNotifications
+                );
+              }
+
+              if (this.socketManager.isUserOnline(userId)) {
+                const notificationIds = userNotifications.map((n) => n.id);
+                await Promise.all(
+                  notificationIds.map((id) => this.markAsDelivered(id))
+                );
+              }
+            } catch (error) {
+              console.error(
+                `Failed to send notifications to user ${userId}:`,
+                error
+              );
+            }
           }
-        });
+        );
 
-        await Promise.all(notificationPromises);
+        await Promise.allSettled(socketPromises);
+
+        if (type === "SYSTEM_ANNOUNCEMENT" && data?.announcementId) {
+          await this.updateAnnouncementStats(data.announcementId);
+          await this.broadcastAnnouncementStats(data.announcementId);
+        }
       }
 
       if (this.emailService) {
         const emailPromises = notifications.map(async (notification) => {
-          const shouldEmail =
-            sendEmail !== null
-              ? sendEmail
-              : await this.shouldSendEmail(notification.userId, type);
-          if (shouldEmail) {
-            await this.sendEmailNotification(notification.userId, notification);
+          try {
+            const shouldEmail =
+              sendEmail !== null
+                ? sendEmail
+                : await this.shouldSendEmail(notification.userId, type);
+            if (shouldEmail) {
+              await this.sendEmailNotification(
+                notification.userId,
+                notification
+              );
+            }
+          } catch (error) {
+            console.error(
+              `Failed to send email for notification ${notification.id}:`,
+              error
+            );
           }
         });
 
-        await Promise.all(emailPromises);
+        await Promise.allSettled(emailPromises);
       }
 
-      return notifications;
+      return {
+        success: true,
+        notifications: notifications,
+        created: notifications.length,
+        failed: userIds.length - notifications.length,
+      };
     } catch (error) {
       console.error("Failed to create bulk notifications", error);
       throw error;
+    }
+  }
+
+  async updateAnnouncementStats(announcementId) {
+    try {
+      const stats = await prisma.notification.groupBy({
+        by: ["isRead"],
+        where: {
+          data: {
+            path: ["announcementId"],
+            equals: announcementId,
+          },
+        },
+        _count: {
+          id: true,
+        },
+      });
+
+      const readCount = stats.find((s) => s.isRead === true)?._count.id || 0;
+      const unreadCount = stats.find((s) => s.isRead === false)?._count.id || 0;
+      const totalCount = readCount + unreadCount;
+
+      return {
+        announcementId,
+        totalNotifications: totalCount,
+        readCount,
+        unreadCount,
+        readPercentage:
+          totalCount > 0 ? Math.round((readCount / totalCount) * 100) : 0,
+      };
+    } catch (error) {
+      console.error("Failed to update announcement stats:", error);
+      return null;
+    }
+  }
+
+  async broadcastAnnouncementStats(announcementId) {
+    try {
+      if (!this.socketManager) return;
+
+      const stats = await this.updateAnnouncementStats(announcementId);
+      if (stats) {
+        this.socketManager.sendToRole(
+          "ADMIN",
+          "announcement_stats_updated",
+          stats
+        );
+        this.socketManager.sendToRole(
+          "MODERATOR",
+          "announcement_stats_updated",
+          stats
+        );
+      }
+    } catch (error) {
+      console.error("Failed to broadcast announcement stats:", error);
     }
   }
 
@@ -160,6 +304,253 @@ class NotificationService {
     }
   }
 
+  async getNotifications({ userId, page = 1, limit = 20, filters = {} }) {
+    try {
+      const skip = (page - 1) * limit;
+      const where = { userId };
+
+      if (filters.isRead !== undefined) {
+        where.isRead = filters.isRead;
+      }
+
+      if (filters.type) {
+        where.type = filters.type;
+      }
+
+      if (filters.priority) {
+        where.priority = filters.priority;
+      }
+
+      if (filters.search) {
+        where.OR = [
+          { title: { contains: filters.search, mode: "insensitive" } },
+          { message: { contains: filters.search, mode: "insensitive" } },
+        ];
+      }
+
+      if (filters.startDate || filters.endDate) {
+        where.createdAt = {};
+        if (filters.startDate) {
+          where.createdAt.gte = new Date(filters.startDate);
+        }
+        if (filters.endDate) {
+          where.createdAt.lte = new Date(filters.endDate);
+        }
+      }
+
+      const [notifications, total] = await Promise.all([
+        prisma.notification.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: limit,
+        }),
+        prisma.notification.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        notifications,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+        filters,
+      };
+    } catch (error) {
+      console.error("Get notifications error:", error);
+      throw error;
+    }
+  }
+
+  async getUnreadCount(userId) {
+    try {
+      const count = await prisma.notification.count({
+        where: { userId, isRead: false },
+      });
+      return count;
+    } catch (error) {
+      console.error("Get unread count error:", error);
+      throw error;
+    }
+  }
+
+  async getNotificationStats(userId) {
+    try {
+      const [total, unread, delivered, byPriority] = await Promise.all([
+        prisma.notification.count({ where: { userId } }),
+        prisma.notification.count({
+          where: {
+            userId,
+            isRead: false,
+          },
+        }),
+        prisma.notification.count({
+          where: { userId, isDelivered: true },
+        }),
+        prisma.notification.groupBy({
+          by: ["priority"],
+          where: {
+            userId,
+            isRead: false,
+          },
+          _count: { priority: true },
+        }),
+      ]);
+
+      const priorityStats = byPriority.reduce((acc, item) => {
+        acc[item.priority] = item._count.priority;
+        return acc;
+      }, {});
+
+      return {
+        total,
+        unread,
+        read: total - unread,
+        delivered,
+        byPriority: priorityStats,
+      };
+    } catch (error) {
+      console.error("Get notification stats error:", error);
+      return { total: 0, unread: 0, read: 0, delivered: 0, byPriority: {} };
+    }
+  }
+
+  async markNotificationsAsRead({ notificationIds, markAll = false, userId }) {
+    try {
+      const where = { userId };
+
+      if (markAll) {
+        where.isRead = false;
+      } else {
+        where.id = { in: notificationIds };
+      }
+
+      const result = await prisma.notification.updateMany({
+        where,
+        data: {
+          isRead: true,
+          readAt: new Date(),
+        },
+      });
+
+      if (this.socketManager) {
+        const targetIds = markAll ? [] : notificationIds;
+        this.socketManager.sendToUser(userId, "notifications_marked_read", {
+          notificationIds: targetIds,
+          markAll,
+          count: result.count,
+        });
+
+        const unreadCount = await prisma.notification.count({
+          where: { userId, isRead: false },
+        });
+
+        this.socketManager.sendToUser(userId, "unread_count_updated", {
+          count: unreadCount,
+        });
+
+        const readNotifications = await prisma.notification.findMany({
+          where: markAll
+            ? { userId, isRead: true }
+            : { id: { in: notificationIds } },
+          select: { data: true },
+        });
+
+        const announcementIds = readNotifications
+          .filter((n) => n.data?.announcementId)
+          .map((n) => n.data.announcementId);
+
+        for (const announcementId of [...new Set(announcementIds)]) {
+          await this.broadcastAnnouncementStats(announcementId);
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Mark notifications as read error:", error);
+      throw error;
+    }
+  }
+
+  async deleteNotification({ notificationId, userId }) {
+    try {
+      const notification = await prisma.notification.findFirst({
+        where: { id: notificationId, userId },
+      });
+
+      if (!notification) {
+        throw new Error("Notification not found");
+      }
+
+      await prisma.notification.delete({
+        where: { id: notificationId },
+      });
+
+      if (this.socketManager) {
+        this.socketManager.sendToUser(userId, "notification_deleted", {
+          notificationId,
+        });
+
+        const unreadCount = await prisma.notification.count({
+          where: { userId, isRead: false },
+        });
+
+        this.socketManager.sendToUser(userId, "unread_count_updated", {
+          count: unreadCount,
+        });
+
+        if (notification.data?.announcementId) {
+          await this.broadcastAnnouncementStats(
+            notification.data.announcementId
+          );
+        }
+      }
+
+      return { deleted: true, notification };
+    } catch (error) {
+      console.error("Delete notification error:", error);
+      throw error;
+    }
+  }
+
+  async deleteAllReadNotifications(userId) {
+    try {
+      const readNotifications = await prisma.notification.findMany({
+        where: { userId, isRead: true },
+        select: { data: true },
+      });
+
+      const result = await prisma.notification.deleteMany({
+        where: { userId, isRead: true },
+      });
+
+      if (this.socketManager) {
+        this.socketManager.sendToUser(userId, "read_notifications_deleted", {
+          count: result.count,
+        });
+
+        const announcementIds = readNotifications
+          .filter((n) => n.data?.announcementId)
+          .map((n) => n.data.announcementId);
+
+        for (const announcementId of [...new Set(announcementIds)]) {
+          await this.broadcastAnnouncementStats(announcementId);
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Delete all read notifications error:", error);
+      throw error;
+    }
+  }
+
   async shouldSendEmail(userId, type) {
     try {
       const settings = await prisma.notificationSettings.findUnique({
@@ -169,22 +560,23 @@ class NotificationService {
       if (!settings) return this.getDefaultEmailSetting(type);
 
       const highPriorityTypes = [
-        "payment_confirmed",
-        "payment_failed",
-        "security_alert",
-        "account_suspended",
-        "course_approved",
-        "course_rejected",
-        "assignment_graded",
-        "certificate_ready",
-        "refund_processed",
-        "payout_processed",
+        "PAYMENT_RECEIVED",
+        "PAYMENT_FAILED",
+        "SECURITY_ALERT",
+        "ACCOUNT_SUSPENDED",
+        "COURSE_APPROVED",
+        "COURSE_REJECTED",
+        "ASSIGNMENT_GRADED",
+        "CERTIFICATE_ISSUED",
+        "REFUND_PROCESSED",
+        "PAYOUT_PROCESSED",
       ];
 
       const mediumPriorityTypes = [
-        "new_student_enrolled",
-        "course_completed",
-        "support_ticket_resolved",
+        "NEW_ENROLLMENT",
+        "COURSE_COMPLETED",
+        "SUPPORT_TICKET_RESOLVED",
+        "SYSTEM_ANNOUNCEMENT",
       ];
 
       if (highPriorityTypes.includes(type)) {
@@ -204,11 +596,11 @@ class NotificationService {
 
   getDefaultEmailSetting(type) {
     const alwaysEmailTypes = [
-      "payment_confirmed",
-      "payment_failed",
-      "security_alert",
-      "account_suspended",
-      "certificate_ready",
+      "PAYMENT_RECEIVED",
+      "PAYMENT_FAILED",
+      "SECURITY_ALERT",
+      "ACCOUNT_SUSPENDED",
+      "CERTIFICATE_ISSUED",
     ];
     return alwaysEmailTypes.includes(type);
   }
@@ -245,7 +637,7 @@ class NotificationService {
     const { type, title, message, data } = notification;
 
     switch (type) {
-      case "payment_confirmed":
+      case "PAYMENT_RECEIVED":
         return {
           subject: "Payment Confirmed - Educademy",
           html: emailTemplates.transactional({
@@ -264,43 +656,22 @@ class NotificationService {
           }),
         };
 
-      case "payment_failed":
+      case "SYSTEM_ANNOUNCEMENT":
         return {
-          subject: "Payment Failed - Educademy",
-          html: emailTemplates.transactional({
+          subject: `${title} - Educademy`,
+          html: emailTemplates.system({
             userName: user.firstName,
-            title: "Payment Failed",
-            subtitle: "Your payment could not be processed",
-            message:
-              "We were unable to process your payment. Please try again.",
-            transactionType: "failed",
-            amount: data?.amount,
-            currency: data?.currency || "INR",
-            actionButton: "Retry Payment",
-            actionUrl: data?.retryUrl,
-            details: data?.details || [],
-          }),
-        };
-
-      case "security_alert":
-        return {
-          subject: "Security Alert - Educademy",
-          html: emailTemplates.security({
-            userName: user.firstName,
-            title: "Security Alert",
-            subtitle: "Unusual activity detected on your account",
+            title: title,
+            subtitle: "Important announcement from Educademy",
             message: message,
-            alertType: "warning",
-            actionButton: "Secure Account",
-            actionUrl: data?.securityUrl,
-            details: data?.details || [],
-            securityTips: data?.securityTips || [],
-            footerNote:
-              "If this wasn't you, please secure your account immediately.",
+            systemType: "announcement",
+            actionButton: "View Details",
+            actionUrl: data?.actionUrl || "/announcements",
+            additionalInfo: data?.fullContent ? [data.fullContent] : [],
           }),
         };
 
-      case "assignment_graded":
+      case "ASSIGNMENT_GRADED":
         return {
           subject: "Assignment Graded - Educademy",
           html: emailTemplates.communication({
@@ -319,321 +690,40 @@ class NotificationService {
           }),
         };
 
-      case "certificate_ready":
-        return {
-          subject: "Certificate Ready - Educademy",
-          html: emailTemplates.course({
-            userName: user.firstName,
-            title: "Certificate Ready!",
-            subtitle: "Congratulations on completing your course",
-            message:
-              "Your course completion certificate is now available for download.",
-            courseType: "completed",
-            courseName: data?.courseName,
-            certificateUrl: data?.certificateUrl,
-            actionButton: "Download Certificate",
-            actionUrl: data?.certificateUrl,
-            achievements: data?.achievements || [],
-          }),
-        };
-
-      case "course_approved":
-        return {
-          subject: "Course Approved - Educademy",
-          html: emailTemplates.course({
-            userName: user.firstName,
-            title: "Course Approved!",
-            subtitle: "Your course is now live on Educademy",
-            message:
-              "Congratulations! Your course has been reviewed and approved.",
-            courseType: "published",
-            courseName: data?.courseName,
-            actionButton: "View Course",
-            actionUrl: data?.courseUrl,
-            achievements: data?.achievements || [],
-          }),
-        };
-
-      case "course_rejected":
-        return {
-          subject: "Course Review Required - Educademy",
-          html: emailTemplates.course({
-            userName: user.firstName,
-            title: "Course Under Review",
-            subtitle: "Your course needs some improvements",
-            message: "Please address the following items before resubmission.",
-            courseType: "rejected",
-            courseName: data?.courseName,
-            actionButton: "Edit Course",
-            actionUrl: data?.editUrl,
-            suggestions: data?.suggestions || [],
-          }),
-        };
-
-      case "new_student_enrolled":
-        return {
-          subject: "New Student Enrolled - Educademy",
-          html: emailTemplates.course({
-            userName: user.firstName,
-            title: "New Student Enrolled",
-            subtitle: "Someone just joined your course",
-            message: "Great news! A new student has enrolled in your course.",
-            courseType: "enrolled",
-            courseName: data?.courseName,
-            actionButton: "View Analytics",
-            actionUrl: data?.analyticsUrl,
-          }),
-        };
-
-      case "refund_processed":
-        return {
-          subject: "Refund Processed - Educademy",
-          html: emailTemplates.transactional({
-            userName: user.firstName,
-            title: "Refund Processed",
-            subtitle: "Your refund has been initiated",
-            message: "Your refund request has been processed successfully.",
-            transactionType: "refund",
-            amount: data?.amount,
-            currency: data?.currency || "INR",
-            transactionId: data?.refundId,
-            details: data?.details || [],
-            footerNote: data?.deliveryNote,
-          }),
-        };
-
-      case "payout_processed":
-        return {
-          subject: "Payout Processed - Educademy",
-          html: emailTemplates.transactional({
-            userName: user.firstName,
-            title: "Payout Processed",
-            subtitle: "Your earnings have been transferred",
-            message:
-              "Your earnings have been successfully transferred to your account.",
-            transactionType: "success",
-            amount: data?.amount,
-            currency: data?.currency || "INR",
-            transactionId: data?.payoutId,
-            details: data?.details || [],
-          }),
-        };
-
-      case "support_ticket_resolved":
-        return {
-          subject: "Support Ticket Resolved - Educademy",
-          html: emailTemplates.system({
-            userName: user.firstName,
-            title: "Support Ticket Resolved",
-            subtitle: "Your support request has been resolved",
-            message:
-              "We have resolved your support ticket. Please review the solution.",
-            systemType: "support",
-            ticketId: data?.ticketId,
-            actionButton: "View Resolution",
-            actionUrl: data?.ticketUrl,
-            additionalInfo: data?.resolution ? [data.resolution] : [],
-          }),
-        };
-
       default:
         return null;
     }
   }
 
-  async getUserNotifications(userId, options = {}) {
-    const { page = 1, limit = 20, isRead, type, priority } = options;
-    const skip = (page - 1) * limit;
-
+  async getNotificationSettings(userId) {
     try {
-      const where = { userId };
-
-      if (isRead !== undefined) where.isRead = isRead;
-      if (type) where.type = type;
-      if (priority) where.priority = priority;
-
-      const [notifications, total] = await Promise.all([
-        prisma.notification.findMany({
-          where,
-          orderBy: { createdAt: "desc" },
-          skip,
-          take: limit,
-        }),
-        prisma.notification.count({ where }),
-      ]);
-
-      return {
-        notifications,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
-    } catch (error) {
-      console.error("Failed to get user notifications", error);
-      throw error;
-    }
-  }
-
-  async markAsRead(notificationIds, userId) {
-    try {
-      await prisma.notification.updateMany({
-        where: {
-          id: { in: notificationIds },
-          userId,
-        },
-        data: {
-          isRead: true,
-          readAt: new Date(),
-        },
+      let settings = await prisma.notificationSettings.findUnique({
+        where: { userId },
       });
 
-      if (this.socketManager) {
-        this.socketManager.sendToUser(userId, "notifications_marked_read", {
-          notificationIds,
+      if (!settings) {
+        settings = await prisma.notificationSettings.create({
+          data: {
+            userId,
+            email: true,
+            push: true,
+            inApp: true,
+            sms: false,
+            assignmentUpdates: true,
+            courseUpdates: true,
+            accountUpdates: true,
+            marketingUpdates: false,
+            discussionUpdates: true,
+            reviewUpdates: true,
+            paymentUpdates: true,
+          },
         });
       }
+
+      return settings;
     } catch (error) {
-      console.error("Failed to mark notifications as read", error);
+      console.error("Get notification settings error:", error);
       throw error;
-    }
-  }
-
-  async markAllAsRead(userId) {
-    try {
-      await prisma.notification.updateMany({
-        where: {
-          userId,
-          isRead: false,
-        },
-        data: {
-          isRead: true,
-          readAt: new Date(),
-        },
-      });
-
-      if (this.socketManager) {
-        this.socketManager.sendToUser(userId, "all_notifications_read", {});
-      }
-    } catch (error) {
-      console.error("Failed to mark all notifications as read", error);
-      throw error;
-    }
-  }
-
-  async deleteNotification(notificationId, userId) {
-    try {
-      await prisma.notification.delete({
-        where: {
-          id: notificationId,
-          userId,
-        },
-      });
-
-      if (this.socketManager) {
-        this.socketManager.sendToUser(userId, "notification_deleted", {
-          notificationId,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to delete notification", error);
-      throw error;
-    }
-  }
-
-  async deleteAllRead(userId) {
-    try {
-      await prisma.notification.deleteMany({
-        where: {
-          userId,
-          isRead: true,
-        },
-      });
-
-      if (this.socketManager) {
-        this.socketManager.sendToUser(userId, "read_notifications_deleted", {});
-      }
-    } catch (error) {
-      console.error("Failed to delete read notifications", error);
-      throw error;
-    }
-  }
-
-  async getUnreadCount(userId) {
-    try {
-      return await prisma.notification.count({
-        where: {
-          userId,
-          isRead: false,
-        },
-      });
-    } catch (error) {
-      console.error("Failed to get unread count", error);
-      return 0;
-    }
-  }
-
-  async getNotificationStats(userId) {
-    try {
-      const [total, unread, delivered, byPriority] = await Promise.all([
-        prisma.notification.count({ where: { userId } }),
-        prisma.notification.count({
-          where: {
-            userId,
-            isRead: false,
-          },
-        }),
-        prisma.notification.count({
-          where: { userId, isDelivered: true },
-        }),
-        prisma.notification.groupBy({
-          by: ["priority"],
-          where: {
-            userId,
-            isRead: false,
-          },
-          _count: { priority: true },
-        }),
-      ]);
-
-      return {
-        total,
-        unread,
-        delivered,
-        byPriority: byPriority.reduce((acc, item) => {
-          acc[item.priority] = item._count.priority;
-          return acc;
-        }, {}),
-      };
-    } catch (error) {
-      console.error("Failed to get notification stats", error);
-      return { total: 0, unread: 0, delivered: 0, byPriority: {} };
-    }
-  }
-
-  async cleanupExpiredNotifications() {
-    try {
-      // Since there's no expiresAt field, we can cleanup old read notifications
-      // or implement a different cleanup strategy based on createdAt
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const result = await prisma.notification.deleteMany({
-        where: {
-          isRead: true,
-          readAt: {
-            lt: thirtyDaysAgo,
-          },
-        },
-      });
-
-      console.log(`Cleaned up ${result.count} old read notifications`);
-      return result.count;
-    } catch (error) {
-      console.error("Failed to cleanup old notifications", error);
-      return 0;
     }
   }
 
@@ -656,31 +746,48 @@ class NotificationService {
 
       return updatedSettings;
     } catch (error) {
-      console.error("Failed to update notification settings", error);
+      console.error("Update notification settings error:", error);
       throw error;
     }
   }
 
-  async getNotificationSettings(userId) {
+  async sendTestNotification({ userId, type, title, message, priority }) {
     try {
-      const settings = await prisma.notificationSettings.findUnique({
-        where: { userId },
+      const notification = await this.createNotification({
+        userId,
+        type,
+        title,
+        message,
+        priority,
+        data: { isTest: true },
       });
 
-      return (
-        settings || {
-          email: true,
-          inApp: true,
-          courseUpdates: true,
-          assignmentUpdates: true,
-          discussionUpdates: true,
-          paymentUpdates: true,
-          accountUpdates: true,
-        }
-      );
+      return notification;
     } catch (error) {
-      console.error("Failed to get notification settings", error);
-      return null;
+      console.error("Send test notification error:", error);
+      throw error;
+    }
+  }
+
+  async cleanupExpiredNotifications() {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const result = await prisma.notification.deleteMany({
+        where: {
+          isRead: true,
+          readAt: {
+            lt: thirtyDaysAgo,
+          },
+        },
+      });
+
+      console.log(`Cleaned up ${result.count} old read notifications`);
+      return result.count;
+    } catch (error) {
+      console.error("Failed to cleanup old notifications", error);
+      return 0;
     }
   }
 }

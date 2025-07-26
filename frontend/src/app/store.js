@@ -2,12 +2,15 @@ import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
-import authReducer from "@/features/authSlice";
+import authReducer from "@/features/common/authSlice";
 import adminAnalyticsReducer from "@/features/adminSlice/adminAnalytics";
 import adminUserReducer from "@/features/adminSlice/adminUser";
 import adminSystemReducer from "@/features/adminSlice/adminSystem";
 import adminModerationReducer from "@/features/adminSlice/adminModeration";
 import adminCourseReducer from "@/features/adminSlice/adminCourse";
+import adminPaymentReducer from "../features/adminSlice/adminPayment";
+import ticketSupportReducer from "@/features/common/ticketSlice";
+import notificationReducer from "@/features/common/notificationSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -22,6 +25,9 @@ const rootReducer = combineReducers({
   adminSystem: adminSystemReducer,
   adminModeration: adminModerationReducer,
   adminCourse: adminCourseReducer,
+  adminPayment: adminPaymentReducer,
+  ticketSupport: ticketSupportReducer,
+  notification: notificationReducer,
 });
 
 export const store = configureStore({

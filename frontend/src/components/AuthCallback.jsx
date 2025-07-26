@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { exchangeAuthCode } from "@/features/authSlice";
+import { exchangeAuthCode } from "@/features/common/authSlice";
 
 const AuthCallback = () => {
   const navigate = useNavigate();

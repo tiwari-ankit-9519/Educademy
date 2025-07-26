@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTheme } from "@/components/ThemeProvider";
-import { verifyUser, resendOTP, clearError } from "@/features/authSlice";
+import { verifyUser, resendOTP, clearError } from "@/features/common/authSlice";
 
 const OTPVerificationPage = () => {
   const { theme } = useTheme();

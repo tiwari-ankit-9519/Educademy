@@ -164,9 +164,75 @@ const isAdmin = async (req, res, next) => {
       });
     }
 
+    if (req.userRole !== "ADMIN") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required.",
+        code: "INSUFFICIENT_PERMISSIONS",
+      });
+    }
+
     next();
   } catch (error) {
     console.error("Admin authorization error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Authorization verification failed",
+      code: "AUTH_VERIFICATION_ERROR",
+    });
+  }
+};
+
+const isModerator = async (req, res, next) => {
+  try {
+    if (!req.userAuthId || !req.userRole) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+        code: "AUTH_REQUIRED",
+      });
+    }
+
+    if (req.userRole !== "MODERATOR") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Moderator privileges required.",
+        code: "INSUFFICIENT_PERMISSIONS",
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Moderator authorization error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Authorization verification failed",
+      code: "AUTH_VERIFICATION_ERROR",
+    });
+  }
+};
+
+const isStaff = async (req, res, next) => {
+  try {
+    if (!req.userAuthId || !req.userRole) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+        code: "AUTH_REQUIRED",
+      });
+    }
+
+    if (req.userRole !== "ADMIN" && req.userRole !== "MODERATOR") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Staff privileges required.",
+        code: "INSUFFICIENT_PERMISSIONS",
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Staff authorization error:", error);
     return res.status(500).json({
       success: false,
       message: "Authorization verification failed",
@@ -315,14 +381,20 @@ const isStudent = async (req, res, next) => {
 };
 
 const requireAdmin = [isLoggedIn, isAdmin];
+const requireModerator = [isLoggedIn, isModerator];
+const requireStaff = [isLoggedIn, isStaff];
 const requireInstructor = [isLoggedIn, isInstructor];
 const requireStudent = [isLoggedIn, isStudent];
 
 export {
   isAdmin,
+  isModerator,
+  isStaff,
   isInstructor,
   isStudent,
   requireAdmin,
+  requireModerator,
+  requireStaff,
   requireInstructor,
   requireStudent,
   isTokenBlacklisted,

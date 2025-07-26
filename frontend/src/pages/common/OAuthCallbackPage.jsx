@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import { exchangeAuthCode } from "@/features/authSlice";
+import { exchangeAuthCode } from "@/features/common/authSlice";
 
 const OAuthCallbackPage = () => {
   const [searchParams] = useSearchParams();

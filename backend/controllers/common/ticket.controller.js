@@ -10,6 +10,19 @@ import { uploadDocument } from "../../config/upload.js";
 
 const prisma = new PrismaClient();
 
+const STAFF_ROLES = {
+  TICKET_MANAGEMENT: ["ADMIN", "MODERATOR"],
+  VIEW_ALL_TICKETS: ["ADMIN", "MODERATOR"],
+  NOTIFICATIONS: ["ADMIN", "MODERATOR"],
+};
+
+const USER_ROLES = {
+  ADMIN: "ADMIN",
+  MODERATOR: "MODERATOR",
+  INSTRUCTOR: "INSTRUCTOR",
+  STUDENT: "STUDENT",
+};
+
 const generateRequestId = () => {
   return `support_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
@@ -138,6 +151,14 @@ const validateTicketFilters = (filters) => {
   };
 };
 
+const canViewAllTickets = (userRole) => {
+  return userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.MODERATOR;
+};
+
+const canManageTickets = (userRole) => {
+  return STAFF_ROLES.TICKET_MANAGEMENT.includes(userRole);
+};
+
 const buildTicketFilters = (query, userId, userRole) => {
   const filters = {
     page: parseInt(query.page) || 1,
@@ -146,7 +167,7 @@ const buildTicketFilters = (query, userId, userRole) => {
 
   const where = {};
 
-  if (userRole !== "ADMIN" && userRole !== "MODERATOR") {
+  if (!canViewAllTickets(userRole)) {
     where.userId = userId;
   }
 
@@ -216,7 +237,7 @@ const notifyStaffNewTicket = async (ticket, user) => {
   try {
     const staffUsers = await prisma.user.findMany({
       where: {
-        role: { in: ["ADMIN", "MODERATOR"] },
+        role: { in: STAFF_ROLES.NOTIFICATIONS },
         isActive: true,
       },
       select: { id: true },
@@ -484,9 +505,10 @@ export const getSupportTickets = asyncHandler(async (req, res) => {
     const filters = buildTicketFilters(req.query, req.userAuthId, req.userRole);
     const skip = (filters.page - 1) * filters.limit;
 
-    const cacheKey = `support_tickets:${req.userAuthId}:${JSON.stringify(
-      filters
-    )}`;
+    const cacheKey = canViewAllTickets(req.userRole)
+      ? `support_tickets:all:${JSON.stringify(filters)}`
+      : `support_tickets:${req.userAuthId}:${JSON.stringify(filters)}`;
+
     let cachedResult = await redisService.getJSON(cacheKey);
 
     if (cachedResult && filters.page === 1) {
@@ -551,14 +573,13 @@ export const getSupportTickets = asyncHandler(async (req, res) => {
         createdAt: ticket.createdAt,
         updatedAt: ticket.updatedAt,
         resolvedAt: ticket.resolvedAt,
-        user:
-          req.userRole === "ADMIN" || req.userRole === "MODERATOR"
-            ? {
-                name: `${ticket.user.firstName} ${ticket.user.lastName}`,
-                email: ticket.user.email,
-                role: ticket.user.role,
-              }
-            : undefined,
+        user: canViewAllTickets(req.userRole)
+          ? {
+              name: `${ticket.user.firstName} ${ticket.user.lastName}`,
+              email: ticket.user.email,
+              role: ticket.user.role,
+            }
+          : undefined,
         responseCount: ticket._count.responses,
         lastResponse: ticket.responses[0] || null,
         isOverdue: isTicketOverdue(ticket),
@@ -645,7 +666,8 @@ export const getSupportTicket = asyncHandler(async (req, res) => {
     }
 
     const where = { id: ticketId };
-    if (req.userRole !== "ADMIN" && req.userRole !== "MODERATOR") {
+
+    if (!canViewAllTickets(req.userRole)) {
       where.userId = req.userAuthId;
     }
 
@@ -680,8 +702,17 @@ export const getSupportTicket = asyncHandler(async (req, res) => {
     if (!ticket) {
       return res.status(404).json({
         success: false,
-        message: "Support ticket not found",
+        message:
+          "Support ticket not found or you don't have permission to view it",
         code: "TICKET_NOT_FOUND",
+      });
+    }
+
+    if (!canViewAllTickets(req.userRole) && ticket.userId !== req.userAuthId) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to view this ticket",
+        code: "ACCESS_DENIED",
       });
     }
 
@@ -699,18 +730,17 @@ export const getSupportTicket = asyncHandler(async (req, res) => {
         resolvedAt: ticket.resolvedAt,
         resolvedBy: ticket.resolvedBy,
         metadata: ticket.metadata,
-        user:
-          req.userRole === "ADMIN" || req.userRole === "MODERATOR"
-            ? {
-                name: `${ticket.user.firstName} ${ticket.user.lastName}`,
-                email: ticket.user.email,
-                role: ticket.user.role,
-                profileImage: ticket.user.profileImage,
-              }
-            : {
-                name: `${ticket.user.firstName} ${ticket.user.lastName}`,
-                profileImage: ticket.user.profileImage,
-              },
+        user: canViewAllTickets(req.userRole)
+          ? {
+              name: `${ticket.user.firstName} ${ticket.user.lastName}`,
+              email: ticket.user.email,
+              role: ticket.user.role,
+              profileImage: ticket.user.profileImage,
+            }
+          : {
+              name: `${ticket.user.firstName} ${ticket.user.lastName}`,
+              profileImage: ticket.user.profileImage,
+            },
         responses: ticket.responses.map((response) => ({
           id: response.id,
           message: response.message,
@@ -805,7 +835,7 @@ export const addTicketResponse = asyncHandler(async (req, res) => {
       }
 
       const where = { id: ticketId };
-      if (req.userRole !== "ADMIN" && req.userRole !== "MODERATOR") {
+      if (!canViewAllTickets(req.userRole)) {
         where.userId = req.userAuthId;
       }
 
@@ -825,8 +855,20 @@ export const addTicketResponse = asyncHandler(async (req, res) => {
       if (!ticket) {
         return res.status(404).json({
           success: false,
-          message: "Support ticket not found",
+          message:
+            "Support ticket not found or you don't have permission to respond",
           code: "TICKET_NOT_FOUND",
+        });
+      }
+
+      if (
+        !canViewAllTickets(req.userRole) &&
+        ticket.userId !== req.userAuthId
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "You don't have permission to respond to this ticket",
+          code: "ACCESS_DENIED",
         });
       }
 
@@ -839,8 +881,7 @@ export const addTicketResponse = asyncHandler(async (req, res) => {
       }
 
       const { message } = req.body;
-      const isStaffResponse =
-        req.userRole === "ADMIN" || req.userRole === "MODERATOR";
+      const isStaffResponse = canManageTickets(req.userRole);
 
       const attachments = req.files
         ? req.files.map((file) => ({
@@ -891,6 +932,9 @@ export const addTicketResponse = asyncHandler(async (req, res) => {
       });
 
       await redisService.delPattern(`support_tickets:${ticket.userId}*`);
+      if (canViewAllTickets(req.userRole)) {
+        await redisService.delPattern(`support_tickets:all:*`);
+      }
 
       const recipientId = isStaffResponse ? ticket.userId : null;
       if (recipientId && recipientId !== req.userAuthId) {
@@ -975,11 +1019,11 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
     const { ticketId } = req.params;
     const { status, resolvedBy } = req.body;
 
-    if (req.userRole !== "ADMIN" && req.userRole !== "MODERATOR") {
+    if (!canManageTickets(req.userRole)) {
       return res.status(403).json({
         success: false,
-        message: "Only staff members can update ticket status",
-        code: "INSUFFICIENT_PERMISSIONS",
+        message: "You don't have permission to update ticket status",
+        code: "ACCESS_DENIED",
       });
     }
 
@@ -1055,6 +1099,7 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
     });
 
     await redisService.delPattern(`support_tickets:${ticket.userId}*`);
+    await redisService.delPattern(`support_tickets:all:*`);
 
     const notificationMessage = getStatusUpdateMessage(
       ticket.status,
@@ -1298,7 +1343,7 @@ export const getSupportStats = asyncHandler(async (req, res) => {
     }
 
     const where = {};
-    if (req.userRole !== "ADMIN" && req.userRole !== "MODERATOR") {
+    if (!canViewAllTickets(req.userRole)) {
       where.userId = req.userAuthId;
     }
 

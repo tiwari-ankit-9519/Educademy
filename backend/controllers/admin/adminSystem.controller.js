@@ -344,25 +344,85 @@ export const createAnnouncement = asyncHandler(async (req, res) => {
 
     await redisService.delPattern("admin_announcements:*");
 
+    let notificationsSent = false;
+    let notificationsCount = 0;
+
     if (isActive && (!scheduledFor || new Date(scheduledFor) <= new Date())) {
       const userIds = await getTargetAudienceUserIds(targetAudience);
 
       if (userIds.length > 0) {
-        await notificationService.createBulkNotifications({
-          userIds,
-          type: "SYSTEM_ANNOUNCEMENT",
-          title: title,
-          message:
-            content.substring(0, 200) + (content.length > 200 ? "..." : ""),
-          priority: priority,
-          data: {
-            announcementId: announcement.id,
-            type,
-            targetAudience,
-            fullContent: content,
-          },
-          actionUrl: "/announcements",
-        });
+        console.log(`Creating notifications for ${userIds.length} users`);
+
+        try {
+          const notifications =
+            await notificationService.createBulkNotifications({
+              userIds,
+              type: "SYSTEM_ANNOUNCEMENT",
+              title: title,
+              message:
+                content.substring(0, 200) + (content.length > 200 ? "..." : ""),
+              priority: priority,
+              data: {
+                announcementId: announcement.id,
+                type,
+                targetAudience,
+                fullContent: content,
+              },
+              actionUrl: "/announcements",
+              sendSocket: true,
+              sendEmail: false,
+            });
+
+          console.log("Notifications created:", notifications.created);
+          notificationsSent = true;
+          notificationsCount = notifications.created;
+
+          if (req.socketManager) {
+            req.socketManager.broadcast(
+              "announcement_created",
+              enrichedAnnouncement
+            );
+
+            let roomName = "ALL";
+            if (targetAudience === "STUDENTS") roomName = "STUDENT";
+            else if (targetAudience === "INSTRUCTORS") roomName = "INSTRUCTOR";
+            else if (targetAudience === "ADMINS") roomName = "ADMIN";
+
+            if (roomName !== "ALL") {
+              req.socketManager.sendToRole(roomName, "system_announcement", {
+                title: title,
+                message:
+                  content.substring(0, 200) +
+                  (content.length > 200 ? "..." : ""),
+                priority: priority,
+                announcementId: announcement.id,
+              });
+            } else {
+              req.socketManager.broadcast("system_announcement", {
+                title: title,
+                message:
+                  content.substring(0, 200) +
+                  (content.length > 200 ? "..." : ""),
+                priority: priority,
+                announcementId: announcement.id,
+                type: type,
+              });
+            }
+
+            req.socketManager.sendToRole(
+              "ADMIN",
+              "announcement_created",
+              enrichedAnnouncement
+            );
+            req.socketManager.sendToRole(
+              "MODERATOR",
+              "announcement_created",
+              enrichedAnnouncement
+            );
+          }
+        } catch (notificationError) {
+          console.error("Notification creation error:", notificationError);
+        }
       }
     }
 
@@ -375,6 +435,8 @@ export const createAnnouncement = asyncHandler(async (req, res) => {
       meta: {
         executionTime,
         timestamp: new Date().toISOString(),
+        notificationsSent,
+        notificationsCount,
       },
     });
   } catch (error) {
@@ -556,6 +618,19 @@ export const updateAnnouncement = asyncHandler(async (req, res) => {
     };
 
     await redisService.delPattern("admin_announcements:*");
+
+    if (req.socketManager) {
+      req.socketManager.sendToRole(
+        "ADMIN",
+        "announcement_updated",
+        enrichedAnnouncement
+      );
+      req.socketManager.sendToRole(
+        "MODERATOR",
+        "announcement_updated",
+        enrichedAnnouncement
+      );
+    }
 
     const executionTime = Math.round(performance.now() - startTime);
 
@@ -746,6 +821,17 @@ export const deleteAnnouncement = asyncHandler(async (req, res) => {
 
     await redisService.delPattern("admin_announcements:*");
 
+    if (req.socketManager) {
+      req.socketManager.sendToRole("ADMIN", "announcement_deleted", {
+        announcementId,
+        deletedAnnouncement: existingAnnouncement,
+      });
+      req.socketManager.sendToRole("MODERATOR", "announcement_deleted", {
+        announcementId,
+        deletedAnnouncement: existingAnnouncement,
+      });
+    }
+
     const executionTime = Math.round(performance.now() - startTime);
 
     res.status(200).json({
@@ -914,6 +1000,8 @@ const getAllActiveUserIds = async () => {
 
 const getTargetAudienceUserIds = async (audience) => {
   try {
+    console.log("Getting target audience user IDs for:", audience);
+
     const where = { isActive: true };
 
     if (audience === "STUDENTS") {
@@ -926,8 +1014,10 @@ const getTargetAudienceUserIds = async (audience) => {
 
     const users = await prisma.user.findMany({
       where,
-      select: { id: true },
+      select: { id: true, role: true },
     });
+
+    console.log(`Found ${users.length} users for audience ${audience}`);
 
     return users.map((user) => user.id);
   } catch (error) {

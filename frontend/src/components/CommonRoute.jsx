@@ -6,6 +6,8 @@ import OTPVerificationPage from "../pages/common/OTPVerificationPage";
 import ForgotPasswordPage from "../pages/common/ForgotPasswordPage";
 import AuthCallback from "../components/AuthCallback";
 import ProfilePage from "../pages/common/ProfilePage";
+import SupportPage from "@/pages/common/SupportPage";
+import NotificationsPage from "@/pages/common/NotificationsPage";
 
 export const commonRoutes = [
   <Route
@@ -41,7 +43,7 @@ export const commonRoutes = [
   <Route
     key="notifications"
     path="/notifications"
-    element={<ProtectedRoute element={<div>Notifications</div>} />}
+    element={<ProtectedRoute element={<NotificationsPage />} />}
   />,
   <Route
     key="search"
@@ -51,7 +53,7 @@ export const commonRoutes = [
   <Route
     key="support"
     path="/support"
-    element={<ProtectedRoute element={<div>Support</div>} />}
+    element={<ProtectedRoute element={<SupportPage />} />}
   />,
   <Route
     key="uploads"

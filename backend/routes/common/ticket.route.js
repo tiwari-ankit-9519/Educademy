@@ -1,5 +1,5 @@
 import express from "express";
-import { isLoggedIn, requireAdmin } from "../../middlewares/middleware.js";
+import { isLoggedIn, requireStaff } from "../../middlewares/middleware.js";
 import {
   createSupportTicket,
   getSupportTickets,
@@ -9,19 +9,45 @@ import {
   getSupportCategories,
   getSupportStats,
 } from "../../controllers/common/ticket.controller.js";
+import { trackRoute } from "../../utils/routeWrapper.js";
 
 const router = express.Router();
 
-router.get("/categories", getSupportCategories);
-
 router.use(isLoggedIn);
 
-router.post("/tickets", createSupportTicket);
-router.get("/tickets", getSupportTickets);
-router.get("/tickets/:ticketId", getSupportTicket);
-router.post("/tickets/:ticketId/responses", addTicketResponse);
-router.get("/stats", getSupportStats);
+router.get(
+  "/categories",
+  trackRoute("Tickets", "getSupportCategories"),
+  getSupportCategories
+);
+router.post(
+  "/tickets",
+  trackRoute("Tickets", "createSupportTicket"),
+  createSupportTicket
+);
+router.get(
+  "/tickets",
+  trackRoute("Tickets", "getSupportTickets"),
+  getSupportTickets
+);
+router.get(
+  "/tickets/:ticketId",
+  trackRoute("Tickets", "getSupportTicket"),
+  getSupportTicket
+);
+router.get("/stats", trackRoute("Tickets", "getSupportStats"), getSupportStats);
 
-router.put("/tickets/:ticketId/status", requireAdmin, updateTicketStatus);
+router.post(
+  "/tickets/:ticketId/responses",
+  requireStaff,
+  trackRoute("Tickets", "addTicketResponse"),
+  addTicketResponse
+);
+router.put(
+  "/tickets/:ticketId/status",
+  requireStaff,
+  trackRoute("Tickets", "updateTicketStatus"),
+  updateTicketStatus
+);
 
 export default router;

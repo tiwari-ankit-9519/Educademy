@@ -33,7 +33,7 @@ import {
   resetPassword,
   resendOTP,
   clearError,
-} from "@/features/authSlice";
+} from "@/features/common/authSlice";
 
 const ForgotPasswordPage = () => {
   const { theme } = useTheme();

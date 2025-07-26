@@ -17,6 +17,8 @@ const initialState = {
   deleteAnnouncementLoading: false,
   systemHealthLoading: false,
   needsRefresh: false,
+  socketConnectionStatus: false,
+  lastCreatedAnnouncement: null,
   announcementsPagination: {
     page: 1,
     limit: 20,
@@ -103,8 +105,11 @@ export const createAnnouncement = createAsyncThunk(
         announcementData
       );
       toast.success(response.data.message);
+
+      const createdAnnouncement = response.data.data;
+
       return {
-        data: response.data.data,
+        data: createdAnnouncement,
         tempId,
         optimisticAnnouncement,
       };
@@ -240,12 +245,6 @@ const adminSystemSlice = createSlice({
     clearSystemSettings: (state) => {
       state.systemSettings = null;
     },
-    clearCoupons: (state) => {
-      state.coupons = [];
-    },
-    clearCouponDetails: (state) => {
-      state.couponDetails = null;
-    },
     clearAnnouncements: (state) => {
       state.announcements = [];
     },
@@ -255,17 +254,11 @@ const adminSystemSlice = createSlice({
     clearSystemHealth: (state) => {
       state.systemHealth = null;
     },
-    setCouponsFilters: (state, action) => {
-      state.couponsFilters = { ...state.couponsFilters, ...action.payload };
-    },
     setAnnouncementsFilters: (state, action) => {
       state.announcementsFilters = {
         ...state.announcementsFilters,
         ...action.payload,
       };
-    },
-    resetCouponsFilters: (state) => {
-      state.couponsFilters = initialState.couponsFilters;
     },
     resetAnnouncementsFilters: (state) => {
       state.announcementsFilters = initialState.announcementsFilters;
@@ -279,27 +272,116 @@ const adminSystemSlice = createSlice({
     clearRefreshFlag: (state) => {
       state.needsRefresh = false;
     },
-    optimisticCouponUpdate: (state, action) => {
-      const { couponId, updates } = action.payload;
-      state.coupons = state.coupons.map((coupon) =>
-        coupon.id === couponId ? { ...coupon, ...updates } : coupon
+    setSocketConnectionStatus: (state, action) => {
+      state.socketConnectionStatus = action.payload;
+    },
+    clearLastCreatedAnnouncement: (state) => {
+      state.lastCreatedAnnouncement = null;
+    },
+    onAnnouncementCreated: (state, action) => {
+      const announcement = action.payload;
+      const existingIndex = state.announcements.findIndex(
+        (a) => a.id === announcement.id
       );
 
-      if (state.couponDetails && state.couponDetails.id === couponId) {
-        state.couponDetails = { ...state.couponDetails, ...updates };
+      if (existingIndex === -1) {
+        state.announcements.unshift(announcement);
+        state.announcementsPagination = updatePaginationAfterCreate(
+          state.announcementsPagination
+        );
       }
     },
-    optimisticCouponRemove: (state, action) => {
-      const couponId = action.payload;
-      state.coupons = state.coupons.filter((coupon) => coupon.id !== couponId);
+    onAnnouncementUpdated: (state, action) => {
+      const updatedAnnouncement = action.payload;
+      const existingIndex = state.announcements.findIndex(
+        (a) => a.id === updatedAnnouncement.id
+      );
 
-      if (state.couponDetails && state.couponDetails.id === couponId) {
-        state.couponDetails = null;
+      if (existingIndex !== -1) {
+        state.announcements[existingIndex] = updatedAnnouncement;
       }
 
-      state.couponsPagination = updatePaginationAfterDelete(
-        state.couponsPagination
+      if (
+        state.announcementDetails &&
+        state.announcementDetails.id === updatedAnnouncement.id
+      ) {
+        state.announcementDetails = updatedAnnouncement;
+      }
+    },
+    onAnnouncementDeleted: (state, action) => {
+      const { announcementId, deletedAnnouncement } = action.payload;
+      const targetId = announcementId || deletedAnnouncement?.id;
+
+      if (targetId) {
+        state.announcements = state.announcements.filter(
+          (announcement) => announcement.id !== targetId
+        );
+
+        if (
+          state.announcementDetails &&
+          state.announcementDetails.id === targetId
+        ) {
+          state.announcementDetails = null;
+        }
+
+        state.announcementsPagination = updatePaginationAfterDelete(
+          state.announcementsPagination
+        );
+      }
+    },
+    onAnnouncementStatsUpdated: (state, action) => {
+      const stats = action.payload;
+      const { announcementId } = stats;
+
+      const announcementIndex = state.announcements.findIndex(
+        (a) => a.id === announcementId
       );
+
+      if (announcementIndex !== -1) {
+        state.announcements[announcementIndex] = {
+          ...state.announcements[announcementIndex],
+          readCount: stats.readCount || 0,
+          totalNotifications: stats.totalNotifications || 0,
+          readPercentage: stats.readPercentage || 0,
+        };
+      }
+
+      if (
+        state.announcementDetails &&
+        state.announcementDetails.id === announcementId
+      ) {
+        state.announcementDetails = {
+          ...state.announcementDetails,
+          readCount: stats.readCount || 0,
+          totalNotifications: stats.totalNotifications || 0,
+          readPercentage: stats.readPercentage || 0,
+        };
+      }
+    },
+    onNotificationStatusUpdate: (state, action) => {
+      const { announcementId, stats } = action.payload;
+
+      const announcementIndex = state.announcements.findIndex(
+        (a) => a.id === announcementId
+      );
+      if (announcementIndex !== -1) {
+        state.announcements[announcementIndex] = {
+          ...state.announcements[announcementIndex],
+          readCount: stats.readCount || 0,
+          dismissedCount: stats.dismissedCount || 0,
+        };
+      }
+
+      if (
+        state.announcementDetails &&
+        state.announcementDetails.id === announcementId
+      ) {
+        state.announcementDetails = {
+          ...state.announcementDetails,
+          readCount: stats.readCount || 0,
+          dismissedCount: stats.dismissedCount || 0,
+        };
+      }
     },
     optimisticAnnouncementUpdate: (state, action) => {
       const { announcementId, updates } = action.payload;
@@ -446,6 +528,7 @@ const adminSystemSlice = createSlice({
           );
         }
 
+        state.lastCreatedAnnouncement = action.payload.data;
         state.error = null;
       })
       .addCase(createAnnouncement.rejected, (state, action) => {
@@ -606,6 +689,13 @@ export const {
   resetAdminSystemState,
   markForRefresh,
   clearRefreshFlag,
+  setSocketConnectionStatus,
+  clearLastCreatedAnnouncement,
+  onAnnouncementCreated,
+  onAnnouncementUpdated,
+  onAnnouncementDeleted,
+  onAnnouncementStatsUpdated,
+  onNotificationStatusUpdate,
   optimisticAnnouncementUpdate,
   optimisticAnnouncementRemove,
 } = adminSystemSlice.actions;

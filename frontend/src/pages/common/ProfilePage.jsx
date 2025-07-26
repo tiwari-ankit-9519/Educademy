@@ -65,7 +65,7 @@ import {
   getUserSessions,
   invalidateAllSessions,
   clearError,
-} from "@/features/authSlice";
+} from "@/features/common/authSlice";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -167,7 +167,7 @@ const ProfilePage = () => {
         });
       }
     }
-  }, [user, notificationSettings]);
+  }, [user]);
 
   const validateForm = () => {
     const errors = {};

@@ -4,35 +4,49 @@ import { toast } from "sonner";
 
 const initialState = {
   notifications: [],
+  socketNotifications: [],
   unreadCount: 0,
   notificationStats: null,
   notificationSettings: null,
   notificationPreferences: null,
+  announcementStats: {},
   error: null,
   loading: false,
   notificationsLoading: false,
   unreadCountLoading: false,
-  statsLoading: false,
-  settingsLoading: false,
-  preferencesLoading: false,
+  notificationStatsLoading: false,
   markReadLoading: false,
-  deleteLoading: false,
-  deleteAllLoading: false,
+  deleteNotificationLoading: false,
+  deleteAllReadLoading: false,
+  notificationSettingsLoading: false,
   updateSettingsLoading: false,
-  testNotificationLoading: false,
-  pagination: {
-    currentPage: 1,
-    totalPages: 1,
-    totalCount: 0,
+  sendTestLoading: false,
+  notificationPreferencesLoading: false,
+  needsRefresh: false,
+  notificationsPagination: {
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
     hasNext: false,
     hasPrev: false,
   },
-  filters: {
+  notificationsFilters: {
     isRead: undefined,
-    type: undefined,
-    priority: undefined,
-    startDate: undefined,
-    endDate: undefined,
+    type: "",
+    priority: "",
+    startDate: "",
+    endDate: "",
+    search: "",
+  },
+  socketConnectionStatus: false,
+  pendingMarkAsRead: [],
+  pendingDeletes: [],
+  lastAnnouncementNotification: null,
+  realtimeUpdates: {
+    enabled: true,
+    lastUpdate: null,
+    updateCount: 0,
   },
 };
 
@@ -77,11 +91,159 @@ export const getNotificationStats = createAsyncThunk(
   }
 );
 
+export const markNotificationsAsRead = createAsyncThunk(
+  "notification/markNotificationsAsRead",
+  async (
+    { notificationIds, markAll = false },
+    { rejectWithValue, getState }
+  ) => {
+    const state = getState();
+    const affectedNotifications = markAll
+      ? state.notification.notifications.filter((n) => !n.isRead)
+      : state.notification.notifications.filter((n) =>
+          notificationIds.includes(n.id)
+        );
+
+    const optimisticUpdates = affectedNotifications.map((notification) => ({
+      ...notification,
+      isRead: true,
+      readAt: new Date().toISOString(),
+    }));
+
+    try {
+      const response = await api.put("/notifications/mark-read", {
+        notificationIds: markAll ? undefined : notificationIds,
+        markAll,
+      });
+      toast.success(response.data.message);
+      return {
+        data: response.data.data,
+        notificationIds: markAll
+          ? affectedNotifications.map((n) => n.id)
+          : notificationIds,
+        markAll,
+        optimisticUpdates,
+        affectedNotifications,
+      };
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+      return rejectWithValue({
+        error: error.response?.data || { message },
+        notificationIds: markAll
+          ? affectedNotifications.map((n) => n.id)
+          : notificationIds,
+        originalNotifications: affectedNotifications,
+      });
+    }
+  }
+);
+
+export const deleteNotification = createAsyncThunk(
+  "notification/deleteNotification",
+  async (notificationId, { rejectWithValue, getState }) => {
+    const state = getState();
+    const existingNotification = state.notification.notifications.find(
+      (n) => n.id === notificationId
+    );
+
+    try {
+      const response = await api.delete(`/notifications/${notificationId}`);
+      toast.success(response.data.message);
+      return {
+        data: response.data.data,
+        notificationId,
+        existingNotification,
+      };
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+      return rejectWithValue({
+        error: error.response?.data || { message },
+        notificationId,
+        originalNotification: existingNotification,
+      });
+    }
+  }
+);
+
+export const deleteAllReadNotifications = createAsyncThunk(
+  "notification/deleteAllReadNotifications",
+  async (_, { rejectWithValue, getState }) => {
+    const state = getState();
+    const readNotifications = state.notification.notifications.filter(
+      (n) => n.isRead
+    );
+    const readNotificationIds = readNotifications.map((n) => n.id);
+
+    try {
+      const response = await api.delete("/notifications/read/all");
+      toast.success(response.data.message);
+      return {
+        data: response.data.data,
+        deletedNotificationIds: readNotificationIds,
+        deletedNotifications: readNotifications,
+      };
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+      return rejectWithValue({
+        error: error.response?.data || { message },
+        originalNotifications: readNotifications,
+      });
+    }
+  }
+);
+
 export const getNotificationSettings = createAsyncThunk(
   "notification/getNotificationSettings",
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/notifications/settings");
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+      return rejectWithValue(error.response?.data || { message });
+    }
+  }
+);
+
+export const updateNotificationSettings = createAsyncThunk(
+  "notification/updateNotificationSettings",
+  async (settings, { rejectWithValue, getState }) => {
+    const state = getState();
+    const currentSettings = state.notification.notificationSettings;
+
+    const optimisticSettings = {
+      ...currentSettings,
+      ...settings,
+    };
+
+    try {
+      const response = await api.put("/notifications/settings", settings);
+      toast.success(response.data.message);
+      return {
+        data: response.data.data,
+        optimisticSettings,
+      };
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+      return rejectWithValue({
+        error: error.response?.data || { message },
+        originalSettings: currentSettings,
+      });
+    }
+  }
+);
+
+export const sendTestNotification = createAsyncThunk(
+  "notification/sendTestNotification",
+  async (testData, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/notifications/test", testData);
+      toast.success(response.data.message);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -105,80 +267,87 @@ export const getNotificationPreferences = createAsyncThunk(
   }
 );
 
-export const markNotificationsAsRead = createAsyncThunk(
-  "notification/markNotificationsAsRead",
-  async (data, { rejectWithValue }) => {
-    try {
-      const response = await api.put("/notifications/mark-read", data);
-      toast.success(response.data.message);
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      toast.error(message);
-      return rejectWithValue(error.response?.data || { message });
-    }
-  }
-);
+const updateStatsAfterMarkRead = (state, notificationIds) => {
+  if (!state.notificationStats) return;
 
-export const updateNotificationSettings = createAsyncThunk(
-  "notification/updateNotificationSettings",
-  async (settings, { rejectWithValue }) => {
-    try {
-      const response = await api.put("/notifications/settings", settings);
-      toast.success(response.data.message);
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      toast.error(message);
-      return rejectWithValue(error.response?.data || { message });
-    }
-  }
-);
+  const markedNotifications = state.notifications.filter(
+    (n) => notificationIds.includes(n.id) && !n.isRead
+  );
 
-export const deleteNotification = createAsyncThunk(
-  "notification/deleteNotification",
-  async (notificationId, { rejectWithValue }) => {
-    try {
-      const response = await api.delete(`/notifications/${notificationId}`);
-      toast.success(response.data.message);
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      toast.error(message);
-      return rejectWithValue(error.response?.data || { message });
-    }
-  }
-);
+  const unreadCount = markedNotifications.length;
 
-export const deleteAllReadNotifications = createAsyncThunk(
-  "notification/deleteAllReadNotifications",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.delete("/notifications/read/all");
-      toast.success(response.data.message);
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      toast.error(message);
-      return rejectWithValue(error.response?.data || { message });
+  const updatedByPriority = { ...state.notificationStats.byPriority };
+  markedNotifications.forEach((notification) => {
+    const priority = notification.priority;
+    if (priority && updatedByPriority[priority]) {
+      updatedByPriority[priority] = Math.max(
+        0,
+        updatedByPriority[priority] - 1
+      );
     }
-  }
-);
+  });
 
-export const sendTestNotification = createAsyncThunk(
-  "notification/sendTestNotification",
-  async (notificationData, { rejectWithValue }) => {
-    try {
-      const response = await api.post("/notifications/test", notificationData);
-      toast.success(response.data.message);
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.message || error.message;
-      toast.error(message);
-      return rejectWithValue(error.response?.data || { message });
+  state.notificationStats = {
+    ...state.notificationStats,
+    unread: Math.max(0, state.notificationStats.unread - unreadCount),
+    byPriority: updatedByPriority,
+  };
+
+  state.unreadCount = Math.max(0, state.unreadCount - unreadCount);
+};
+
+const updateStatsAfterDelete = (state, deletedNotifications) => {
+  if (!state.notificationStats) return;
+
+  const unreadDeleted = deletedNotifications.filter((n) => !n.isRead).length;
+  const totalDeleted = deletedNotifications.length;
+
+  const updatedByPriority = { ...state.notificationStats.byPriority };
+  deletedNotifications.forEach((notification) => {
+    const priority = notification.priority;
+    if (priority && updatedByPriority[priority]) {
+      if (!notification.isRead) {
+        updatedByPriority[priority] = Math.max(
+          0,
+          updatedByPriority[priority] - 1
+        );
+      }
     }
-  }
-);
+  });
+
+  state.notificationStats = {
+    ...state.notificationStats,
+    total: Math.max(0, state.notificationStats.total - totalDeleted),
+    unread: Math.max(0, state.notificationStats.unread - unreadDeleted),
+    byPriority: updatedByPriority,
+  };
+
+  state.unreadCount = Math.max(0, state.unreadCount - unreadDeleted);
+};
+
+const updatePaginationAfterRemoval = (pagination, removedCount) => {
+  const newTotal = Math.max(0, pagination.total - removedCount);
+  const newTotalPages = Math.max(1, Math.ceil(newTotal / pagination.limit));
+
+  return {
+    ...pagination,
+    total: newTotal,
+    totalPages: newTotalPages,
+    hasNext: pagination.page < newTotalPages,
+    hasPrev: pagination.page > 1,
+  };
+};
+
+const addToArray = (array, items) => {
+  const itemsArray = Array.isArray(items) ? items : [items];
+  const newItems = itemsArray.filter((item) => !array.includes(item));
+  return [...array, ...newItems];
+};
+
+const removeFromArray = (array, items) => {
+  const itemsArray = Array.isArray(items) ? items : [items];
+  return array.filter((item) => !itemsArray.includes(item));
+};
 
 const notificationSlice = createSlice({
   name: "notification",
@@ -189,38 +358,348 @@ const notificationSlice = createSlice({
     },
     clearNotifications: (state) => {
       state.notifications = [];
-      state.pagination = initialState.pagination;
     },
-    setFilters: (state, action) => {
-      state.filters = { ...state.filters, ...action.payload };
+    clearSocketNotifications: (state) => {
+      state.socketNotifications = [];
     },
-    clearFilters: (state) => {
-      state.filters = initialState.filters;
+    clearNotificationStats: (state) => {
+      state.notificationStats = null;
+    },
+    clearNotificationSettings: (state) => {
+      state.notificationSettings = null;
+    },
+    clearNotificationPreferences: (state) => {
+      state.notificationPreferences = null;
+    },
+    setNotificationsFilters: (state, action) => {
+      state.notificationsFilters = {
+        ...state.notificationsFilters,
+        ...action.payload,
+      };
+    },
+    resetNotificationsFilters: (state) => {
+      state.notificationsFilters = initialState.notificationsFilters;
+    },
+    resetNotificationState: () => {
+      return { ...initialState };
+    },
+    markForRefresh: (state) => {
+      state.needsRefresh = true;
+    },
+    clearRefreshFlag: (state) => {
+      state.needsRefresh = false;
+    },
+    setSocketConnectionStatus: (state, action) => {
+      state.socketConnectionStatus = action.payload;
     },
     addSocketNotification: (state, action) => {
-      const newNotification = action.payload;
-      state.notifications = [newNotification, ...state.notifications];
-      if (!newNotification.isRead) {
-        state.unreadCount += 1;
+      const notification = action.payload;
+      const existingIndex = state.socketNotifications.findIndex(
+        (n) => n.id === notification.id
+      );
+
+      if (existingIndex === -1) {
+        state.socketNotifications.unshift(notification);
+        if (!notification.isRead) {
+          state.unreadCount += 1;
+        }
       }
+
+      const mainNotificationIndex = state.notifications.findIndex(
+        (n) => n.id === notification.id
+      );
+      if (mainNotificationIndex === -1) {
+        state.notifications.unshift(notification);
+        state.notificationsPagination = {
+          ...state.notificationsPagination,
+          total: state.notificationsPagination.total + 1,
+        };
+      }
+
+      if (state.notificationStats) {
+        state.notificationStats = {
+          ...state.notificationStats,
+          total: state.notificationStats.total + 1,
+          unread:
+            state.notificationStats.unread + (!notification.isRead ? 1 : 0),
+          byPriority: {
+            ...state.notificationStats.byPriority,
+            [notification.priority]:
+              (state.notificationStats.byPriority[notification.priority] || 0) +
+              (!notification.isRead ? 1 : 0),
+          },
+        };
+      }
+
+      if (notification.type === "SYSTEM_ANNOUNCEMENT") {
+        state.lastAnnouncementNotification = notification;
+
+        if (notification.data?.announcementId) {
+          state.announcementStats[notification.data.announcementId] = {
+            ...state.announcementStats[notification.data.announcementId],
+            totalNotifications:
+              (state.announcementStats[notification.data.announcementId]
+                ?.totalNotifications || 0) + 1,
+            unreadCount:
+              (state.announcementStats[notification.data.announcementId]
+                ?.unreadCount || 0) + (!notification.isRead ? 1 : 0),
+          };
+        }
+      }
+
+      state.realtimeUpdates.lastUpdate = new Date().toISOString();
+      state.realtimeUpdates.updateCount += 1;
     },
     updateSocketNotificationRead: (state, action) => {
       const { notificationIds } = action.payload;
+
+      state.socketNotifications = state.socketNotifications.map(
+        (notification) =>
+          notificationIds.includes(notification.id)
+            ? {
+                ...notification,
+                isRead: true,
+                readAt: new Date().toISOString(),
+              }
+            : notification
+      );
+
       state.notifications = state.notifications.map((notification) =>
         notificationIds.includes(notification.id)
-          ? { ...notification, isRead: true }
+          ? { ...notification, isRead: true, readAt: new Date().toISOString() }
           : notification
       );
-      state.unreadCount = Math.max(
+
+      const unreadCount = Math.max(
         0,
         state.unreadCount - notificationIds.length
       );
+      state.unreadCount = unreadCount;
+
+      notificationIds.forEach((notificationId) => {
+        const notification = state.notifications.find(
+          (n) => n.id === notificationId
+        );
+        if (
+          notification?.type === "SYSTEM_ANNOUNCEMENT" &&
+          notification.data?.announcementId
+        ) {
+          const announcementId = notification.data.announcementId;
+          if (state.announcementStats[announcementId]) {
+            state.announcementStats[announcementId] = {
+              ...state.announcementStats[announcementId],
+              readCount:
+                (state.announcementStats[announcementId].readCount || 0) + 1,
+              unreadCount: Math.max(
+                0,
+                (state.announcementStats[announcementId].unreadCount || 0) - 1
+              ),
+            };
+          }
+        }
+      });
+
+      state.realtimeUpdates.lastUpdate = new Date().toISOString();
+      state.realtimeUpdates.updateCount += 1;
+    },
+    addBulkSocketNotifications: (state, action) => {
+      const notifications = action.payload;
+      notifications.forEach((notification) => {
+        const existingIndex = state.socketNotifications.findIndex(
+          (n) => n.id === notification.id
+        );
+
+        if (existingIndex === -1) {
+          state.socketNotifications.unshift(notification);
+        }
+
+        const mainNotificationIndex = state.notifications.findIndex(
+          (n) => n.id === notification.id
+        );
+        if (mainNotificationIndex === -1) {
+          state.notifications.unshift(notification);
+        }
+
+        if (
+          notification.type === "SYSTEM_ANNOUNCEMENT" &&
+          notification.data?.announcementId
+        ) {
+          const announcementId = notification.data.announcementId;
+          if (!state.announcementStats[announcementId]) {
+            state.announcementStats[announcementId] = {
+              totalNotifications: 0,
+              readCount: 0,
+              unreadCount: 0,
+            };
+          }
+          state.announcementStats[announcementId] = {
+            ...state.announcementStats[announcementId],
+            totalNotifications:
+              state.announcementStats[announcementId].totalNotifications + 1,
+            unreadCount:
+              state.announcementStats[announcementId].unreadCount +
+              (!notification.isRead ? 1 : 0),
+          };
+        }
+      });
+
+      const newUnreadCount = notifications.filter((n) => !n.isRead).length;
+      state.unreadCount += newUnreadCount;
+
+      if (state.notificationStats) {
+        const priorityCounts = {};
+        notifications.forEach((notification) => {
+          if (!notification.isRead && notification.priority) {
+            priorityCounts[notification.priority] =
+              (priorityCounts[notification.priority] || 0) + 1;
+          }
+        });
+
+        const updatedByPriority = { ...state.notificationStats.byPriority };
+        Object.keys(priorityCounts).forEach((priority) => {
+          updatedByPriority[priority] =
+            (updatedByPriority[priority] || 0) + priorityCounts[priority];
+        });
+
+        state.notificationStats = {
+          ...state.notificationStats,
+          total: state.notificationStats.total + notifications.length,
+          unread: state.notificationStats.unread + newUnreadCount,
+          byPriority: updatedByPriority,
+        };
+      }
+
+      state.notificationsPagination = {
+        ...state.notificationsPagination,
+        total: state.notificationsPagination.total + notifications.length,
+      };
+
+      state.realtimeUpdates.lastUpdate = new Date().toISOString();
+      state.realtimeUpdates.updateCount += 1;
+    },
+    onAnnouncementStatsUpdated: (state, action) => {
+      const stats = action.payload;
+      const { announcementId } = stats;
+
+      if (announcementId) {
+        state.announcementStats[announcementId] = {
+          ...state.announcementStats[announcementId],
+          ...stats,
+        };
+
+        state.realtimeUpdates.lastUpdate = new Date().toISOString();
+        state.realtimeUpdates.updateCount += 1;
+      }
+    },
+    clearLastAnnouncementNotification: (state) => {
+      state.lastAnnouncementNotification = null;
     },
     setSocketUnreadCount: (state, action) => {
       state.unreadCount = action.payload;
     },
-    resetNotificationState: () => {
-      return { ...initialState };
+    optimisticNotificationUpdate: (state, action) => {
+      const { notificationId, updates } = action.payload;
+
+      state.notifications = state.notifications.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, ...updates }
+          : notification
+      );
+
+      state.socketNotifications = state.socketNotifications.map(
+        (notification) =>
+          notification.id === notificationId
+            ? { ...notification, ...updates }
+            : notification
+      );
+    },
+    optimisticNotificationRemove: (state, action) => {
+      const notificationIds = Array.isArray(action.payload)
+        ? action.payload
+        : [action.payload];
+
+      const removedNotifications = state.notifications.filter((notification) =>
+        notificationIds.includes(notification.id)
+      );
+
+      removedNotifications.forEach((notification) => {
+        if (
+          notification.type === "SYSTEM_ANNOUNCEMENT" &&
+          notification.data?.announcementId
+        ) {
+          const announcementId = notification.data.announcementId;
+          if (state.announcementStats[announcementId]) {
+            state.announcementStats[announcementId] = {
+              ...state.announcementStats[announcementId],
+              totalNotifications: Math.max(
+                0,
+                state.announcementStats[announcementId].totalNotifications - 1
+              ),
+              unreadCount: Math.max(
+                0,
+                state.announcementStats[announcementId].unreadCount -
+                  (!notification.isRead ? 1 : 0)
+              ),
+            };
+          }
+        }
+      });
+
+      state.notifications = state.notifications.filter(
+        (notification) => !notificationIds.includes(notification.id)
+      );
+
+      state.socketNotifications = state.socketNotifications.filter(
+        (notification) => !notificationIds.includes(notification.id)
+      );
+
+      state.notificationsPagination = updatePaginationAfterRemoval(
+        state.notificationsPagination,
+        notificationIds.length
+      );
+    },
+    addToPendingMarkAsRead: (state, action) => {
+      state.pendingMarkAsRead = addToArray(
+        state.pendingMarkAsRead,
+        action.payload
+      );
+    },
+    removeFromPendingMarkAsRead: (state, action) => {
+      state.pendingMarkAsRead = removeFromArray(
+        state.pendingMarkAsRead,
+        action.payload
+      );
+    },
+    addToPendingDeletes: (state, action) => {
+      state.pendingDeletes = addToArray(state.pendingDeletes, action.payload);
+    },
+    removeFromPendingDeletes: (state, action) => {
+      state.pendingDeletes = removeFromArray(
+        state.pendingDeletes,
+        action.payload
+      );
+    },
+    toggleRealtimeUpdates: (state) => {
+      state.realtimeUpdates.enabled = !state.realtimeUpdates.enabled;
+    },
+    updateAnnouncementNotificationStats: (state, action) => {
+      const { announcementId, readCount, totalNotifications } = action.payload;
+
+      if (state.announcementStats[announcementId]) {
+        state.announcementStats[announcementId] = {
+          ...state.announcementStats[announcementId],
+          readCount: readCount || 0,
+          totalNotifications: totalNotifications || 0,
+          unreadCount: Math.max(
+            0,
+            (totalNotifications || 0) - (readCount || 0)
+          ),
+          readPercentage:
+            totalNotifications > 0
+              ? Math.round((readCount / totalNotifications) * 100)
+              : 0,
+        };
+      }
     },
   },
   extraReducers: (builder) => {
@@ -233,14 +712,14 @@ const notificationSlice = createSlice({
       .addCase(getNotifications.fulfilled, (state, action) => {
         state.notificationsLoading = false;
         state.loading = false;
-        state.notifications = action.payload.data.notifications;
-        state.pagination = {
-          currentPage: action.payload.data.currentPage,
-          totalPages: action.payload.data.totalPages,
-          totalCount: action.payload.data.totalCount,
-          hasNext: action.payload.data.hasNext,
-          hasPrev: action.payload.data.hasPrev,
+        state.notifications = action.payload.data.notifications || [];
+        state.notificationsPagination =
+          action.payload.data.pagination || state.notificationsPagination;
+        state.notificationsFilters = {
+          ...state.notificationsFilters,
+          ...action.payload.data.filters,
         };
+        state.needsRefresh = false;
         state.error = null;
       })
       .addCase(getNotifications.rejected, (state, action) => {
@@ -249,6 +728,7 @@ const notificationSlice = createSlice({
         state.error =
           action.payload?.message || "Failed to fetch notifications";
       })
+
       .addCase(getUnreadCount.pending, (state) => {
         state.unreadCountLoading = true;
         state.error = null;
@@ -262,93 +742,329 @@ const notificationSlice = createSlice({
         state.unreadCountLoading = false;
         state.error = action.payload?.message || "Failed to fetch unread count";
       })
+
       .addCase(getNotificationStats.pending, (state) => {
-        state.statsLoading = true;
+        state.notificationStatsLoading = true;
         state.loading = true;
         state.error = null;
       })
       .addCase(getNotificationStats.fulfilled, (state, action) => {
-        state.statsLoading = false;
+        state.notificationStatsLoading = false;
         state.loading = false;
         state.notificationStats = action.payload.data;
         state.error = null;
       })
       .addCase(getNotificationStats.rejected, (state, action) => {
-        state.statsLoading = false;
+        state.notificationStatsLoading = false;
         state.loading = false;
         state.error =
           action.payload?.message || "Failed to fetch notification stats";
       })
-      .addCase(getNotificationSettings.pending, (state) => {
-        state.settingsLoading = true;
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getNotificationSettings.fulfilled, (state, action) => {
-        state.settingsLoading = false;
-        state.loading = false;
-        state.notificationSettings = action.payload.data.settings;
-        state.error = null;
-      })
-      .addCase(getNotificationSettings.rejected, (state, action) => {
-        state.settingsLoading = false;
-        state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to fetch notification settings";
-      })
-      .addCase(getNotificationPreferences.pending, (state) => {
-        state.preferencesLoading = true;
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(getNotificationPreferences.fulfilled, (state, action) => {
-        state.preferencesLoading = false;
-        state.loading = false;
-        state.notificationPreferences = action.payload.data;
-        state.error = null;
-      })
-      .addCase(getNotificationPreferences.rejected, (state, action) => {
-        state.preferencesLoading = false;
-        state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to fetch notification preferences";
-      })
-      .addCase(markNotificationsAsRead.pending, (state) => {
+
+      .addCase(markNotificationsAsRead.pending, (state, action) => {
         state.markReadLoading = true;
         state.loading = true;
         state.error = null;
+
+        const { notificationIds, markAll } = action.meta.arg;
+        const idsToMark = markAll
+          ? state.notifications.filter((n) => !n.isRead).map((n) => n.id)
+          : notificationIds;
+
+        state.pendingMarkAsRead = addToArray(
+          state.pendingMarkAsRead,
+          idsToMark
+        );
+
+        updateStatsAfterMarkRead(state, idsToMark);
+
+        state.notifications = state.notifications.map((notification) =>
+          idsToMark.includes(notification.id)
+            ? {
+                ...notification,
+                isRead: true,
+                readAt: new Date().toISOString(),
+              }
+            : notification
+        );
+
+        state.socketNotifications = state.socketNotifications.map(
+          (notification) =>
+            idsToMark.includes(notification.id)
+              ? {
+                  ...notification,
+                  isRead: true,
+                  readAt: new Date().toISOString(),
+                }
+              : notification
+        );
       })
       .addCase(markNotificationsAsRead.fulfilled, (state, action) => {
         state.markReadLoading = false;
         state.loading = false;
-        const { notificationIds, markAll, markedCount } = action.payload.data;
 
-        if (markAll) {
-          state.notifications = state.notifications.map((notification) => ({
-            ...notification,
-            isRead: true,
-          }));
-          state.unreadCount = 0;
-        } else {
-          state.notifications = state.notifications.map((notification) =>
-            notificationIds.includes(notification.id)
-              ? { ...notification, isRead: true }
-              : notification
-          );
-          state.unreadCount = Math.max(0, state.unreadCount - markedCount);
-        }
+        const { notificationIds } = action.payload;
+        state.pendingMarkAsRead = removeFromArray(
+          state.pendingMarkAsRead,
+          notificationIds
+        );
         state.error = null;
       })
       .addCase(markNotificationsAsRead.rejected, (state, action) => {
         state.markReadLoading = false;
         state.loading = false;
+
+        if (action.payload?.originalNotifications) {
+          const originalNotificationsMap = new Map(
+            action.payload.originalNotifications.map((notification) => [
+              notification.id,
+              notification,
+            ])
+          );
+
+          state.notifications = state.notifications.map((notification) =>
+            originalNotificationsMap.has(notification.id)
+              ? originalNotificationsMap.get(notification.id)
+              : notification
+          );
+
+          state.socketNotifications = state.socketNotifications.map(
+            (notification) =>
+              originalNotificationsMap.has(notification.id)
+                ? originalNotificationsMap.get(notification.id)
+                : notification
+          );
+
+          const unreadReverted = action.payload.originalNotifications.filter(
+            (n) => !n.isRead
+          ).length;
+
+          if (state.notificationStats) {
+            const updatedByPriority = { ...state.notificationStats.byPriority };
+            action.payload.originalNotifications.forEach((notification) => {
+              if (
+                !notification.isRead &&
+                notification.priority &&
+                updatedByPriority[notification.priority] !== undefined
+              ) {
+                updatedByPriority[notification.priority] =
+                  updatedByPriority[notification.priority] + 1;
+              }
+            });
+
+            state.notificationStats = {
+              ...state.notificationStats,
+              unread: state.notificationStats.unread + unreadReverted,
+              byPriority: updatedByPriority,
+            };
+          }
+          state.unreadCount = state.unreadCount + unreadReverted;
+        }
+
+        const notificationIds = action.payload?.notificationIds || [];
+        state.pendingMarkAsRead = removeFromArray(
+          state.pendingMarkAsRead,
+          notificationIds
+        );
         state.error =
-          action.payload?.message || "Failed to mark notifications as read";
+          action.payload?.error?.message ||
+          "Failed to mark notifications as read";
       })
-      .addCase(updateNotificationSettings.pending, (state) => {
+
+      .addCase(deleteNotification.pending, (state, action) => {
+        state.deleteNotificationLoading = true;
+        state.loading = true;
+        state.error = null;
+
+        const notificationId = action.meta.arg;
+        const notificationToDelete = state.notifications.find(
+          (n) => n.id === notificationId
+        );
+
+        state.pendingDeletes = addToArray(state.pendingDeletes, notificationId);
+
+        if (notificationToDelete) {
+          updateStatsAfterDelete(state, [notificationToDelete]);
+        }
+
+        state.notifications = state.notifications.filter(
+          (n) => n.id !== notificationId
+        );
+        state.socketNotifications = state.socketNotifications.filter(
+          (n) => n.id !== notificationId
+        );
+        state.notificationsPagination = updatePaginationAfterRemoval(
+          state.notificationsPagination,
+          1
+        );
+      })
+      .addCase(deleteNotification.fulfilled, (state, action) => {
+        state.deleteNotificationLoading = false;
+        state.loading = false;
+
+        const { notificationId } = action.payload;
+        state.pendingDeletes = removeFromArray(
+          state.pendingDeletes,
+          notificationId
+        );
+        state.error = null;
+      })
+      .addCase(deleteNotification.rejected, (state, action) => {
+        state.deleteNotificationLoading = false;
+        state.loading = false;
+
+        if (action.payload?.originalNotification) {
+          state.notifications.push(action.payload.originalNotification);
+          state.socketNotifications.push(action.payload.originalNotification);
+
+          if (state.notificationStats) {
+            const updatedByPriority = { ...state.notificationStats.byPriority };
+            const notification = action.payload.originalNotification;
+
+            if (
+              !notification.isRead &&
+              notification.priority &&
+              updatedByPriority[notification.priority] !== undefined
+            ) {
+              updatedByPriority[notification.priority] =
+                updatedByPriority[notification.priority] + 1;
+            }
+
+            state.notificationStats = {
+              ...state.notificationStats,
+              total: state.notificationStats.total + 1,
+              unread: !notification.isRead
+                ? state.notificationStats.unread + 1
+                : state.notificationStats.unread,
+              byPriority: updatedByPriority,
+            };
+          }
+
+          if (!action.payload.originalNotification.isRead) {
+            state.unreadCount = state.unreadCount + 1;
+          }
+        }
+
+        const notificationId = action.payload?.notificationId;
+        if (notificationId) {
+          state.pendingDeletes = removeFromArray(
+            state.pendingDeletes,
+            notificationId
+          );
+        }
+        state.error =
+          action.payload?.error?.message || "Failed to delete notification";
+      })
+
+      .addCase(deleteAllReadNotifications.pending, (state) => {
+        state.deleteAllReadLoading = true;
+        state.loading = true;
+        state.error = null;
+
+        const readNotifications = state.notifications.filter((n) => n.isRead);
+        const readNotificationIds = readNotifications.map((n) => n.id);
+
+        state.pendingDeletes = addToArray(
+          state.pendingDeletes,
+          readNotificationIds
+        );
+
+        updateStatsAfterDelete(state, readNotifications);
+
+        state.notifications = state.notifications.filter((n) => !n.isRead);
+        state.socketNotifications = state.socketNotifications.filter(
+          (n) => !n.isRead
+        );
+        state.notificationsPagination = updatePaginationAfterRemoval(
+          state.notificationsPagination,
+          readNotificationIds.length
+        );
+      })
+      .addCase(deleteAllReadNotifications.fulfilled, (state, action) => {
+        state.deleteAllReadLoading = false;
+        state.loading = false;
+
+        const { deletedNotificationIds } = action.payload;
+        state.pendingDeletes = removeFromArray(
+          state.pendingDeletes,
+          deletedNotificationIds
+        );
+        state.error = null;
+      })
+      .addCase(deleteAllReadNotifications.rejected, (state, action) => {
+        state.deleteAllReadLoading = false;
+        state.loading = false;
+
+        if (action.payload?.originalNotifications) {
+          action.payload.originalNotifications.forEach((notification) => {
+            state.notifications.push(notification);
+            state.socketNotifications.push(notification);
+          });
+
+          const restoredCount = action.payload.originalNotifications.length;
+          if (state.notificationStats) {
+            const updatedByPriority = { ...state.notificationStats.byPriority };
+
+            action.payload.originalNotifications.forEach((notification) => {
+              if (
+                !notification.isRead &&
+                notification.priority &&
+                updatedByPriority[notification.priority] !== undefined
+              ) {
+                updatedByPriority[notification.priority] =
+                  updatedByPriority[notification.priority] + 1;
+              }
+            });
+
+            state.notificationStats = {
+              ...state.notificationStats,
+              total: state.notificationStats.total + restoredCount,
+              byPriority: updatedByPriority,
+            };
+          }
+
+          const deletedIds = action.payload.originalNotifications.map(
+            (n) => n.id
+          );
+          state.pendingDeletes = removeFromArray(
+            state.pendingDeletes,
+            deletedIds
+          );
+        }
+
+        state.error =
+          action.payload?.error?.message ||
+          "Failed to delete read notifications";
+      })
+
+      .addCase(getNotificationSettings.pending, (state) => {
+        state.notificationSettingsLoading = true;
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getNotificationSettings.fulfilled, (state, action) => {
+        state.notificationSettingsLoading = false;
+        state.loading = false;
+        state.notificationSettings = action.payload.data.settings;
+        state.error = null;
+      })
+      .addCase(getNotificationSettings.rejected, (state, action) => {
+        state.notificationSettingsLoading = false;
+        state.loading = false;
+        state.error =
+          action.payload?.message || "Failed to fetch notification settings";
+      })
+
+      .addCase(updateNotificationSettings.pending, (state, action) => {
         state.updateSettingsLoading = true;
         state.loading = true;
         state.error = null;
+
+        const settings = action.meta.arg;
+        state.notificationSettings = {
+          ...state.notificationSettings,
+          ...settings,
+        };
       })
       .addCase(updateNotificationSettings.fulfilled, (state, action) => {
         state.updateSettingsLoading = false;
@@ -359,72 +1075,49 @@ const notificationSlice = createSlice({
       .addCase(updateNotificationSettings.rejected, (state, action) => {
         state.updateSettingsLoading = false;
         state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to update notification settings";
-      })
-      .addCase(deleteNotification.pending, (state) => {
-        state.deleteLoading = true;
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteNotification.fulfilled, (state, action) => {
-        state.deleteLoading = false;
-        state.loading = false;
-        const { deletedNotificationId } = action.payload.data;
-        const deletedNotification = state.notifications.find(
-          (n) => n.id === deletedNotificationId
-        );
 
-        state.notifications = state.notifications.filter(
-          (notification) => notification.id !== deletedNotificationId
-        );
-
-        if (deletedNotification && !deletedNotification.isRead) {
-          state.unreadCount = Math.max(0, state.unreadCount - 1);
+        if (action.payload?.originalSettings) {
+          state.notificationSettings = action.payload.originalSettings;
         }
-        state.error = null;
-      })
-      .addCase(deleteNotification.rejected, (state, action) => {
-        state.deleteLoading = false;
-        state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to delete notification";
-      })
-      .addCase(deleteAllReadNotifications.pending, (state) => {
-        state.deleteAllLoading = true;
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteAllReadNotifications.fulfilled, (state) => {
-        state.deleteAllLoading = false;
-        state.loading = false;
 
-        state.notifications = state.notifications.filter(
-          (notification) => !notification.isRead
-        );
-        state.error = null;
-      })
-      .addCase(deleteAllReadNotifications.rejected, (state, action) => {
-        state.deleteAllLoading = false;
-        state.loading = false;
         state.error =
-          action.payload?.message || "Failed to delete read notifications";
+          action.payload?.error?.message ||
+          "Failed to update notification settings";
       })
+
       .addCase(sendTestNotification.pending, (state) => {
-        state.testNotificationLoading = true;
+        state.sendTestLoading = true;
         state.loading = true;
         state.error = null;
       })
       .addCase(sendTestNotification.fulfilled, (state) => {
-        state.testNotificationLoading = false;
+        state.sendTestLoading = false;
         state.loading = false;
         state.error = null;
       })
       .addCase(sendTestNotification.rejected, (state, action) => {
-        state.testNotificationLoading = false;
+        state.sendTestLoading = false;
         state.loading = false;
         state.error =
           action.payload?.message || "Failed to send test notification";
+      })
+
+      .addCase(getNotificationPreferences.pending, (state) => {
+        state.notificationPreferencesLoading = true;
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getNotificationPreferences.fulfilled, (state, action) => {
+        state.notificationPreferencesLoading = false;
+        state.loading = false;
+        state.notificationPreferences = action.payload.data;
+        state.error = null;
+      })
+      .addCase(getNotificationPreferences.rejected, (state, action) => {
+        state.notificationPreferencesLoading = false;
+        state.loading = false;
+        state.error =
+          action.payload?.message || "Failed to fetch notification preferences";
       });
   },
 });
@@ -432,12 +1125,30 @@ const notificationSlice = createSlice({
 export const {
   clearError,
   clearNotifications,
-  setFilters,
-  clearFilters,
+  clearSocketNotifications,
+  clearNotificationStats,
+  clearNotificationSettings,
+  clearNotificationPreferences,
+  setNotificationsFilters,
+  resetNotificationsFilters,
+  resetNotificationState,
+  markForRefresh,
+  clearRefreshFlag,
+  setSocketConnectionStatus,
   addSocketNotification,
+  addBulkSocketNotifications,
   updateSocketNotificationRead,
   setSocketUnreadCount,
-  resetNotificationState,
+  optimisticNotificationUpdate,
+  optimisticNotificationRemove,
+  addToPendingMarkAsRead,
+  removeFromPendingMarkAsRead,
+  addToPendingDeletes,
+  removeFromPendingDeletes,
+  clearLastAnnouncementNotification,
+  onAnnouncementStatsUpdated,
+  toggleRealtimeUpdates,
+  updateAnnouncementNotificationStats,
 } = notificationSlice.actions;
 
 const notificationReducer = notificationSlice.reducer;

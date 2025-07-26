@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "@/features/authSlice";
+import { logoutUser } from "@/features/common/authSlice";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,8 +11,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,13 +68,17 @@ import {
 } from "lucide-react";
 
 const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
-  // const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState(new Set());
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { notificationStats } = useSelector(
+    (state) => state.notification || {}
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const unreadCount = notificationStats?.unread || 0;
 
   const toggleExpanded = (menuId) => {
     const newExpanded = new Set(expandedMenus);
@@ -121,7 +131,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "admin-analytics",
       title: "Analytics",
       icon: BarChart3,
-      path: "/admin/analytics",
       children: [
         { title: "Users", path: "/admin/analytics/users" },
         { title: "Courses", path: "/admin/analytics/courses" },
@@ -133,7 +142,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "admin-users",
       title: "User Management",
       icon: Users,
-      path: "/admin/users/overview",
       children: [
         { title: "All Users", path: "/admin/users" },
         {
@@ -146,7 +154,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "admin-courses",
       title: "Course Management",
       icon: BookOpen,
-      path: "/admin/courses",
       children: [
         { title: "Pending Reviews", path: "/admin/courses/pending" },
         { title: "Course Stats", path: "/admin/courses/stats" },
@@ -157,19 +164,15 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "admin-payments",
       title: "Payment Management",
       icon: CreditCard,
-      path: "/admin/payments",
       children: [
         { title: "Transactions", path: "/admin/payments/transactions" },
         { title: "Payouts", path: "/admin/payments/payouts" },
-        { title: "Revenue Overview", path: "/admin/payments/revenue" },
-        { title: "Financial Analytics", path: "/admin/payments/analytics" },
       ],
     },
     {
       id: "admin-moderation",
       title: "Moderation",
       icon: Shield,
-      path: "/admin/moderation",
       children: [
         { title: "Content Reports", path: "/admin/moderation/reports" },
         { title: "User Violations", path: "/admin/moderation/violations" },
@@ -181,7 +184,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "admin-system",
       title: "System Settings",
       icon: Settings,
-      path: "/admin/system",
       children: [
         { title: "General Settings", path: "/admin/system/settings" },
         { title: "Categories", path: "/admin/users/categories" },
@@ -202,7 +204,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-courses",
       title: "My Courses",
       icon: BookOpen,
-      path: "/instructor/courses",
       children: [
         { title: "All Courses", path: "/instructor/courses" },
         { title: "Create Course", path: "/instructor/courses/create" },
@@ -213,7 +214,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-content",
       title: "Course Content",
       icon: Edit3,
-      path: "/instructor/content",
       children: [
         { title: "Sections & Lessons", path: "/instructor/content/sections" },
         { title: "Quizzes", path: "/instructor/content/quizzes" },
@@ -225,7 +225,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-students",
       title: "Students",
       icon: GraduationCap,
-      path: "/instructor/students",
       children: [
         { title: "Enrolled Students", path: "/instructor/students" },
         { title: "Student Analytics", path: "/instructor/students/analytics" },
@@ -237,7 +236,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-community",
       title: "Community",
       icon: MessageSquare,
-      path: "/instructor/community",
       children: [
         { title: "Q&A", path: "/instructor/community/qna" },
         { title: "Reviews", path: "/instructor/community/reviews" },
@@ -248,7 +246,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-earnings",
       title: "Earnings",
       icon: DollarSign,
-      path: "/instructor/earnings",
       children: [
         { title: "Overview", path: "/instructor/earnings/overview" },
         { title: "Detailed Report", path: "/instructor/earnings/detailed" },
@@ -260,7 +257,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-coupons",
       title: "Coupons",
       icon: Package,
-      path: "/instructor/coupons",
       children: [
         { title: "All Coupons", path: "/instructor/coupons" },
         { title: "Create Coupon", path: "/instructor/coupons/create" },
@@ -271,7 +267,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-verification",
       title: "Verification",
       icon: CheckCircle,
-      path: "/instructor/verification",
       children: [
         {
           title: "Request Verification",
@@ -287,7 +282,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "student-learning",
       title: "My Learning",
       icon: PlayCircle,
-      path: "/student/learning",
       children: [
         { title: "Enrolled Courses", path: "/student/learning/courses" },
         { title: "Learning Analytics", path: "/student/learning/analytics" },
@@ -298,7 +292,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "student-catalog",
       title: "Browse Courses",
       icon: Globe,
-      path: "/catalog",
       children: [
         { title: "All Courses", path: "/catalog/courses" },
         { title: "Categories", path: "/catalog/categories" },
@@ -335,7 +328,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "student-community",
       title: "Community",
       icon: MessageSquare,
-      path: "/student/community",
       children: [
         { title: "Course Reviews", path: "/student/community/reviews" },
         { title: "Q&A", path: "/student/community/qna" },
@@ -355,6 +347,7 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       title: "Notifications",
       icon: Bell,
       path: "/notifications",
+      badge: unreadCount > 0 ? unreadCount : null,
     },
     {
       id: "support",
@@ -381,46 +374,66 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
     return [...menuItems, ...commonMenuItems];
   };
 
+  const renderCollapsedMenuWithChildren = (item) => {
+    const Icon = item.icon;
+
+    return (
+      <Popover key={item.id}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full h-11 px-3 font-medium transition-all duration-200 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:text-indigo-600 dark:hover:text-indigo-400"
+          >
+            <div className="p-1.5 rounded-lg transition-colors bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 relative">
+              <Icon className="w-4 h-4" />
+              {item.badge && (
+                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                  {item.badge > 99 ? "99+" : item.badge}
+                </Badge>
+              )}
+            </div>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          side="right"
+          className="w-56 p-2 ml-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 rounded-xl shadow-lg"
+          sideOffset={8}
+        >
+          <div className="space-y-1">
+            <div className="px-2 py-1 text-sm font-medium text-slate-700 dark:text-slate-300 border-b border-slate-200/50 dark:border-slate-600/50 pb-2 mb-2">
+              {item.title}
+            </div>
+            {item.children.map((child) => (
+              <Button
+                key={child.path}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start h-8 px-2 text-xs font-normal rounded-lg transition-all duration-200",
+                  isActive(child.path)
+                    ? "bg-gradient-to-r from-indigo-500/15 to-blue-500/15 text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-slate-700/30"
+                )}
+                onClick={() => handleNavigate(child.path)}
+              >
+                {child.title}
+              </Button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   const renderMenuItem = (item, isMobile = false) => {
     const Icon = item.icon;
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedMenus.has(item.id);
-    const isItemActive = isActive(item.path);
+    const isItemActive =
+      !hasChildren && item.path ? isActive(item.path) : false;
 
     if (hasChildren) {
       if (isCollapsed && !isMobile) {
-        return (
-          <TooltipProvider key={item.id}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full h-11 px-3 font-medium transition-all duration-200 rounded-xl flex items-center justify-center",
-                    isItemActive
-                      ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/30 shadow-sm"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:text-indigo-600 dark:hover:text-indigo-400"
-                  )}
-                  onClick={() => handleNavigate(item.path)}
-                >
-                  <div
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors",
-                      isItemActive
-                        ? "bg-gradient-to-br from-indigo-500 to-blue-500 text-white shadow-sm"
-                        : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="ml-2">
-                <p>{item.title}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        );
+        return renderCollapsedMenuWithChildren(item);
       }
 
       return (
@@ -433,7 +446,7 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-between h-11 px-3 text-left font-medium transition-all duration-200 rounded-xl",
+                "w-full h-11 px-3 text-left font-medium transition-all duration-200 rounded-xl flex items-center justify-between",
                 isItemActive
                   ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/30 shadow-sm"
                   : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:text-indigo-600 dark:hover:text-indigo-400"
@@ -442,23 +455,30 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
               <div className="flex items-center space-x-3">
                 <div
                   className={cn(
-                    "p-1.5 rounded-lg transition-colors",
+                    "p-1.5 rounded-lg transition-colors relative flex-shrink-0",
                     isItemActive
                       ? "bg-gradient-to-br from-indigo-500 to-blue-500 text-white shadow-sm"
                       : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                   )}
                 >
                   <Icon className="w-4 h-4" />
+                  {item.badge && (
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </Badge>
+                  )}
                 </div>
 
                 <span className="text-sm">{item.title}</span>
               </div>
 
-              {isExpanded ? (
-                <ChevronDown className="w-4 h-4 transition-transform" />
-              ) : (
-                <ChevronRight className="w-4 h-4 transition-transform" />
-              )}
+              <div className="flex-shrink-0">
+                {isExpanded ? (
+                  <ChevronDown className="w-4 h-4 transition-transform" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 transition-transform" />
+                )}
+              </div>
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-1 pl-10 pt-2">
@@ -499,18 +519,30 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
               >
                 <div
                   className={cn(
-                    "p-1.5 rounded-lg transition-colors",
+                    "p-1.5 rounded-lg transition-colors relative",
                     isItemActive
                       ? "bg-gradient-to-br from-indigo-500 to-blue-500 text-white shadow-sm"
                       : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                   )}
                 >
                   <Icon className="w-4 h-4" />
+                  {item.badge && (
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </Badge>
+                  )}
                 </div>
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" className="ml-2">
-              <p>{item.title}</p>
+              <div className="flex items-center space-x-2">
+                <p>{item.title}</p>
+                {item.badge && (
+                  <Badge className="h-4 w-4 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </Badge>
+                )}
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -522,131 +554,313 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
         key={item.id}
         variant="ghost"
         className={cn(
-          "w-full justify-start h-11 px-3 font-medium transition-all duration-200 rounded-xl",
+          "w-full h-11 px-3 font-medium transition-all duration-200 rounded-xl flex items-center justify-between",
           isItemActive
             ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/30 shadow-sm"
             : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:text-indigo-600 dark:hover:text-indigo-400"
         )}
         onClick={() => handleNavigate(item.path)}
       >
-        <div
-          className={cn(
-            "p-1.5 rounded-lg transition-colors mr-3",
-            isItemActive
-              ? "bg-gradient-to-br from-indigo-500 to-blue-500 text-white shadow-sm"
-              : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-          )}
-        >
-          <Icon className="w-4 h-4" />
+        <div className="flex items-center space-x-3">
+          <div
+            className={cn(
+              "p-1.5 rounded-lg transition-colors relative flex-shrink-0",
+              isItemActive
+                ? "bg-gradient-to-br from-indigo-500 to-blue-500 text-white shadow-sm"
+                : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+            )}
+          >
+            <Icon className="w-4 h-4" />
+            {item.badge && (
+              <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                {item.badge > 99 ? "99+" : item.badge}
+              </Badge>
+            )}
+          </div>
+          <span className="text-sm">{item.title}</span>
         </div>
-        <span className="text-sm">{item.title}</span>
+        {item.badge && !isCollapsed && (
+          <Badge className="h-5 w-5 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+            {item.badge > 99 ? "99+" : item.badge}
+          </Badge>
+        )}
       </Button>
     );
   };
 
   const desktopSidebarContent = (
-    <div className="h-full">
-      <div className="flex flex-col h-full p-4">
-        <div className="flex items-center justify-between mb-6">
-          {!isCollapsed && (
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Shield className="w-4 h-4 text-white" />
-              </div>
-              <h2 className="font-bold text-lg text-slate-800 dark:text-white">
-                {user?.role?.toLowerCase() === "admin"
-                  ? "Admin Panel"
-                  : user?.role?.toLowerCase() === "instructor"
-                  ? "Instructor Dashboard"
-                  : "Student Dashboard"}
-              </h2>
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 flex items-center justify-between p-4 pb-0">
+        {!isCollapsed && (
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+              <Shield className="w-4 h-4 text-white" />
             </div>
-          )}
+            <h2 className="font-bold text-lg text-slate-800 dark:text-white">
+              {user?.role?.toLowerCase() === "admin"
+                ? "Admin Panel"
+                : user?.role?.toLowerCase() === "instructor"
+                ? "Instructor Dashboard"
+                : "Student Dashboard"}
+            </h2>
+          </div>
+        )}
 
-          {isCollapsed ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="ml-2">
-                  <p>Expand sidebar</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
+        {isCollapsed ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="ml-2">
+                <p>Expand sidebar</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
 
-        <Separator className="mb-6 bg-white/30 dark:bg-slate-700/50" />
+      <Separator className="flex-shrink-0 mx-4 mt-4 mb-2 bg-white/30 dark:bg-slate-700/50" />
 
-        <ScrollArea className="flex-1 -mx-2">
-          <div className="space-y-2 px-2">
+      <div className="flex-1 overflow-hidden px-4">
+        <ScrollArea className="h-full">
+          <div className="space-y-2 py-2 pr-4">
             {getMenuItems().map((item) => renderMenuItem(item, false))}
           </div>
         </ScrollArea>
+      </div>
 
-        <Separator className="my-4 bg-white/30 dark:bg-slate-700/50" />
+      <div className="flex-shrink-0 bg-gradient-to-br from-blue-50/95 via-indigo-50/95 to-cyan-50/95 dark:from-slate-900/95 dark:via-slate-800/95 dark:to-gray-900/95 backdrop-blur-xl border-t border-white/30 dark:border-slate-700/30">
+        <div className="p-4">
+          <div className="space-y-3">
+            {isCollapsed ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center justify-center p-3 rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm">
+                      <Avatar className="h-8 w-8 ring-2 ring-white/50 dark:ring-slate-600/50">
+                        <AvatarImage src={user?.profilePicture} />
+                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-blue-500 text-white text-xs">
+                          {user?.firstName?.charAt(0)?.toUpperCase() ||
+                            user?.name?.charAt(0)?.toUpperCase() ||
+                            "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="ml-2">
+                    <div className="text-center">
+                      <p className="font-medium">
+                        {user?.firstName + " " + user?.lastName || user?.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {user?.role}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm">
+                <Avatar className="h-8 w-8 ring-2 ring-white/50 dark:ring-slate-600/50">
+                  <AvatarImage src={user?.profilePicture} />
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-blue-500 text-white text-xs">
+                    {user?.firstName?.charAt(0)?.toUpperCase() ||
+                      user?.name?.charAt(0)?.toUpperCase() ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-800 dark:text-white truncate">
+                    {user?.firstName + " " + user?.lastName || user?.name}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                    {user?.role}
+                  </p>
+                </div>
+              </div>
+            )}
 
-        <div className="space-y-3">
-          {isCollapsed ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center justify-center p-3 rounded-xl bg-white/30 dark:bg-slate-700/30 backdrop-blur-sm">
-                    <Avatar className="h-8 w-8 ring-2 ring-white/50 dark:ring-slate-600/50">
-                      <AvatarImage src={user?.profilePicture} />
-                      <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-blue-500 text-white text-xs">
-                        {user?.name?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="ml-2">
-                  <div className="text-center">
-                    <p className="font-medium">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {user?.role}
-                    </p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/30 dark:bg-slate-700/30 backdrop-blur-sm">
+            {!isCollapsed && (
+              <AlertDialog
+                open={isLogoutDialogOpen}
+                onOpenChange={setIsLogoutDialogOpen}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-10 px-3 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-3" />
+                    ) : (
+                      <LogOut className="w-4 h-4 mr-3" />
+                    )}
+                    <span className="text-sm">
+                      {loading ? "Logging out..." : "Logout"}
+                    </span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-slate-800 dark:text-white">
+                      Are you sure you want to logout?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+                      You will be signed out of your account and redirected to
+                      the login page.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleLogout}
+                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Logging out...
+                        </>
+                      ) : (
+                        "Logout"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+            {isCollapsed && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialog
+                      open={isLogoutDialogOpen}
+                      onOpenChange={setIsLogoutDialogOpen}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-lg text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20"
+                        >
+                          {loading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <LogOut className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 rounded-2xl">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="text-slate-800 dark:text-white">
+                            Are you sure you want to logout?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
+                            You will be signed out of your account and
+                            redirected to the login page.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="rounded-xl">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleLogout}
+                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl"
+                          >
+                            {loading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Logging out...
+                              </>
+                            ) : (
+                              "Logout"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="ml-2">
+                    <p>Logout</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const mobileSidebarContent = (
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 flex items-center justify-between p-4 pb-0">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+            <Shield className="w-4 h-4 text-white" />
+          </div>
+          <h2 className="font-bold text-lg text-slate-800 dark:text-white">
+            {user?.role?.toLowerCase() === "admin"
+              ? "Admin Panel"
+              : user?.role?.toLowerCase() === "instructor"
+              ? "Instructor Dashboard"
+              : "Student Dashboard"}
+          </h2>
+        </div>
+      </div>
+
+      <Separator className="flex-shrink-0 mx-4 mt-4 mb-2 bg-white/30 dark:bg-slate-700/50" />
+
+      <div className="flex-1 overflow-hidden px-4">
+        <ScrollArea className="h-full">
+          <div className="space-y-2 py-2 pr-4">
+            {getMenuItems().map((item) => renderMenuItem(item, true))}
+          </div>
+        </ScrollArea>
+      </div>
+
+      <div className="flex-shrink-0 bg-gradient-to-br from-blue-50/95 via-indigo-50/95 to-cyan-50/95 dark:from-slate-900/95 dark:via-slate-800/95 dark:to-gray-900/95 backdrop-blur-xl border-t border-white/30 dark:border-slate-700/30">
+        <div className="p-4">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm">
               <Avatar className="h-8 w-8 ring-2 ring-white/50 dark:ring-slate-600/50">
                 <AvatarImage src={user?.profilePicture} />
                 <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-blue-500 text-white text-xs">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                  {user?.firstName?.charAt(0)?.toUpperCase() ||
+                    user?.name?.charAt(0)?.toUpperCase() ||
+                    "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-800 dark:text-white truncate">
-                  {user?.name}
+                  {user?.firstName + " " + user?.lastName || user?.name}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
                   {user?.role}
                 </p>
               </div>
             </div>
-          )}
 
-          {!isCollapsed && (
             <AlertDialog
               open={isLogoutDialogOpen}
               onOpenChange={setIsLogoutDialogOpen}
@@ -696,165 +910,7 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          )}
-          {isCollapsed && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <AlertDialog
-                    open={isLogoutDialogOpen}
-                    onOpenChange={setIsLogoutDialogOpen}
-                  >
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 rounded-lg text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20"
-                      >
-                        {loading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <LogOut className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 rounded-2xl">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-slate-800 dark:text-white">
-                          Are you sure you want to logout?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
-                          You will be signed out of your account and redirected
-                          to the login page.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl">
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleLogout}
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl"
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                              Logging out...
-                            </>
-                          ) : (
-                            "Logout"
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="ml-2">
-                  <p>Logout</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const mobileSidebarContent = (
-    <div className="relative h-full">
-      <div className="flex flex-col h-full p-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="font-bold text-lg text-slate-800 dark:text-white">
-              {user?.role?.toLowerCase() === "admin"
-                ? "Admin Panel"
-                : user?.role?.toLowerCase() === "instructor"
-                ? "Instructor Dashboard"
-                : "Student Dashboard"}
-            </h2>
           </div>
-        </div>
-
-        <Separator className="mb-6 bg-white/30 dark:bg-slate-700/50" />
-
-        <ScrollArea className="flex-1 -mx-2">
-          <div className="space-y-2 px-2">
-            {getMenuItems().map((item) => renderMenuItem(item, true))}
-          </div>
-        </ScrollArea>
-
-        <Separator className="my-4 bg-white/30 dark:bg-slate-700/50" />
-
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/30 dark:bg-slate-700/30 backdrop-blur-sm">
-            <Avatar className="h-8 w-8 ring-2 ring-white/50 dark:ring-slate-600/50">
-              <AvatarImage src={user?.profilePicture} />
-              <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-blue-500 text-white text-xs">
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-800 dark:text-white truncate">
-                {user?.name}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                {user?.role}
-              </p>
-            </div>
-          </div>
-
-          <AlertDialog
-            open={isLogoutDialogOpen}
-            onOpenChange={setIsLogoutDialogOpen}
-          >
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start h-10 px-3 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-3" />
-                ) : (
-                  <LogOut className="w-4 h-4 mr-3" />
-                )}
-                <span className="text-sm">
-                  {loading ? "Logging out..." : "Logout"}
-                </span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 rounded-2xl">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-slate-800 dark:text-white">
-                  Are you sure you want to logout?
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
-                  You will be signed out of your account and redirected to the
-                  login page.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-xl">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleLogout}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Logging out...
-                    </>
-                  ) : (
-                    "Logout"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </div>
     </div>
@@ -866,10 +922,10 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
 
   return (
     <>
-      <div className="hidden lg:block fixed inset-y-0 left-0 z-50">
+      <div className="hidden lg:block flex-shrink-0">
         <div
           className={cn(
-            "h-full transition-all duration-300 ease-in-out bg-gradient-to-br from-blue-50/80 via-indigo-50/80 to-cyan-50/80 dark:from-slate-900/80 dark:via-slate-800/80 dark:to-gray-900/80 backdrop-blur-xl border-r border-white/50 dark:border-slate-700/50 shadow-xl",
+            "h-screen transition-all duration-300 ease-in-out bg-gradient-to-br from-blue-50/80 via-indigo-50/80 to-cyan-50/80 dark:from-slate-900/80 dark:via-slate-800/80 dark:to-gray-900/80 backdrop-blur-xl border-r border-white/50 dark:border-slate-700/50 shadow-xl overflow-hidden",
             isCollapsed ? "w-20" : "w-72",
             className
           )}

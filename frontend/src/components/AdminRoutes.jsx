@@ -20,6 +20,8 @@ import CommunityStandards from "../pages/admin/CommunityStandards";
 import PendingCourseReviewPage from "../pages/admin/PendingCourseReviewPage";
 import CourseStatsPage from "../pages/admin/CourseStatsPage";
 import ReviewHistoryPage from "../pages/admin/ReviewHistroyPage";
+import TransactionsPage from "@/pages/admin/TransactionsPage";
+import PayoutPage from "@/pages/admin/PayoutPage";
 
 export const adminRoutes = [
   <Route
@@ -141,14 +143,22 @@ export const adminRoutes = [
   />,
   <Route
     key="admin-payments"
-    path="/admin/payments/*"
+    path="/admin/payments/transactions"
     element={
       <RoleProtectedRoute
-        element={<div>Payment Management</div>}
+        element={<TransactionsPage />}
         allowedRoles={["admin"]}
       />
     }
   />,
+  <Route
+    key="admin-payments"
+    path="/admin/payments/payouts"
+    element={
+      <RoleProtectedRoute element={<PayoutPage />} allowedRoles={["admin"]} />
+    }
+  />,
+
   <Route
     key="admin-moderation-reports"
     path="/admin/moderation/reports"

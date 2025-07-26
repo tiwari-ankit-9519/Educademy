@@ -3,12 +3,9 @@ import asyncHandler from "express-async-handler";
 import redisService from "../../utils/redis.js";
 import emailService from "../../utils/emailService.js";
 import notificationService from "../../utils/notificationservice.js";
+import { Decimal } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
-
-const generateTransactionId = () => {
-  return `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
 
 const generatePayoutId = () => {
   return `payout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -16,7 +13,107 @@ const generatePayoutId = () => {
 
 const formatCurrency = (amount, currency = "INR") => {
   const symbol = currency === "INR" ? "₹" : "$";
-  return `${symbol}${parseFloat(amount).toLocaleString()}`;
+  return `${symbol}${parseFloat(amount || 0).toLocaleString()}`;
+};
+
+const safeNumber = (value) => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "bigint") return Number(value);
+  if (typeof value === "number") return isNaN(value) ? 0 : value;
+
+  // Handle Prisma Decimal objects - try toNumber() method first
+  if (typeof value === "object" && value !== null) {
+    // Check if it's a Prisma Decimal with toNumber method
+    if (typeof value.toNumber === "function") {
+      try {
+        const result = value.toNumber();
+        return isNaN(result) ? 0 : result;
+      } catch (error) {
+        console.error("Error calling toNumber():", error);
+      }
+    }
+
+    // Check if it's a serialized decimal object
+    if ("s" in value && "e" in value && "d" in value) {
+      try {
+        const decimal = new Decimal(value);
+        const result = decimal.toNumber();
+        return isNaN(result) ? 0 : result;
+      } catch (error) {
+        console.error("Error converting with Decimal:", error);
+
+        // Fallback: manual parsing
+        const sign = value.s === -1 ? -1 : 1;
+        const digits = value.d || [];
+
+        if (digits.length === 0) return 0;
+
+        let mainPart = digits[0] || 0;
+
+        if (digits.length > 1) {
+          const fractionalPart = digits[1];
+          const fractionalStr = fractionalPart.toString();
+          const cents = fractionalStr.substring(0, 2).padEnd(2, "0");
+          const result = sign * (mainPart + parseInt(cents) / 100);
+          return isNaN(result) ? 0 : result;
+        }
+
+        return sign * mainPart;
+      }
+    }
+  }
+
+  const num = Number(value);
+  return isNaN(num) ? 0 : num;
+};
+
+const convertBigIntToNumber = (obj) => {
+  if (obj === null || obj === undefined) {
+    return 0;
+  }
+
+  if (typeof obj === "bigint") {
+    return Number(obj);
+  }
+
+  if (typeof obj === "number") {
+    return isNaN(obj) ? 0 : obj;
+  }
+
+  if (typeof obj === "string") {
+    const parsed = parseFloat(obj);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  // Handle Prisma Decimal objects
+  if (
+    typeof obj === "object" &&
+    obj !== null &&
+    "s" in obj &&
+    "e" in obj &&
+    "d" in obj
+  ) {
+    return safeNumber(obj);
+  }
+
+  // Handle Date objects
+  if (obj instanceof Date) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertBigIntToNumber);
+  }
+
+  if (typeof obj === "object") {
+    const converted = {};
+    for (const [key, value] of Object.entries(obj)) {
+      converted[key] = convertBigIntToNumber(value);
+    }
+    return converted;
+  }
+
+  return obj;
 };
 
 export const getAllTransactions = asyncHandler(async (req, res) => {
@@ -163,9 +260,9 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
     const transactionsData = transactions.map((payment) => ({
       id: payment.id,
       transactionId: payment.transactionId,
-      amount: payment.amount,
-      originalAmount: payment.originalAmount,
-      discountAmount: payment.discountAmount,
+      amount: safeNumber(payment.amount),
+      originalAmount: safeNumber(payment.originalAmount),
+      discountAmount: safeNumber(payment.discountAmount),
       currency: payment.currency,
       status: payment.status,
       method: payment.method,
@@ -184,10 +281,10 @@ export const getAllTransactions = asyncHandler(async (req, res) => {
       coupon: payment.couponUsages[0]?.coupon
         ? {
             code: payment.couponUsages[0].coupon.code,
-            discount: payment.couponUsages[0].discount,
+            discount: safeNumber(payment.couponUsages[0].discount),
           }
         : null,
-      refundAmount: payment.refundAmount,
+      refundAmount: safeNumber(payment.refundAmount),
       refundedAt: payment.refundedAt,
     }));
 
@@ -341,17 +438,17 @@ export const getTransactionDetails = asyncHandler(async (req, res) => {
     const transactionDetails = {
       id: transaction.id,
       transactionId: transaction.transactionId,
-      amount: transaction.amount,
-      originalAmount: transaction.originalAmount,
-      discountAmount: transaction.discountAmount,
-      tax: transaction.tax,
+      amount: safeNumber(transaction.amount),
+      originalAmount: safeNumber(transaction.originalAmount),
+      discountAmount: safeNumber(transaction.discountAmount),
+      tax: safeNumber(transaction.tax),
       currency: transaction.currency,
       status: transaction.status,
       method: transaction.method,
       gateway: transaction.gateway,
       gatewayResponse: transaction.gatewayResponse,
       metadata: transaction.metadata,
-      refundAmount: transaction.refundAmount,
+      refundAmount: safeNumber(transaction.refundAmount),
       refundReason: transaction.refundReason,
       refundedAt: transaction.refundedAt,
       invoiceUrl: transaction.invoiceUrl,
@@ -368,7 +465,7 @@ export const getTransactionDetails = asyncHandler(async (req, res) => {
       courses: transaction.enrollments.map((enrollment) => ({
         id: enrollment.course.id,
         title: enrollment.course.title,
-        price: enrollment.course.price,
+        price: safeNumber(enrollment.course.price),
         instructor: {
           name: `${enrollment.course.instructor.user.firstName} ${enrollment.course.instructor.user.lastName}`,
           email: enrollment.course.instructor.user.email,
@@ -376,9 +473,9 @@ export const getTransactionDetails = asyncHandler(async (req, res) => {
       })),
       earnings: transaction.earnings.map((earning) => ({
         id: earning.id,
-        amount: earning.amount,
-        commission: earning.commission,
-        platformFee: earning.platformFee,
+        amount: safeNumber(earning.amount),
+        commission: safeNumber(earning.commission),
+        platformFee: safeNumber(earning.platformFee),
         status: earning.status,
         instructor: {
           name: `${earning.instructor.user.firstName} ${earning.instructor.user.lastName}`,
@@ -388,8 +485,8 @@ export const getTransactionDetails = asyncHandler(async (req, res) => {
         ? {
             couponCode: transaction.couponUsages[0].coupon.code,
             couponType: transaction.couponUsages[0].coupon.type,
-            couponValue: transaction.couponUsages[0].coupon.value,
-            discountApplied: transaction.couponUsages[0].discount,
+            couponValue: safeNumber(transaction.couponUsages[0].coupon.value),
+            discountApplied: safeNumber(transaction.couponUsages[0].discount),
             usedBy: `${transaction.couponUsages[0].user.firstName} ${transaction.couponUsages[0].user.lastName}`,
           }
         : null,
@@ -481,8 +578,7 @@ export const processRefund = asyncHandler(async (req, res) => {
     }
 
     const totalRefundable =
-      parseFloat(transaction.amount) -
-      parseFloat(transaction.refundAmount || 0);
+      safeNumber(transaction.amount) - safeNumber(transaction.refundAmount);
     if (parseFloat(refundAmount) > totalRefundable) {
       return res.status(400).json({
         success: false,
@@ -494,8 +590,8 @@ export const processRefund = asyncHandler(async (req, res) => {
     }
 
     const newRefundAmount =
-      parseFloat(transaction.refundAmount || 0) + parseFloat(refundAmount);
-    const isFullRefund = newRefundAmount >= parseFloat(transaction.amount);
+      safeNumber(transaction.refundAmount) + parseFloat(refundAmount);
+    const isFullRefund = newRefundAmount >= safeNumber(transaction.amount);
     const newStatus = isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED";
 
     const updatedTransaction = await prisma.payment.update({
@@ -694,7 +790,7 @@ export const getAllPayouts = asyncHandler(async (req, res) => {
 
     const payoutsData = payouts.map((payout) => ({
       id: payout.id,
-      amount: payout.amount,
+      amount: safeNumber(payout.amount),
       currency: payout.currency,
       status: payout.status,
       requestedAt: payout.requestedAt,
@@ -875,7 +971,7 @@ export const processPayout = asyncHandler(async (req, res) => {
       message: "Payout processed successfully",
       data: {
         payoutId: updatedPayout.id,
-        amount: updatedPayout.amount,
+        amount: safeNumber(updatedPayout.amount),
         currency: updatedPayout.currency,
         status: updatedPayout.status,
         processedAt: updatedPayout.processedAt,
@@ -987,7 +1083,6 @@ export const getRevenueOverview = asyncHandler(async (req, res) => {
           payment: { status: "COMPLETED" },
         },
         _count: { courseId: true },
-        _sum: { payment: { amount: true } },
         orderBy: { _count: { courseId: "desc" } },
         take: 5,
       }),
@@ -1006,6 +1101,22 @@ export const getRevenueOverview = asyncHandler(async (req, res) => {
     const courseIds = topCourses.map((item) => item.courseId);
     const instructorIds = topInstructors.map((item) => item.instructorId);
 
+    let courseRevenues = [];
+    if (courseIds.length > 0) {
+      courseRevenues = await prisma.$queryRaw`
+        SELECT 
+          e."courseId",
+          SUM(p.amount) as total_revenue
+        FROM "Enrollment" e
+        JOIN "Payment" p ON e."paymentId" = p.id
+        WHERE e."courseId" = ANY(${courseIds})
+          AND p.status = 'COMPLETED'
+          AND p.currency = ${currency}
+          AND p."createdAt" >= ${startDate}
+        GROUP BY e."courseId"
+      `;
+    }
+
     const [courseDetails, instructorDetails] = await Promise.all([
       prisma.course.findMany({
         where: { id: { in: courseIds } },
@@ -1023,24 +1134,27 @@ export const getRevenueOverview = asyncHandler(async (req, res) => {
 
     const overview = {
       summary: {
-        totalRevenue: totalRevenue._sum.amount || 0,
-        periodRevenue: periodRevenue._sum.amount || 0,
-        totalTransactions: totalRevenue._count,
-        periodTransactions: periodRevenue._count,
-        totalRefunds: refundData._sum.refundAmount || 0,
-        totalPayouts: payoutData._sum.amount || 0,
+        totalRevenue: safeNumber(totalRevenue._sum.amount),
+        periodRevenue: safeNumber(periodRevenue._sum.amount),
+        totalTransactions: totalRevenue._count || 0,
+        periodTransactions: periodRevenue._count || 0,
+        totalRefunds: safeNumber(refundData._sum.refundAmount),
+        totalPayouts: safeNumber(payoutData._sum.amount),
         netRevenue:
-          (periodRevenue._sum.amount || 0) -
-          (refundData._sum.refundAmount || 0),
+          safeNumber(periodRevenue._sum.amount) -
+          safeNumber(refundData._sum.refundAmount),
         currency,
       },
       growth: {
         revenueGrowth: 0,
         transactionGrowth: 0,
         refundRate:
-          periodTransactions > 0
-            ? ((refundData._count / periodTransactions) * 100).toFixed(2)
-            : 0,
+          (periodRevenue._count || 0) > 0
+            ? (
+                ((refundData._count || 0) / (periodRevenue._count || 1)) *
+                100
+              ).toFixed(2)
+            : "0",
       },
       topPerformers: {
         courses: topCourses.map((item) => {
@@ -1048,8 +1162,8 @@ export const getRevenueOverview = asyncHandler(async (req, res) => {
           return {
             courseId: item.courseId,
             title: course?.title || "Unknown Course",
-            enrollments: item._count.courseId,
-            revenue: item._sum?.payment?.amount || 0,
+            enrollments: item._count.courseId || 0,
+            revenue: safeNumber(item._sum?.payment?.amount),
           };
         }),
         instructors: topInstructors.map((item) => {
@@ -1061,25 +1175,29 @@ export const getRevenueOverview = asyncHandler(async (req, res) => {
             name: instructor
               ? `${instructor.user.firstName} ${instructor.user.lastName}`
               : "Unknown Instructor",
-            earnings: item._sum.amount || 0,
+            earnings: safeNumber(item._sum.amount),
           };
         }),
       },
       metrics: {
         averageTransactionValue:
-          periodTransactions > 0
-            ? ((periodRevenue._sum.amount || 0) / periodTransactions).toFixed(2)
-            : 0,
-        payoutRatio:
-          periodRevenue._sum.amount > 0
+          (periodRevenue._count || 0) > 0
             ? (
-                ((payoutData._sum.amount || 0) /
-                  (periodRevenue._sum.amount || 1)) *
+                safeNumber(periodRevenue._sum.amount) /
+                (periodRevenue._count || 1)
+              ).toFixed(2)
+            : "0",
+        payoutRatio:
+          safeNumber(periodRevenue._sum.amount) > 0
+            ? (
+                (safeNumber(payoutData._sum.amount) /
+                  safeNumber(periodRevenue._sum.amount)) *
                 100
               ).toFixed(2)
-            : 0,
+            : "0",
         platformRevenue:
-          (periodRevenue._sum.amount || 0) - (payoutData._sum.amount || 0),
+          safeNumber(periodRevenue._sum.amount) -
+          safeNumber(payoutData._sum.amount),
       },
     };
 
@@ -1219,69 +1337,97 @@ export const getFinancialAnalytics = asyncHandler(async (req, res) => {
       breakdown: {
         byPaymentMethod: revenueByMethod.map((item) => ({
           method: item.method,
-          revenue: item._sum.amount || 0,
-          transactions: item._count,
-          percentage: 0,
+          revenue: item._sum.amount ? Number(item._sum.amount.toString()) : 0,
+          transactions: item._count || 0,
+          percentage: "0",
         })),
         byGateway: revenueByGateway.map((item) => ({
           gateway: item.gateway,
-          revenue: item._sum.amount || 0,
-          transactions: item._count,
-          percentage: 0,
+          revenue: item._sum.amount ? Number(item._sum.amount.toString()) : 0,
+          transactions: item._count || 0,
+          percentage: "0",
         })),
         byStatus: revenueByStatus.map((item) => ({
           status: item.status,
-          revenue: item._sum.amount || 0,
-          transactions: item._count,
-          percentage: 0,
+          revenue: item._sum.amount ? Number(item._sum.amount.toString()) : 0,
+          transactions: item._count || 0,
+          percentage: "0",
         })),
       },
       trends: {
         monthly: monthlyTrends.map((item) => ({
-          month: item.month,
-          revenue: parseFloat(item.revenue) || 0,
-          transactions: parseInt(item.transactions) || 0,
+          month: item.month
+            ? new Date(item.month).toISOString()
+            : new Date().toISOString(),
+          revenue: item.revenue ? Number(item.revenue.toString()) : 0,
+          transactions: item.transactions
+            ? Number(item.transactions.toString())
+            : 0,
         })),
       },
       earnings: {
-        totalInstructorEarnings: instructorEarnings._sum.amount || 0,
-        totalCommissions: instructorEarnings._sum.commission || 0,
-        totalPlatformFees: instructorEarnings._sum.platformFee || 0,
+        totalInstructorEarnings: instructorEarnings._sum.amount
+          ? Number(instructorEarnings._sum.amount.toString())
+          : 0,
+        totalCommissions: instructorEarnings._sum.commission
+          ? Number(instructorEarnings._sum.commission.toString())
+          : 0,
+        totalPlatformFees: instructorEarnings._sum.platformFee
+          ? Number(instructorEarnings._sum.platformFee.toString())
+          : 0,
       },
-      metrics: platformMetrics[0] || {
-        total_transactions: 0,
-        total_revenue: 0,
-        avg_transaction_value: 0,
-        total_enrollments: 0,
-        courses_sold: 0,
-        active_instructors: 0,
+      metrics: {
+        total_transactions: platformMetrics[0]?.total_transactions
+          ? Number(platformMetrics[0].total_transactions.toString())
+          : 0,
+        total_revenue: platformMetrics[0]?.total_revenue
+          ? Number(platformMetrics[0].total_revenue.toString())
+          : 0,
+        avg_transaction_value: platformMetrics[0]?.avg_transaction_value
+          ? Number(platformMetrics[0].avg_transaction_value.toString())
+          : 0,
+        total_enrollments: platformMetrics[0]?.total_enrollments
+          ? Number(platformMetrics[0].total_enrollments.toString())
+          : 0,
+        courses_sold: platformMetrics[0]?.courses_sold
+          ? Number(platformMetrics[0].courses_sold.toString())
+          : 0,
+        active_instructors: platformMetrics[0]?.active_instructors
+          ? Number(platformMetrics[0].active_instructors.toString())
+          : 0,
       },
     };
 
     const totalRevenue = analytics.breakdown.byPaymentMethod.reduce(
-      (sum, item) => sum + item.revenue,
+      (sum, item) => sum + (item.revenue || 0),
       0
     );
+
     if (totalRevenue > 0) {
       analytics.breakdown.byPaymentMethod.forEach((item) => {
-        item.percentage = ((item.revenue / totalRevenue) * 100).toFixed(2);
+        const percentage = ((item.revenue || 0) / totalRevenue) * 100;
+        item.percentage = (isNaN(percentage) ? 0 : percentage).toFixed(2);
       });
       analytics.breakdown.byGateway.forEach((item) => {
-        item.percentage = ((item.revenue / totalRevenue) * 100).toFixed(2);
+        const percentage = ((item.revenue || 0) / totalRevenue) * 100;
+        item.percentage = (isNaN(percentage) ? 0 : percentage).toFixed(2);
       });
       analytics.breakdown.byStatus.forEach((item) => {
-        item.percentage = ((item.revenue / totalRevenue) * 100).toFixed(2);
+        const percentage = ((item.revenue || 0) / totalRevenue) * 100;
+        item.percentage = (isNaN(percentage) ? 0 : percentage).toFixed(2);
       });
     }
 
-    await redisService.setJSON(cacheKey, analytics, { ex: 3600 });
+    const convertedAnalytics = convertBigIntToNumber(analytics);
+
+    await redisService.setJSON(cacheKey, convertedAnalytics, { ex: 3600 });
 
     const executionTime = Math.round(performance.now() - startTime);
 
     res.status(200).json({
       success: true,
       message: "Financial analytics retrieved successfully",
-      data: analytics,
+      data: convertedAnalytics,
       meta: {
         cached: false,
         executionTime,
@@ -1379,40 +1525,46 @@ export const getPaymentStats = asyncHandler(async (req, res) => {
 
     const stats = {
       overview: {
-        totalRevenue: totalStats._sum.amount || 0,
-        totalTransactions: totalStats._count,
-        averageTransactionValue: totalStats._avg.amount || 0,
-        todayRevenue: todayStats._sum.amount || 0,
-        todayTransactions: todayStats._count,
-        weekRevenue: weekStats._sum.amount || 0,
-        weekTransactions: weekStats._count,
-        monthRevenue: monthStats._sum.amount || 0,
-        monthTransactions: monthStats._count,
+        totalRevenue: safeNumber(totalStats._sum.amount),
+        totalTransactions: totalStats._count || 0,
+        averageTransactionValue: safeNumber(totalStats._avg.amount),
+        todayRevenue: safeNumber(todayStats._sum.amount),
+        todayTransactions: todayStats._count || 0,
+        weekRevenue: safeNumber(weekStats._sum.amount),
+        weekTransactions: weekStats._count || 0,
+        monthRevenue: safeNumber(monthStats._sum.amount),
+        monthTransactions: monthStats._count || 0,
       },
       distribution: {
         byStatus: statusDistribution.map((item) => ({
           status: item.status,
-          count: item._count,
+          count: item._count || 0,
           percentage:
-            totalStats._count > 0
-              ? ((item._count / totalStats._count) * 100).toFixed(2)
-              : 0,
+            (totalStats._count || 0) > 0
+              ? (((item._count || 0) / (totalStats._count || 1)) * 100).toFixed(
+                  2
+                )
+              : "0",
         })),
         byMethod: methodDistribution.map((item) => ({
           method: item.method,
-          count: item._count,
+          count: item._count || 0,
           percentage:
-            totalStats._count > 0
-              ? ((item._count / totalStats._count) * 100).toFixed(2)
-              : 0,
+            (totalStats._count || 0) > 0
+              ? (((item._count || 0) / (totalStats._count || 1)) * 100).toFixed(
+                  2
+                )
+              : "0",
         })),
         byGateway: gatewayDistribution.map((item) => ({
           gateway: item.gateway,
-          count: item._count,
+          count: item._count || 0,
           percentage:
-            totalStats._count > 0
-              ? ((item._count / totalStats._count) * 100).toFixed(2)
-              : 0,
+            (totalStats._count || 0) > 0
+              ? (((item._count || 0) / (totalStats._count || 1)) * 100).toFixed(
+                  2
+                )
+              : "0",
         })),
       },
       growth: {

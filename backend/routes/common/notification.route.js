@@ -12,23 +12,64 @@ import {
   sendTestNotification,
   getNotificationPreferences,
 } from "../../controllers/common/notification.controller.js";
+import { trackRoute } from "../../utils/routeWrapper.js";
 
 const router = express.Router();
 
 router.use(isLoggedIn);
 
-router.get("/", getNotifications);
-router.get("/unread-count", getUnreadCount);
-router.get("/stats", getNotificationStats);
-router.get("/settings", getNotificationSettings);
-router.get("/preferences", getNotificationPreferences);
+router.get(
+  "/",
+  trackRoute("Notifications", "getNotifications"),
+  getNotifications
+);
+router.get(
+  "/unread-count",
+  trackRoute("Notifications", "getUnreadCount"),
+  getUnreadCount
+);
+router.get(
+  "/stats",
+  trackRoute("Notifications", "getNotificationStats"),
+  getNotificationStats
+);
+router.get(
+  "/settings",
+  trackRoute("Notifications", "getNotificationSettings"),
+  getNotificationSettings
+);
+router.get(
+  "/preferences",
+  trackRoute("Notifications", "getNotificationPreferences"),
+  getNotificationPreferences
+);
 
-router.put("/mark-read", markNotificationsAsRead);
-router.put("/settings", updateNotificationSettings);
+router.put(
+  "/mark-read",
+  trackRoute("Notifications", "markNotificationsAsRead"),
+  markNotificationsAsRead
+);
+router.put(
+  "/settings",
+  trackRoute("Notifications", "updateNotificationSettings"),
+  updateNotificationSettings
+);
 
-router.delete("/:notificationId", deleteNotification);
-router.delete("/read/all", deleteAllReadNotifications);
+router.delete(
+  "/:notificationId",
+  trackRoute("Notifications", "deleteNotification"),
+  deleteNotification
+);
+router.delete(
+  "/read/all",
+  trackRoute("Notifications", "deleteAllReadNotifications"),
+  deleteAllReadNotifications
+);
 
-router.post("/test", sendTestNotification);
+router.post(
+  "/test",
+  trackRoute("Notifications", "sendTestNotification"),
+  sendTestNotification
+);
 
 export default router;

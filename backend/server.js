@@ -56,6 +56,7 @@ import {
   authErrorHandler,
 } from "./middlewares/errorHandler.js";
 import "./utils/passport.js";
+import notificationService from "./utils/notificationservice.js";
 
 config();
 
@@ -105,17 +106,16 @@ const corsOptions = {
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3000;
+notificationService.setSocketManager(socketManager);
 
 console.log(`🚀 Starting Educademy Backend Server on port ${PORT}`);
 console.log(`📦 Environment: ${process.env.NODE_ENV}`);
 console.log(`🔧 Node.js Version: ${process.version}`);
 
-// Configure server timeouts for slow APIs
 const configureServerTimeouts = (server) => {
-  // Increase timeouts for slow admin operations
-  server.timeout = 600000; // 10 minutes for very slow operations
-  server.keepAliveTimeout = 65000; // 65 seconds
-  server.headersTimeout = 66000; // 66 seconds (should be higher than keepAliveTimeout)
+  server.timeout = 600000;
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
 
   console.log("✅ Server timeouts configured for slow APIs:");
   console.log(`   - Request timeout: ${server.timeout / 1000}s`);
@@ -160,10 +160,9 @@ app.use(globalRequestMiddleware);
 app.use(setPrismaRequest);
 configureMorgan(app);
 
-// Adjusted rate limiting for slower operations
 const globalRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
 
   message: {
     success: false,
@@ -203,14 +202,12 @@ const globalRateLimit = rateLimit({
   },
 });
 
-// Adjusted slow down middleware for admin operations
 const apiSlowDown = slowDown({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  delayAfter: 50, // Start slowing down after 50 requests
-  delayMs: () => 1000, // Add 1 second delay
-  maxDelayMs: 30000, // Maximum 30 seconds delay (increased from 20s)
+  windowMs: 15 * 60 * 1000,
+  delayAfter: 50,
+  delayMs: () => 1000,
+  maxDelayMs: 30000,
 
-  // Skip slow down for admin routes that are expected to be slow
   skip: (req) => {
     const adminRoutes = [
       "/api/admin/users/users",
@@ -230,7 +227,6 @@ const io = socketManager.init(server);
 app.set("socketManager", socketManager);
 app.set("redisService", redisService);
 
-// Webhook routes (before body parsing middleware)
 app.post(
   "/api/webhook/payment",
   express.raw({ type: "application/json" }),
@@ -241,10 +237,8 @@ app.get("/api/webhook/payment/status", getWebhookStatus);
 
 app.post("/api/webhook/payment/test", express.json(), testWebhook);
 
-// Request timeout middleware (10 minutes for slow operations)
 app.use(timeout("600s"));
 
-// Timeout handler middleware
 app.use((req, res, next) => {
   if (!req.timedout) {
     next();
@@ -259,10 +253,9 @@ app.use((req, res, next) => {
   }
 });
 
-// Body parsing with increased limits for admin operations
 app.use(
   express.json({
-    limit: "50mb", // Increased for large admin data operations
+    limit: "50mb",
     verify: (req, res, buf) => {
       req.rawBody = buf;
     },
@@ -303,7 +296,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      maxAge: 1000 * 60 * 60 * 24,
       sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     },
     name: "educademy.sid",
@@ -313,11 +306,17 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Apply rate limiting (commented out for development with slow APIs)
 if (process.env.NODE_ENV === "production") {
   app.use(globalRateLimit);
 }
 app.use(apiSlowDown);
+
+app.use((req, res, next) => {
+  req.redisService = redisService;
+  req.socketManager = socketManager;
+  req.prisma = prisma;
+  next();
+});
 
 app.get("/", (req, res) => {
   res.json({
@@ -377,14 +376,12 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Common routes
 app.use("/api/auth", authRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/support", supportRoutes);
 
-// Admin routes (these can be slow)
 app.use("/api/admin/analytics", adminAnalyticsRoutes);
 app.use("/api/admin/courses", adminCourseRoutes);
 app.use("/api/admin/moderation", adminModerationRoutes);
@@ -392,7 +389,6 @@ app.use("/api/admin/payments", adminPaymentRoutes);
 app.use("/api/admin/system", adminSystemRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 
-// Instructor routes
 app.use("/api/instructor/content", instructorContentRoutes);
 app.use("/api/instructor/coupons", instructorCouponRoutes);
 app.use("/api/instructor/earnings", instructorEarningRoutes);
@@ -401,7 +397,6 @@ app.use("/api/instructor/verification", instructorVerificationRoutes);
 app.use("/api/instructor/courses", instructorCourseRoutes);
 app.use("/api/instructor/students", instructorStudentRoutes);
 
-// Student routes
 app.use("/api/student/cart", studentCartRoutes);
 app.use("/api/student/catalog", studentCatalogRoutes);
 app.use("/api/student/community", studentCommunityRoutes);
@@ -409,15 +404,6 @@ app.use("/api/student/learning", studentLearningRoutes);
 app.use("/api/student/purchase", studentPurchaseRoutes);
 app.use("/api/student/wishlist", studentWishlistRoutes);
 
-// Request enhancement middleware
-app.use((req, res, next) => {
-  req.redisService = redisService;
-  req.socketManager = socketManager;
-  req.prisma = prisma;
-  next();
-});
-
-// Security headers
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
@@ -426,7 +412,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Timeout error handler (add before other error handlers)
 const timeoutErrorHandler = (error, req, res, next) => {
   if (error.code === "ETIMEDOUT" || error.timeout || req.timedout) {
     console.error("Operation timeout:", {
@@ -449,7 +434,6 @@ const timeoutErrorHandler = (error, req, res, next) => {
   next(error);
 };
 
-// Error handling middleware
 app.use(errorCaptureMiddleware);
 app.use(timeoutErrorHandler);
 app.use(validationErrorHandler);
@@ -492,11 +476,10 @@ const gracefulShutdown = (signal) => {
     });
   });
 
-  // Increased shutdown timeout for slow operations
   setTimeout(() => {
     console.error("⏰ Forced shutdown after timeout");
     process.exit(1);
-  }, 60000); // Increased to 60 seconds
+  }, 60000);
 };
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
@@ -526,23 +509,19 @@ process.on("exit", (code) => {
   console.log(`🏁 Process exited with code: ${code}`);
 });
 
-// Memory monitoring with adjusted thresholds
 const memoryUsageInterval = setInterval(() => {
   const used = process.memoryUsage();
   const memoryUsageMB = Math.round(used.heapUsed / 1024 / 1024);
 
   if (memoryUsageMB > 1024) {
-    // Increased threshold for admin operations
     console.warn(`⚠️  High memory usage: ${memoryUsageMB}MB`);
   }
 
   if (global.gc && memoryUsageMB > 512) {
-    // Adjusted GC threshold
     global.gc();
   }
 }, 300000);
 
-// Enhanced health check with timeout monitoring
 const healthCheckInterval = setInterval(async () => {
   try {
     await redisService.healthCheck();
@@ -552,7 +531,6 @@ const healthCheckInterval = setInterval(async () => {
       console.log(`📊 High connection count: ${stats.connectedUsers} users`);
     }
 
-    // Log current server timeout configuration
     console.log(
       `🕐 Server timeouts - Request: ${server.timeout / 1000}s, KeepAlive: ${
         server.keepAliveTimeout / 1000
@@ -561,9 +539,8 @@ const healthCheckInterval = setInterval(async () => {
   } catch (error) {
     console.error("🔍 Health check failed:", error);
   }
-}, 300000); // Reduced frequency to every 5 minutes
+}, 300000);
 
-// Configure server timeouts before starting
 configureServerTimeouts(server);
 
 server.listen(PORT, () => {

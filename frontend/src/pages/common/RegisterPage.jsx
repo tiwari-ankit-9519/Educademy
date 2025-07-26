@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTheme } from "@/components/ThemeProvider";
-import { registerUser, clearError } from "@/features/authSlice";
+import { registerUser, clearError } from "@/features/common/authSlice";
 import { useNavigate } from "react-router-dom";
 import SocialLogin from "@/components/SocialLogin";
 

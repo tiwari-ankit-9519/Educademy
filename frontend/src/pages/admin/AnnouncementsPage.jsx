@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -34,23 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import useSocket from "@/hooks/useSocket";
@@ -62,35 +46,38 @@ import {
   setAnnouncementsFilters,
   resetAnnouncementsFilters,
   clearError,
+  clearLastCreatedAnnouncement,
+  onAnnouncementCreated,
+  onAnnouncementUpdated,
+  onAnnouncementDeleted,
+  onAnnouncementStatsUpdated,
+  onNotificationStatusUpdate,
 } from "@/features/adminSlice/adminSystem";
 import {
   Megaphone,
   Plus,
   Search,
-  MoreVertical,
-  Edit3,
-  Trash2,
-  Eye,
-  EyeOff,
-  Users,
-  AlertTriangle,
-  Info,
-  Wrench,
-  Zap,
-  Tag,
   RefreshCw,
+  Activity,
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Edit,
+  Trash2,
   Send,
   Save,
   X,
   Loader2,
-  Activity,
-  CheckCircle,
-  AlertCircle,
-  Timer,
-  Globe,
+  TrendingUp,
+  Eye,
+  Wifi,
+  WifiOff,
+  Bell,
+  BarChart3,
 } from "lucide-react";
 
-const AnnouncementsPage = () => {
+const AdminAnnouncementsPage = () => {
   const dispatch = useDispatch();
   const {
     announcements,
@@ -101,53 +88,154 @@ const AnnouncementsPage = () => {
     updateAnnouncementLoading,
     deleteAnnouncementLoading,
     error,
+    lastCreatedAnnouncement,
   } = useSelector((state) => state.adminSystem);
 
-  const { isConnected } = useSocket();
+  const {
+    isConnected,
+    emitAnnouncementCreated,
+    emitAnnouncementUpdated,
+    emitAnnouncementDeleted,
+    subscribeToAnnouncementEvents,
+    unsubscribeFromAnnouncementEvents,
+  } = useSocket();
 
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isStatsDialogOpen, setIsStatsDialogOpen] = useState(false);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [announcementToDelete, setAnnouncementToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
+  const [realtimeChanges, setRealtimeChanges] = useState(new Set());
+  const [connectionStatus, setConnectionStatus] = useState("disconnected");
 
-  const [formData, setFormData] = useState({
+  const [createFormData, setCreateFormData] = useState({
     title: "",
     content: "",
     type: "INFO",
     priority: "NORMAL",
     targetAudience: "ALL",
+    isActive: true,
     scheduledFor: "",
     expiresAt: "",
+  });
+
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    content: "",
+    type: "INFO",
+    priority: "NORMAL",
+    targetAudience: "ALL",
     isActive: true,
+    scheduledFor: "",
+    expiresAt: "",
   });
 
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    scheduled: 0,
-    expired: 0,
-    inactive: 0,
-  });
+  // Track connection status
+  useEffect(() => {
+    setConnectionStatus(isConnected ? "connected" : "disconnected");
+  }, [isConnected]);
 
+  // Socket event handlers
+  useEffect(() => {
+    if (
+      isConnected &&
+      subscribeToAnnouncementEvents &&
+      unsubscribeFromAnnouncementEvents
+    ) {
+      const handleAnnouncementCreated = (data) => {
+        dispatch(onAnnouncementCreated(data));
+        setRealtimeChanges((prev) => new Set([...prev, data.id]));
+        toast.success(`New announcement created: ${data.title}`);
+
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+          setRealtimeChanges((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(data.id);
+            return newSet;
+          });
+        }, 3000);
+      };
+
+      const handleAnnouncementUpdated = (data) => {
+        dispatch(onAnnouncementUpdated(data));
+        setRealtimeChanges((prev) => new Set([...prev, data.id]));
+        toast.info(`Announcement updated: ${data.title}`);
+
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+          setRealtimeChanges((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(data.id);
+            return newSet;
+          });
+        }, 3000);
+      };
+
+      const handleAnnouncementDeleted = (data) => {
+        dispatch(onAnnouncementDeleted(data));
+        toast.info(
+          `Announcement deleted: ${
+            data.deletedAnnouncement?.title || "Unknown"
+          }`
+        );
+      };
+
+      const handleAnnouncementStatsUpdated = (data) => {
+        dispatch(onAnnouncementStatsUpdated(data));
+        setRealtimeChanges((prev) => new Set([...prev, data.announcementId]));
+
+        // Remove highlight after 2 seconds for stats updates
+        setTimeout(() => {
+          setRealtimeChanges((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(data.announcementId);
+            return newSet;
+          });
+        }, 2000);
+      };
+
+      const handleNotificationStatusUpdate = (data) => {
+        dispatch(onNotificationStatusUpdate(data));
+      };
+
+      // Subscribe to events
+      subscribeToAnnouncementEvents({
+        onAnnouncementCreated: handleAnnouncementCreated,
+        onAnnouncementUpdated: handleAnnouncementUpdated,
+        onAnnouncementDeleted: handleAnnouncementDeleted,
+        onAnnouncementStatsUpdated: handleAnnouncementStatsUpdated,
+        onNotificationStatusUpdate: handleNotificationStatusUpdate,
+      });
+
+      return () => {
+        unsubscribeFromAnnouncementEvents();
+      };
+    }
+  }, [
+    isConnected,
+    subscribeToAnnouncementEvents,
+    unsubscribeFromAnnouncementEvents,
+    dispatch,
+  ]);
+
+  // Initial load
   useEffect(() => {
     if (!hasInitialLoaded) {
-      dispatch(
-        getAllAnnouncements({
-          page: 1,
-          limit: 20,
-        })
-      );
+      dispatch(getAllAnnouncements({ page: 1, limit: 20 }));
       setHasInitialLoaded(true);
     }
   }, [dispatch, hasInitialLoaded]);
 
+  // Handle search filter
   useEffect(() => {
     setSearchTerm(announcementsFilters.search || "");
   }, [announcementsFilters.search]);
 
+  // Handle errors
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -155,19 +243,34 @@ const AnnouncementsPage = () => {
     }
   }, [error, dispatch]);
 
+  // Improved socket emission for created announcements
   useEffect(() => {
-    if (announcements.length > 0) {
-      const newStats = announcements.reduce(
-        (acc, announcement) => {
-          acc.total += 1;
-          acc[announcement.status] = (acc[announcement.status] || 0) + 1;
-          return acc;
-        },
-        { total: 0, active: 0, scheduled: 0, expired: 0, inactive: 0 }
-      );
-      setStats(newStats);
+    if (isConnected && lastCreatedAnnouncement) {
+      try {
+        // Emit to other admins
+        if (emitAnnouncementCreated) {
+          emitAnnouncementCreated(lastCreatedAnnouncement);
+        }
+
+        // Also emit notification creation event for users
+        if (lastCreatedAnnouncement.isActive) {
+          // This should trigger notifications to be sent to users
+          // The backend should handle creating and broadcasting notifications
+          console.log(
+            "Announcement created and should trigger notifications:",
+            lastCreatedAnnouncement
+          );
+        }
+
+        dispatch(clearLastCreatedAnnouncement());
+      } catch (error) {
+        console.error("Failed to emit announcement creation:", error);
+        toast.warning(
+          "Announcement created but may not be visible to others immediately"
+        );
+      }
     }
-  }, [announcements]);
+  }, [isConnected, lastCreatedAnnouncement, emitAnnouncementCreated, dispatch]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...announcementsFilters, [key]: value };
@@ -214,60 +317,92 @@ const AnnouncementsPage = () => {
     );
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      content: "",
-      type: "INFO",
-      priority: "NORMAL",
-      targetAudience: "ALL",
-      scheduledFor: "",
-      expiresAt: "",
-      isActive: true,
-    });
-  };
-
   const handleCreateAnnouncement = async () => {
     try {
-      const payload = {
-        ...formData,
-        scheduledFor: formData.scheduledFor || null,
-        expiresAt: formData.expiresAt || null,
-      };
-
-      await dispatch(createAnnouncement(payload)).unwrap();
+      const result = await dispatch(
+        createAnnouncement(createFormData)
+      ).unwrap();
       setIsCreateDialogOpen(false);
-      resetForm();
+      setCreateFormData({
+        title: "",
+        content: "",
+        type: "INFO",
+        priority: "NORMAL",
+        targetAudience: "ALL",
+        isActive: true,
+        scheduledFor: "",
+        expiresAt: "",
+      });
+
+      toast.success("Announcement created and notifications sent!");
+
+      // Emit to other connected admins if connected
+      if (isConnected && emitAnnouncementCreated) {
+        try {
+          emitAnnouncementCreated(result.data);
+        } catch (error) {
+          console.error("Failed to emit announcement creation:", error);
+        }
+      }
     } catch (error) {
       toast.error(error.message || "Failed to create announcement");
     }
   };
 
-  const handleEditAnnouncement = async () => {
+  const handleUpdateAnnouncement = async () => {
     try {
-      await dispatch(
+      const result = await dispatch(
         updateAnnouncement({
           announcementId: selectedAnnouncement.id,
-          announcementData: {
-            ...formData,
-            scheduledFor: formData.scheduledFor || null,
-            expiresAt: formData.expiresAt || null,
-          },
+          announcementData: editFormData,
         })
       ).unwrap();
+
       setIsEditDialogOpen(false);
       setSelectedAnnouncement(null);
-      resetForm();
+
+      toast.success("Announcement updated successfully!");
+
+      // Emit update via socket with improved error handling
+      if (isConnected && emitAnnouncementUpdated) {
+        try {
+          emitAnnouncementUpdated(result.data);
+        } catch (error) {
+          console.error("Failed to emit announcement update:", error);
+          toast.warning(
+            "Announcement updated but may not be visible to other admins immediately"
+          );
+        }
+      }
     } catch (error) {
       toast.error(error.message || "Failed to update announcement");
     }
   };
 
   const handleDeleteAnnouncement = async () => {
+    if (!announcementToDelete) return;
+
     try {
-      await dispatch(deleteAnnouncement(selectedAnnouncement.id)).unwrap();
+      await dispatch(deleteAnnouncement(announcementToDelete.id)).unwrap();
+
       setIsDeleteDialogOpen(false);
-      setSelectedAnnouncement(null);
+      setAnnouncementToDelete(null);
+      toast.success("Announcement deleted successfully!");
+
+      // Emit deletion via socket
+      if (isConnected && emitAnnouncementDeleted) {
+        try {
+          emitAnnouncementDeleted({
+            announcementId: announcementToDelete.id,
+            deletedAnnouncement: announcementToDelete,
+          });
+        } catch (error) {
+          console.error("Failed to emit announcement deletion:", error);
+          toast.warning(
+            "Announcement deleted but may still be visible to other admins temporarily"
+          );
+        }
+      }
     } catch (error) {
       toast.error(error.message || "Failed to delete announcement");
     }
@@ -275,60 +410,45 @@ const AnnouncementsPage = () => {
 
   const openEditDialog = (announcement) => {
     setSelectedAnnouncement(announcement);
-    setFormData({
+    setEditFormData({
       title: announcement.title,
       content: announcement.content,
       type: announcement.type,
       priority: announcement.priority,
       targetAudience: announcement.targetAudience,
+      isActive: announcement.isActive,
       scheduledFor: announcement.scheduledFor
         ? format(new Date(announcement.scheduledFor), "yyyy-MM-dd'T'HH:mm")
         : "",
       expiresAt: announcement.expiresAt
         ? format(new Date(announcement.expiresAt), "yyyy-MM-dd'T'HH:mm")
         : "",
-      isActive: announcement.isActive,
     });
     setIsEditDialogOpen(true);
   };
 
-  const openViewDialog = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setIsViewDialogOpen(true);
-  };
-
   const openDeleteDialog = (announcement) => {
-    setSelectedAnnouncement(announcement);
+    setAnnouncementToDelete(announcement);
     setIsDeleteDialogOpen(true);
   };
 
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case "WARNING":
-        return <AlertTriangle className="w-4 h-4" />;
-      case "UPDATE":
-        return <Zap className="w-4 h-4" />;
-      case "MAINTENANCE":
-        return <Wrench className="w-4 h-4" />;
-      case "PROMOTION":
-        return <Tag className="w-4 h-4" />;
-      default:
-        return <Info className="w-4 h-4" />;
-    }
+  const openStatsDialog = (announcement) => {
+    setSelectedAnnouncement(announcement);
+    setIsStatsDialogOpen(true);
   };
 
-  const getTypeColor = (type) => {
-    switch (type) {
-      case "WARNING":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
-      case "UPDATE":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
-      case "MAINTENANCE":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
-      case "PROMOTION":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
-      default:
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
         return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      case "scheduled":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      case "expired":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
+      case "inactive":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
     }
   };
 
@@ -347,67 +467,60 @@ const AnnouncementsPage = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-      case "scheduled":
+  const getTypeColor = (type) => {
+    switch (type) {
+      case "INFO":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
-      case "expired":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
-      case "inactive":
+      case "WARNING":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+      case "UPDATE":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      case "MAINTENANCE":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
+      case "PROMOTION":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "active":
-        return <CheckCircle className="w-3 h-3" />;
-      case "scheduled":
-        return <Timer className="w-3 h-3" />;
-      case "expired":
-        return <AlertCircle className="w-3 h-3" />;
-      case "inactive":
-        return <EyeOff className="w-3 h-3" />;
+  const getConnectionIcon = () => {
+    switch (connectionStatus) {
+      case "connected":
+        return <Wifi className="w-3 h-3" />;
+      case "disconnected":
+        return <WifiOff className="w-3 h-3" />;
       default:
         return <Activity className="w-3 h-3" />;
     }
   };
 
-  const getAudienceIcon = (audience) => {
-    switch (audience) {
-      case "STUDENTS":
-        return <Users className="w-4 h-4" />;
-      case "INSTRUCTORS":
-        return <Users className="w-4 h-4" />;
-      case "ADMINS":
-        return <Users className="w-4 h-4" />;
+  const getConnectionColor = () => {
+    switch (connectionStatus) {
+      case "connected":
+        return "default";
+      case "disconnected":
+        return "destructive";
       default:
-        return <Globe className="w-4 h-4" />;
+        return "secondary";
     }
   };
 
   if (announcementsLoading && announcements.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-16 left-16 w-24 h-24 bg-indigo-300/20 dark:bg-indigo-500/10 rounded-full"></div>
-          <div className="absolute top-32 right-24 w-32 h-32 bg-blue-300/20 dark:bg-blue-500/10 rounded-2xl"></div>
-          <div className="absolute bottom-24 left-24 w-28 h-28 bg-cyan-300/20 dark:bg-cyan-500/10 rounded-full"></div>
-          <div className="absolute bottom-16 right-16 w-20 h-20 bg-violet-300/20 dark:bg-violet-500/10 rounded-2xl"></div>
-        </div>
-        <div className="container mx-auto px-4 py-8 max-w-7xl relative">
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-64 rounded-xl" />
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="animate-pulse space-y-6">
+            <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-2xl" />
+                <div
+                  key={i}
+                  className="h-32 bg-slate-200 dark:bg-slate-700 rounded-2xl"
+                ></div>
               ))}
             </div>
-            <Skeleton className="h-96 rounded-2xl" />
+            <div className="h-96 bg-slate-200 dark:bg-slate-700 rounded-2xl"></div>
           </div>
         </div>
       </div>
@@ -415,11 +528,12 @@ const AnnouncementsPage = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-            <div className="p-3 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-2xl shadow-lg shadow-indigo-300/30 dark:shadow-indigo-500/20">
+            <div className="p-3 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-2xl shadow-lg">
               <Megaphone className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -434,244 +548,31 @@ const AnnouncementsPage = () => {
 
           <div className="flex items-center space-x-3">
             <Badge
-              variant={isConnected ? "default" : "destructive"}
+              variant={getConnectionColor()}
               className="rounded-xl shadow-sm"
             >
-              <Activity className="w-3 h-3 mr-1" />
-              {isConnected ? "Connected" : "Disconnected"}
+              {getConnectionIcon()}
+              {connectionStatus === "connected" ? "Connected" : "Disconnected"}
             </Badge>
+
+            {realtimeChanges.size > 0 && (
+              <Badge className="rounded-xl shadow-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                <Activity className="w-3 h-3 mr-1 animate-pulse" />
+                {realtimeChanges.size} Live Update
+                {realtimeChanges.size > 1 ? "s" : ""}
+              </Badge>
+            )}
 
             <Dialog
               open={isCreateDialogOpen}
               onOpenChange={setIsCreateDialogOpen}
             >
               <DialogTrigger asChild>
-                <Button
-                  onClick={resetForm}
-                  className="rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white shadow-lg shadow-indigo-300/30 dark:shadow-indigo-500/20"
-                >
+                <Button className="rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Announcement
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl max-w-2xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent"></div>
-                <div className="relative z-10">
-                  <DialogHeader>
-                    <DialogTitle className="text-slate-800 dark:text-white">
-                      Create New Announcement
-                    </DialogTitle>
-                    <DialogDescription className="text-slate-600 dark:text-slate-400">
-                      Create a system-wide announcement for your platform users.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <div className="grid gap-6 py-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="title"
-                          className="text-slate-700 dark:text-slate-300"
-                        >
-                          Title
-                        </Label>
-                        <Input
-                          id="title"
-                          value={formData.title}
-                          onChange={(e) =>
-                            setFormData({ ...formData, title: e.target.value })
-                          }
-                          placeholder="Announcement title"
-                          className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="type"
-                          className="text-slate-700 dark:text-slate-300"
-                        >
-                          Type
-                        </Label>
-                        <Select
-                          value={formData.type}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, type: value })
-                          }
-                        >
-                          <SelectTrigger className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                            <SelectItem value="INFO">Info</SelectItem>
-                            <SelectItem value="WARNING">Warning</SelectItem>
-                            <SelectItem value="UPDATE">Update</SelectItem>
-                            <SelectItem value="MAINTENANCE">
-                              Maintenance
-                            </SelectItem>
-                            <SelectItem value="PROMOTION">Promotion</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="priority"
-                          className="text-slate-700 dark:text-slate-300"
-                        >
-                          Priority
-                        </Label>
-                        <Select
-                          value={formData.priority}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, priority: value })
-                          }
-                        >
-                          <SelectTrigger className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                            <SelectItem value="LOW">Low</SelectItem>
-                            <SelectItem value="NORMAL">Normal</SelectItem>
-                            <SelectItem value="HIGH">High</SelectItem>
-                            <SelectItem value="URGENT">Urgent</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="audience"
-                          className="text-slate-700 dark:text-slate-300"
-                        >
-                          Target Audience
-                        </Label>
-                        <Select
-                          value={formData.targetAudience}
-                          onValueChange={(value) =>
-                            setFormData({ ...formData, targetAudience: value })
-                          }
-                        >
-                          <SelectTrigger className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                            <SelectItem value="ALL">All Users</SelectItem>
-                            <SelectItem value="STUDENTS">Students</SelectItem>
-                            <SelectItem value="INSTRUCTORS">
-                              Instructors
-                            </SelectItem>
-                            <SelectItem value="ADMINS">Admins</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="content"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Content
-                      </Label>
-                      <Textarea
-                        id="content"
-                        value={formData.content}
-                        onChange={(e) =>
-                          setFormData({ ...formData, content: e.target.value })
-                        }
-                        placeholder="Announcement content"
-                        className="rounded-xl min-h-[120px] bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="scheduledFor"
-                          className="text-slate-700 dark:text-slate-300"
-                        >
-                          Schedule For (Optional)
-                        </Label>
-                        <Input
-                          id="scheduledFor"
-                          type="datetime-local"
-                          value={formData.scheduledFor}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              scheduledFor: e.target.value,
-                            })
-                          }
-                          className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="expiresAt"
-                          className="text-slate-700 dark:text-slate-300"
-                        >
-                          Expires At (Optional)
-                        </Label>
-                        <Input
-                          id="expiresAt"
-                          type="datetime-local"
-                          value={formData.expiresAt}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              expiresAt: e.target.value,
-                            })
-                          }
-                          className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="isActive"
-                        checked={formData.isActive}
-                        onCheckedChange={(checked) =>
-                          setFormData({ ...formData, isActive: checked })
-                        }
-                      />
-                      <Label
-                        htmlFor="isActive"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Active
-                      </Label>
-                    </div>
-                  </div>
-
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsCreateDialogOpen(false)}
-                      className="rounded-xl border-slate-200 dark:border-slate-600"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleCreateAnnouncement}
-                      disabled={
-                        createAnnouncementLoading ||
-                        !formData.title ||
-                        !formData.content
-                      }
-                      className="rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 shadow-md text-white"
-                    >
-                      {createAnnouncementLoading ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Send className="w-4 h-4 mr-2" />
-                      )}
-                      Create Announcement
-                    </Button>
-                  </DialogFooter>
-                </div>
-              </DialogContent>
             </Dialog>
 
             <Button
@@ -691,17 +592,17 @@ const AnnouncementsPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <CardContent className="p-6 relative">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                     Total
                   </p>
                   <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                    {stats.total}
+                    {announcementsPagination.total}
                   </p>
                 </div>
                 <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg shadow-lg">
@@ -712,15 +613,14 @@ const AnnouncementsPage = () => {
           </Card>
 
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <CardContent className="p-6 relative">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                     Active
                   </p>
                   <p className="text-2xl font-bold text-green-600">
-                    {stats.active}
+                    {announcements.filter((a) => a.status === "active").length}
                   </p>
                 </div>
                 <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg shadow-lg">
@@ -731,66 +631,51 @@ const AnnouncementsPage = () => {
           </Card>
 
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <CardContent className="p-6 relative">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                     Scheduled
                   </p>
                   <p className="text-2xl font-bold text-blue-600">
-                    {stats.scheduled}
+                    {
+                      announcements.filter((a) => a.status === "scheduled")
+                        .length
+                    }
                   </p>
                 </div>
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg">
-                  <Timer className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <CardContent className="p-6 relative">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Expired
-                  </p>
-                  <p className="text-2xl font-bold text-gray-600">
-                    {stats.expired}
-                  </p>
-                </div>
-                <div className="p-2 bg-gradient-to-br from-gray-500 to-slate-500 rounded-lg shadow-lg">
-                  <AlertCircle className="w-5 h-5 text-white" />
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg shadow-lg">
+                  <Clock className="w-5 h-5 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <CardContent className="p-6 relative">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                    Inactive
+                    Total Engagement
                   </p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {stats.inactive}
+                  <p className="text-2xl font-bold text-purple-600">
+                    {announcements.reduce(
+                      (sum, a) => sum + (a.readCount || 0),
+                      0
+                    )}
                   </p>
                 </div>
-                <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg shadow-lg">
-                  <EyeOff className="w-5 h-5 text-white" />
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg shadow-lg">
+                  <BarChart3 className="w-5 h-5 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Announcements List */}
         <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-          <CardHeader className="pb-6 relative">
+          <CardHeader className="pb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <CardTitle className="text-slate-800 dark:text-white">
                 All Announcements
@@ -816,31 +701,13 @@ const AnnouncementsPage = () => {
                   <SelectTrigger className="w-32 rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
+                  <SelectContent className="rounded-xl">
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="INFO">Info</SelectItem>
                     <SelectItem value="WARNING">Warning</SelectItem>
                     <SelectItem value="UPDATE">Update</SelectItem>
                     <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
                     <SelectItem value="PROMOTION">Promotion</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={announcementsFilters.priority || "all"}
-                  onValueChange={(value) =>
-                    handleFilterChange("priority", value === "all" ? "" : value)
-                  }
-                >
-                  <SelectTrigger className="w-32 rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                    <SelectValue placeholder="Priority" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                    <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="LOW">Low</SelectItem>
-                    <SelectItem value="NORMAL">Normal</SelectItem>
-                    <SelectItem value="HIGH">High</SelectItem>
-                    <SelectItem value="URGENT">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -856,7 +723,7 @@ const AnnouncementsPage = () => {
                       })
                     );
                   }}
-                  className="rounded-xl border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm"
+                  className="rounded-xl"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Clear
@@ -865,138 +732,149 @@ const AnnouncementsPage = () => {
             </div>
           </CardHeader>
 
-          <CardContent className="relative">
-            <ScrollArea className="h-[600px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Title
-                    </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Type
-                    </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Priority
-                    </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Audience
-                    </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-slate-700 dark:text-slate-300">
-                      Created
-                    </TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {announcements.map((announcement) => (
-                    <TableRow
-                      key={announcement.id}
-                      className="hover:bg-white/50 dark:hover:bg-slate-700/30 transition-all duration-200"
-                    >
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-slate-800 dark:text-white">
-                            {announcement.title}
-                          </span>
-                          <span className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs">
-                            {announcement.content}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
+          <CardContent>
+            <div className="space-y-4">
+              {announcements.map((announcement) => (
+                <div
+                  key={announcement.id}
+                  className={cn(
+                    "p-6 rounded-xl border transition-all duration-200",
+                    realtimeChanges.has(announcement.id)
+                      ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700 shadow-lg"
+                      : "bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 hover:bg-white/70 dark:hover:bg-slate-700/70"
+                  )}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+                          {announcement.title}
+                        </h3>
+
+                        {realtimeChanges.has(announcement.id) && (
+                          <Badge className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            <Activity className="w-3 h-3 mr-1 animate-pulse" />
+                            Live Update
+                          </Badge>
+                        )}
+
                         <Badge
                           className={cn(
-                            "rounded-lg shadow-sm",
+                            "text-xs",
+                            getStatusColor(announcement.status)
+                          )}
+                        >
+                          {announcement.status}
+                        </Badge>
+                        <Badge
+                          className={cn(
+                            "text-xs",
                             getTypeColor(announcement.type)
                           )}
                         >
-                          {getTypeIcon(announcement.type)}
-                          <span className="ml-1">{announcement.type}</span>
+                          {announcement.type}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
                         <Badge
                           className={cn(
-                            "rounded-lg shadow-sm",
+                            "text-xs",
                             getPriorityColor(announcement.priority)
                           )}
                         >
                           {announcement.priority}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          {getAudienceIcon(announcement.targetAudience)}
-                          <span className="ml-2 text-sm text-slate-700 dark:text-slate-300">
-                            {announcement.targetAudience}
+                      </div>
+
+                      <p className="text-slate-600 dark:text-slate-300 mb-3 line-clamp-2">
+                        {announcement.content}
+                      </p>
+
+                      <div className="flex items-center space-x-6 text-sm text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center space-x-1">
+                          <Users className="w-4 h-4" />
+                          <span>{announcement.targetAudience}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Eye className="w-4 h-4" />
+                          <span>{announcement.readCount || 0} reads</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Bell className="w-4 h-4" />
+                          <span>
+                            {announcement.totalNotifications || 0} sent
                           </span>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={cn(
-                            "rounded-lg shadow-sm",
-                            getStatusColor(announcement.status)
-                          )}
-                        >
-                          {getStatusIcon(announcement.status)}
-                          <span className="ml-1 capitalize">
-                            {announcement.status}
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-4 h-4" />
+                          <span>
+                            {formatDistanceToNow(
+                              new Date(announcement.createdAt)
+                            )}{" "}
+                            ago
                           </span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-slate-600 dark:text-slate-400">
-                        {formatDistanceToNow(new Date(announcement.createdAt))}{" "}
-                        ago
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-lg"
-                            >
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-lg"
-                          >
-                            <DropdownMenuItem
-                              onClick={() => openViewDialog(announcement)}
-                              className="rounded-lg"
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openEditDialog(announcement)}
-                              className="rounded-lg"
-                            >
-                              <Edit3 className="w-4 h-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => openDeleteDialog(announcement)}
-                              className="text-red-600 dark:text-red-400 rounded-lg"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        </div>
+                      </div>
+
+                      {announcement.totalNotifications > 0 && (
+                        <div className="mt-3 p-3 bg-white/30 dark:bg-slate-600/30 rounded-lg">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                              Engagement Rate
+                            </span>
+                            <span className="text-sm font-bold text-slate-800 dark:text-white">
+                              {announcement.totalNotifications > 0
+                                ? Math.round(
+                                    ((announcement.readCount || 0) /
+                                      announcement.totalNotifications) *
+                                      100
+                                  )
+                                : 0}
+                              %
+                            </span>
+                          </div>
+                          <Progress
+                            value={
+                              announcement.totalNotifications > 0
+                                ? ((announcement.readCount || 0) /
+                                    announcement.totalNotifications) *
+                                  100
+                                : 0
+                            }
+                            className="h-2"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openStatsDialog(announcement)}
+                        className="rounded-lg"
+                      >
+                        <TrendingUp className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditDialog(announcement)}
+                        className="rounded-lg"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openDeleteDialog(announcement)}
+                        disabled={deleteAnnouncementLoading}
+                        className="rounded-lg text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
 
               {announcements.length === 0 && !announcementsLoading && (
                 <div className="text-center py-12">
@@ -1006,410 +884,452 @@ const AnnouncementsPage = () => {
                   </p>
                 </div>
               )}
-            </ScrollArea>
+            </div>
           </CardContent>
         </Card>
 
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl max-w-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <div className="relative z-10">
-              <DialogHeader>
-                <DialogTitle className="text-slate-800 dark:text-white">
-                  Edit Announcement
-                </DialogTitle>
-                <DialogDescription className="text-slate-600 dark:text-slate-400">
-                  Update the announcement details.
-                </DialogDescription>
-              </DialogHeader>
+        {/* Stats Dialog */}
+        <Dialog open={isStatsDialogOpen} onOpenChange={setIsStatsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <BarChart3 className="w-5 h-5 mr-2" />
+                Announcement Statistics
+              </DialogTitle>
+              <DialogDescription>
+                Detailed engagement metrics for "{selectedAnnouncement?.title}"
+              </DialogDescription>
+            </DialogHeader>
 
-              <div className="grid gap-6 py-4">
+            {selectedAnnouncement && (
+              <div className="space-y-6 py-4">
+                {/* Summary Cards */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="edit-title"
-                      className="text-slate-700 dark:text-slate-300"
-                    >
-                      Title
-                    </Label>
-                    <Input
-                      id="edit-title"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                      placeholder="Announcement title"
-                      className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="edit-type"
-                      className="text-slate-700 dark:text-slate-300"
-                    >
-                      Type
-                    </Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, type: value })
-                      }
-                    >
-                      <SelectTrigger className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                        <SelectItem value="INFO">Info</SelectItem>
-                        <SelectItem value="WARNING">Warning</SelectItem>
-                        <SelectItem value="UPDATE">Update</SelectItem>
-                        <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                        <SelectItem value="PROMOTION">Promotion</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Card className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-blue-100 text-sm">Total Sent</p>
+                          <p className="text-2xl font-bold">
+                            {selectedAnnouncement.totalNotifications || 0}
+                          </p>
+                        </div>
+                        <Bell className="w-8 h-8 text-blue-200" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-green-100 text-sm">Total Reads</p>
+                          <p className="text-2xl font-bold">
+                            {selectedAnnouncement.readCount || 0}
+                          </p>
+                        </div>
+                        <Eye className="w-8 h-8 text-green-200" />
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="edit-priority"
-                      className="text-slate-700 dark:text-slate-300"
-                    >
-                      Priority
-                    </Label>
-                    <Select
-                      value={formData.priority}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, priority: value })
-                      }
-                    >
-                      <SelectTrigger className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                        <SelectItem value="LOW">Low</SelectItem>
-                        <SelectItem value="NORMAL">Normal</SelectItem>
-                        <SelectItem value="HIGH">High</SelectItem>
-                        <SelectItem value="URGENT">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {/* Engagement Rate */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Engagement Rate
+                    </span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-white">
+                      {selectedAnnouncement.totalNotifications > 0
+                        ? Math.round(
+                            ((selectedAnnouncement.readCount || 0) /
+                              selectedAnnouncement.totalNotifications) *
+                              100
+                          )
+                        : 0}
+                      %
+                    </span>
                   </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="edit-audience"
-                      className="text-slate-700 dark:text-slate-300"
-                    >
+                  <Progress
+                    value={
+                      selectedAnnouncement.totalNotifications > 0
+                        ? ((selectedAnnouncement.readCount || 0) /
+                            selectedAnnouncement.totalNotifications) *
+                          100
+                        : 0
+                    }
+                    className="h-3"
+                  />
+                </div>
+
+                {/* Details */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Created
+                    </p>
+                    <p className="font-medium">
+                      {format(new Date(selectedAnnouncement.createdAt), "PPP")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                       Target Audience
-                    </Label>
-                    <Select
-                      value={formData.targetAudience}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, targetAudience: value })
-                      }
-                    >
-                      <SelectTrigger className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-white/50 dark:border-slate-700/50">
-                        <SelectItem value="ALL">All Users</SelectItem>
-                        <SelectItem value="STUDENTS">Students</SelectItem>
-                        <SelectItem value="INSTRUCTORS">Instructors</SelectItem>
-                        <SelectItem value="ADMINS">Admins</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    </p>
+                    <p className="font-medium">
+                      {selectedAnnouncement.targetAudience}
+                    </p>
                   </div>
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Type
+                    </p>
+                    <Badge className={getTypeColor(selectedAnnouncement.type)}>
+                      {selectedAnnouncement.type}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Priority
+                    </p>
+                    <Badge
+                      className={getPriorityColor(
+                        selectedAnnouncement.priority
+                      )}
+                    >
+                      {selectedAnnouncement.priority}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsStatsDialogOpen(false)}
+                className="rounded-xl"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Announcement Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Announcement</DialogTitle>
+              <DialogDescription>
+                Create a system-wide announcement that will be sent as
+                notifications to users.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input
+                  value={createFormData.title}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      title: e.target.value,
+                    })
+                  }
+                  placeholder="Announcement title"
+                  className="rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Content</Label>
+                <Textarea
+                  value={createFormData.content}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      content: e.target.value,
+                    })
+                  }
+                  placeholder="Announcement content"
+                  className="rounded-xl min-h-[100px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={createFormData.type}
+                    onValueChange={(value) =>
+                      setCreateFormData({ ...createFormData, type: value })
+                    }
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INFO">Info</SelectItem>
+                      <SelectItem value="WARNING">Warning</SelectItem>
+                      <SelectItem value="UPDATE">Update</SelectItem>
+                      <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                      <SelectItem value="PROMOTION">Promotion</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-content"
-                    className="text-slate-700 dark:text-slate-300"
-                  >
-                    Content
-                  </Label>
-                  <Textarea
-                    id="edit-content"
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData({ ...formData, content: e.target.value })
+                  <Label>Priority</Label>
+                  <Select
+                    value={createFormData.priority}
+                    onValueChange={(value) =>
+                      setCreateFormData({ ...createFormData, priority: value })
                     }
-                    placeholder="Announcement content"
-                    className="rounded-xl min-h-[120px] bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                  />
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">Low</SelectItem>
+                      <SelectItem value="NORMAL">Normal</SelectItem>
+                      <SelectItem value="HIGH">High</SelectItem>
+                      <SelectItem value="URGENT">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="edit-scheduledFor"
-                      className="text-slate-700 dark:text-slate-300"
-                    >
-                      Schedule For (Optional)
-                    </Label>
-                    <Input
-                      id="edit-scheduledFor"
-                      type="datetime-local"
-                      value={formData.scheduledFor}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          scheduledFor: e.target.value,
-                        })
-                      }
-                      className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="edit-expiresAt"
-                      className="text-slate-700 dark:text-slate-300"
-                    >
-                      Expires At (Optional)
-                    </Label>
-                    <Input
-                      id="edit-expiresAt"
-                      type="datetime-local"
-                      value={formData.expiresAt}
-                      onChange={(e) =>
-                        setFormData({ ...formData, expiresAt: e.target.value })
-                      }
-                      className="rounded-xl bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="edit-isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, isActive: checked })
+                <div className="space-y-2">
+                  <Label>Target Audience</Label>
+                  <Select
+                    value={createFormData.targetAudience}
+                    onValueChange={(value) =>
+                      setCreateFormData({
+                        ...createFormData,
+                        targetAudience: value,
+                      })
                     }
-                  />
-                  <Label
-                    htmlFor="edit-isActive"
-                    className="text-slate-700 dark:text-slate-300"
                   >
-                    Active
-                  </Label>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Users</SelectItem>
+                      <SelectItem value="STUDENTS">Students</SelectItem>
+                      <SelectItem value="INSTRUCTORS">Instructors</SelectItem>
+                      <SelectItem value="ADMINS">Admins</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditDialogOpen(false)}
-                  className="rounded-xl border-slate-200 dark:border-slate-600"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleEditAnnouncement}
-                  disabled={
-                    updateAnnouncementLoading ||
-                    !formData.title ||
-                    !formData.content
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={createFormData.isActive}
+                  onCheckedChange={(checked) =>
+                    setCreateFormData({ ...createFormData, isActive: checked })
                   }
-                  className="rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-md"
-                >
-                  {updateAnnouncementLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
-                  Update Announcement
-                </Button>
-              </DialogFooter>
+                />
+                <Label>Active (send notifications immediately)</Label>
+              </div>
             </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateAnnouncement}
+                disabled={
+                  createAnnouncementLoading ||
+                  !createFormData.title ||
+                  !createFormData.content
+                }
+                className="rounded-xl"
+              >
+                {createAnnouncementLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Create & Send
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl max-w-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            {selectedAnnouncement && (
-              <div className="relative z-10">
-                <DialogHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <DialogTitle className="text-slate-800 dark:text-white mb-2">
-                        {selectedAnnouncement.title}
-                      </DialogTitle>
-                      <div className="flex items-center space-x-2 mb-4">
-                        <Badge
-                          className={cn(
-                            "rounded-lg shadow-sm",
-                            getTypeColor(selectedAnnouncement.type)
-                          )}
-                        >
-                          {getTypeIcon(selectedAnnouncement.type)}
-                          <span className="ml-1">
-                            {selectedAnnouncement.type}
-                          </span>
-                        </Badge>
-                        <Badge
-                          className={cn(
-                            "rounded-lg shadow-sm",
-                            getPriorityColor(selectedAnnouncement.priority)
-                          )}
-                        >
-                          {selectedAnnouncement.priority}
-                        </Badge>
-                        <Badge
-                          className={cn(
-                            "rounded-lg shadow-sm",
-                            getStatusColor(selectedAnnouncement.status)
-                          )}
-                        >
-                          {getStatusIcon(selectedAnnouncement.status)}
-                          <span className="ml-1 capitalize">
-                            {selectedAnnouncement.status}
-                          </span>
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </DialogHeader>
+        {/* Edit Announcement Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Announcement</DialogTitle>
+              <DialogDescription>
+                Update the announcement details.
+              </DialogDescription>
+            </DialogHeader>
 
-                <div className="space-y-4">
-                  <div className="bg-white/30 dark:bg-slate-700/30 backdrop-blur-sm rounded-xl p-4">
-                    <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-                      {selectedAnnouncement.content}
-                    </p>
-                  </div>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input
+                  value={editFormData.title}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, title: e.target.value })
+                  }
+                  placeholder="Announcement title"
+                  className="rounded-xl"
+                />
+              </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Target Audience
-                      </Label>
-                      <div className="flex items-center text-slate-700 dark:text-slate-300">
-                        {getAudienceIcon(selectedAnnouncement.targetAudience)}
-                        <span className="ml-2">
-                          {selectedAnnouncement.targetAudience}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Created
-                      </Label>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">
-                        {format(
-                          new Date(selectedAnnouncement.createdAt),
-                          "PPP 'at' p"
-                        )}
-                      </p>
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <Label>Content</Label>
+                <Textarea
+                  value={editFormData.content}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      content: e.target.value,
+                    })
+                  }
+                  placeholder="Announcement content"
+                  className="rounded-xl min-h-[100px]"
+                />
+              </div>
 
-                  {selectedAnnouncement.scheduledFor && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Scheduled For
-                      </Label>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">
-                        {format(
-                          new Date(selectedAnnouncement.scheduledFor),
-                          "PPP 'at' p"
-                        )}
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedAnnouncement.expiresAt && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Expires At
-                      </Label>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">
-                        {format(
-                          new Date(selectedAnnouncement.expiresAt),
-                          "PPP 'at' p"
-                        )}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Read Count
-                      </Label>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">
-                        {selectedAnnouncement.readCount || 0}
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Dismissed Count
-                      </Label>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">
-                        {selectedAnnouncement.dismissedCount || 0}
-                      </p>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={editFormData.type}
+                    onValueChange={(value) =>
+                      setEditFormData({ ...editFormData, type: value })
+                    }
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INFO">Info</SelectItem>
+                      <SelectItem value="WARNING">Warning</SelectItem>
+                      <SelectItem value="UPDATE">Update</SelectItem>
+                      <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                      <SelectItem value="PROMOTION">Promotion</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsViewDialogOpen(false)}
-                    className="rounded-xl border-slate-200 dark:border-slate-600"
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select
+                    value={editFormData.priority}
+                    onValueChange={(value) =>
+                      setEditFormData({ ...editFormData, priority: value })
+                    }
                   >
-                    Close
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setIsViewDialogOpen(false);
-                      openEditDialog(selectedAnnouncement);
-                    }}
-                    className="rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 shadow-md"
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">Low</SelectItem>
+                      <SelectItem value="NORMAL">Normal</SelectItem>
+                      <SelectItem value="HIGH">High</SelectItem>
+                      <SelectItem value="URGENT">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Target Audience</Label>
+                  <Select
+                    value={editFormData.targetAudience}
+                    onValueChange={(value) =>
+                      setEditFormData({
+                        ...editFormData,
+                        targetAudience: value,
+                      })
+                    }
                   >
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                </DialogFooter>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Users</SelectItem>
+                      <SelectItem value="STUDENTS">Students</SelectItem>
+                      <SelectItem value="INSTRUCTORS">Instructors</SelectItem>
+                      <SelectItem value="ADMINS">Admins</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            )}
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={editFormData.isActive}
+                  onCheckedChange={(checked) =>
+                    setEditFormData({ ...editFormData, isActive: checked })
+                  }
+                />
+                <Label>Active</Label>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateAnnouncement}
+                disabled={
+                  updateAnnouncementLoading ||
+                  !editFormData.title ||
+                  !editFormData.content
+                }
+                className="rounded-xl"
+              >
+                {updateAnnouncementLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Save Changes
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
+        {/* Delete Confirmation Dialog */}
         <AlertDialog
           open={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
         >
-          <AlertDialogContent className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
-            <div className="relative z-10">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-slate-800 dark:text-white">
-                  Delete Announcement
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-slate-600 dark:text-slate-400">
-                  Are you sure you want to delete "{selectedAnnouncement?.title}
-                  "? This action cannot be undone and will remove the
-                  announcement from all users.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-xl border-slate-200 dark:border-slate-600">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAnnouncement}
-                  disabled={deleteAnnouncementLoading}
-                  className="rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-md"
-                >
-                  {deleteAnnouncementLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4 mr-2" />
-                  )}
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </div>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Announcement</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{announcementToDelete?.title}"?
+                This action cannot be undone and will remove the announcement
+                for all users.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteAnnouncement}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
@@ -1417,4 +1337,4 @@ const AnnouncementsPage = () => {
   );
 };
 
-export default AnnouncementsPage;
+export default AdminAnnouncementsPage;
