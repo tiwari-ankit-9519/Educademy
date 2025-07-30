@@ -204,6 +204,15 @@ const getNotificationCacheKey = (userId, filters) => {
   )}`;
 };
 
+const safeRateLimitCheck = async (key, limit, window) => {
+  try {
+    return await redisService.rateLimitCheck(key, limit, window);
+  } catch (error) {
+    console.error(`Rate limit check failed: ${error.message}`);
+    return { allowed: true, resetTime: 0 };
+  }
+};
+
 export const getNotifications = asyncHandler(async (req, res) => {
   const requestId = generateRequestId();
   const startTime = performance.now();
@@ -221,8 +230,8 @@ export const getNotifications = asyncHandler(async (req, res) => {
       });
     }
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `get_notifications:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `get_notifications_${userId}`,
       100,
       3600
     );
@@ -239,7 +248,12 @@ export const getNotifications = asyncHandler(async (req, res) => {
     const filters = buildNotificationFilters(req.query);
     const cacheKey = getNotificationCacheKey(userId, filters);
 
-    let cachedResult = await redisService.getJSON(cacheKey);
+    let cachedResult = null;
+    try {
+      cachedResult = await redisService.getJSON(cacheKey);
+    } catch (error) {
+      console.error(`Cache get failed: ${error.message}`);
+    }
 
     if (cachedResult && filters.page === 1) {
       const executionTime = performance.now() - startTime;
@@ -259,11 +273,15 @@ export const getNotifications = asyncHandler(async (req, res) => {
 
     const result = await notificationService.getNotifications({
       userId,
-      ...filters
+      ...filters,
     });
 
     if (filters.page === 1 && result.notifications.length > 0) {
-      await redisService.setJSON(cacheKey, result, { ex: 300 });
+      try {
+        await redisService.setJSON(cacheKey, result, { ex: 300 });
+      } catch (error) {
+        console.error(`Cache set failed: ${error.message}`);
+      }
     }
 
     const executionTime = performance.now() - startTime;
@@ -311,8 +329,8 @@ export const getUnreadCount = asyncHandler(async (req, res) => {
   try {
     const userId = validateUserAuthentication(req);
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `rate_limit:unread_count:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `unread_count_${userId}`,
       200,
       3600
     );
@@ -326,13 +344,24 @@ export const getUnreadCount = asyncHandler(async (req, res) => {
     }
 
     const cacheKey = `cache:unread_count:${userId}`;
-    let unreadCount = await redisService.get(cacheKey);
+    let unreadCount = null;
+
+    try {
+      const cachedValue = await redisService.get(cacheKey);
+      if (cachedValue !== null) {
+        unreadCount = parseInt(cachedValue);
+      }
+    } catch (error) {
+      console.error(`Cache get failed: ${error.message}`);
+    }
 
     if (unreadCount === null) {
       unreadCount = await notificationService.getUnreadCount(userId);
-      await redisService.setex(cacheKey, 60, unreadCount.toString());
-    } else {
-      unreadCount = parseInt(unreadCount);
+      try {
+        await redisService.setex(cacheKey, 60, unreadCount.toString());
+      } catch (error) {
+        console.error(`Cache set failed: ${error.message}`);
+      }
     }
 
     const executionTime = performance.now() - startTime;
@@ -381,8 +410,8 @@ export const getNotificationStats = asyncHandler(async (req, res) => {
   try {
     const userId = validateUserAuthentication(req);
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `notification_stats:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `notification_stats_${userId}`,
       50,
       3600
     );
@@ -396,11 +425,21 @@ export const getNotificationStats = asyncHandler(async (req, res) => {
     }
 
     const cacheKey = `notification_stats:${userId}`;
-    let stats = await redisService.getJSON(cacheKey);
+    let stats = null;
+
+    try {
+      stats = await redisService.getJSON(cacheKey);
+    } catch (error) {
+      console.error(`Cache get failed: ${error.message}`);
+    }
 
     if (!stats) {
       stats = await notificationService.getNotificationStats(userId);
-      await redisService.setJSON(cacheKey, stats, { ex: 600 });
+      try {
+        await redisService.setJSON(cacheKey, stats, { ex: 600 });
+      } catch (error) {
+        console.error(`Cache set failed: ${error.message}`);
+      }
     }
 
     const executionTime = performance.now() - startTime;
@@ -455,8 +494,8 @@ export const markNotificationsAsRead = asyncHandler(async (req, res) => {
       });
     }
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `mark_read:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `mark_read_${userId}`,
       100,
       3600
     );
@@ -475,7 +514,7 @@ export const markNotificationsAsRead = asyncHandler(async (req, res) => {
     if (markAll === true) {
       const result = await notificationService.markNotificationsAsRead({
         markAll: true,
-        userId
+        userId,
       });
       markedCount = result.count;
     } else {
@@ -499,16 +538,20 @@ export const markNotificationsAsRead = asyncHandler(async (req, res) => {
 
       const result = await notificationService.markNotificationsAsRead({
         notificationIds: validIds,
-        userId
+        userId,
       });
       markedCount = result.count;
     }
 
-    await Promise.all([
-      redisService.del(`unread_count:${userId}`),
-      redisService.delPattern(`notifications:${userId}:*`),
-      redisService.del(`notification_stats:${userId}`),
-    ]);
+    try {
+      await Promise.all([
+        redisService.del(`cache:unread_count:${userId}`),
+        redisService.delPattern(`notifications:${userId}:*`),
+        redisService.del(`notification_stats:${userId}`),
+      ]);
+    } catch (error) {
+      console.error(`Cache cleanup failed: ${error.message}`);
+    }
 
     const executionTime = performance.now() - startTime;
 
@@ -569,8 +612,8 @@ export const deleteNotification = asyncHandler(async (req, res) => {
       });
     }
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `delete_notification:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `delete_notification_${userId}`,
       50,
       3600
     );
@@ -601,14 +644,18 @@ export const deleteNotification = asyncHandler(async (req, res) => {
 
     await notificationService.deleteNotification({
       notificationId,
-      userId
+      userId,
     });
 
-    await Promise.all([
-      redisService.del(`unread_count:${userId}`),
-      redisService.delPattern(`notifications:${userId}:*`),
-      redisService.del(`notification_stats:${userId}`),
-    ]);
+    try {
+      await Promise.all([
+        redisService.del(`cache:unread_count:${userId}`),
+        redisService.delPattern(`notifications:${userId}:*`),
+        redisService.del(`notification_stats:${userId}`),
+      ]);
+    } catch (error) {
+      console.error(`Cache cleanup failed: ${error.message}`);
+    }
 
     const executionTime = performance.now() - startTime;
 
@@ -656,8 +703,8 @@ export const deleteAllReadNotifications = asyncHandler(async (req, res) => {
   try {
     const userId = validateUserAuthentication(req);
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `delete_all_read:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `delete_all_read_${userId}`,
       10,
       3600
     );
@@ -695,10 +742,14 @@ export const deleteAllReadNotifications = asyncHandler(async (req, res) => {
 
     await notificationService.deleteAllReadNotifications(userId);
 
-    await Promise.all([
-      redisService.delPattern(`notifications:${userId}:*`),
-      redisService.del(`notification_stats:${userId}`),
-    ]);
+    try {
+      await Promise.all([
+        redisService.delPattern(`notifications:${userId}:*`),
+        redisService.del(`notification_stats:${userId}`),
+      ]);
+    } catch (error) {
+      console.error(`Cache cleanup failed: ${error.message}`);
+    }
 
     const executionTime = performance.now() - startTime;
 
@@ -745,8 +796,8 @@ export const getNotificationSettings = asyncHandler(async (req, res) => {
   try {
     const userId = validateUserAuthentication(req);
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `get_notification_settings:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `get_notification_settings_${userId}`,
       100,
       3600
     );
@@ -760,12 +811,22 @@ export const getNotificationSettings = asyncHandler(async (req, res) => {
     }
 
     const cacheKey = `notification_settings:${userId}`;
-    let settings = await redisService.getJSON(cacheKey);
+    let settings = null;
+
+    try {
+      settings = await redisService.getJSON(cacheKey);
+    } catch (error) {
+      console.error(`Cache get failed: ${error.message}`);
+    }
 
     if (!settings) {
       settings = await notificationService.getNotificationSettings(userId);
       if (settings) {
-        await redisService.setJSON(cacheKey, settings, { ex: 3600 });
+        try {
+          await redisService.setJSON(cacheKey, settings, { ex: 3600 });
+        } catch (error) {
+          console.error(`Cache set failed: ${error.message}`);
+        }
       }
     }
 
@@ -837,8 +898,8 @@ export const updateNotificationSettings = asyncHandler(async (req, res) => {
       });
     }
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `update_notification_settings:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `update_notification_settings_${userId}`,
       20,
       3600
     );
@@ -895,7 +956,11 @@ export const updateNotificationSettings = asyncHandler(async (req, res) => {
     const updatedSettings =
       await notificationService.updateNotificationSettings(userId, updateData);
 
-    await redisService.del(`notification_settings:${userId}`);
+    try {
+      await redisService.del(`notification_settings:${userId}`);
+    } catch (error) {
+      console.error(`Cache cleanup failed: ${error.message}`);
+    }
 
     const executionTime = performance.now() - startTime;
 
@@ -952,8 +1017,8 @@ export const sendTestNotification = asyncHandler(async (req, res) => {
       });
     }
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `test_notification:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `test_notification_${userId}`,
       5,
       3600
     );
@@ -988,7 +1053,11 @@ export const sendTestNotification = asyncHandler(async (req, res) => {
       sendSocket: true,
     });
 
-    await redisService.del(`unread_count:${userId}`);
+    try {
+      await redisService.del(`cache:unread_count:${userId}`);
+    } catch (error) {
+      console.error(`Cache cleanup failed: ${error.message}`);
+    }
 
     const executionTime = performance.now() - startTime;
 
@@ -1044,8 +1113,8 @@ export const getNotificationPreferences = asyncHandler(async (req, res) => {
   try {
     const userId = validateUserAuthentication(req);
 
-    const rateLimitResult = await redisService.rateLimitCheck(
-      `get_preferences:${userId}`,
+    const rateLimitResult = await safeRateLimitCheck(
+      `get_preferences_${userId}`,
       50,
       3600
     );

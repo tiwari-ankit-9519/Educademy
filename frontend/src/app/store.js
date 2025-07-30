@@ -11,6 +11,7 @@ import adminCourseReducer from "@/features/adminSlice/adminCourse";
 import adminPaymentReducer from "../features/adminSlice/adminPayment";
 import ticketSupportReducer from "@/features/common/ticketSlice";
 import notificationReducer from "@/features/common/notificationSlice";
+import verificationReducer from "@/features/instructor/verificationSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   adminPayment: adminPaymentReducer,
   ticketSupport: ticketSupportReducer,
   notification: notificationReducer,
+  verification: verificationReducer,
 });
 
 export const store = configureStore({

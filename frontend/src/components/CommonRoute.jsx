@@ -4,10 +4,10 @@ import LoginPage from "../pages/common/LoginPage";
 import RegisterPage from "../pages/common/RegisterPage";
 import OTPVerificationPage from "../pages/common/OTPVerificationPage";
 import ForgotPasswordPage from "../pages/common/ForgotPasswordPage";
-import AuthCallback from "../components/AuthCallback";
 import ProfilePage from "../pages/common/ProfilePage";
 import SupportPage from "@/pages/common/SupportPage";
 import NotificationsPage from "@/pages/common/NotificationsPage";
+import OAuthCallbackPage from "@/pages/common/OAuthCallbackPage";
 
 export const commonRoutes = [
   <Route
@@ -33,7 +33,7 @@ export const commonRoutes = [
   <Route
     key="auth-callback"
     path="/auth/callback"
-    element={<AuthCallback />}
+    element={<OAuthCallbackPage />}
   />,
   <Route
     key="profile"

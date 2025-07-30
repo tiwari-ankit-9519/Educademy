@@ -36,7 +36,6 @@ const AuthCallback = () => {
 
       try {
         const result = await dispatch(exchangeAuthCode({ code })).unwrap();
-
         navigate("/dashboard");
       } catch (err) {
         console.error("Auth callback error:", err);

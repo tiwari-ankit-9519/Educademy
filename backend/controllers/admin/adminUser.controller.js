@@ -565,7 +565,7 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
       case "activate":
         updateData = { isActive: true };
         actionMessage = "activated";
-        notificationType = "account_reactivated";
+        notificationType = "ACCOUNT_REACTIVATED";
         notificationMessage = "Your account has been reactivated";
         emailTemplate = {
           subject: "Account Reactivated - Educademy",
@@ -2486,9 +2486,9 @@ export const reviewVerificationRequest = asyncHandler(async (req, res) => {
             }),
             notificationService.createNotification({
               userId: verificationRequest.instructor.user.id,
-              type: "SYSTEM_ANNOUNCEMENT",
-              title: "Verification Approved!",
-              message: `Congratulations! Your ${verificationRequest.verificationLevel.toLowerCase()} verification has been approved.`,
+              type: "SYSTEM_NOTIFICATION",
+              title: "Verification Approved! 🎉",
+              message: `Congratulations! Your ${verificationRequest.verificationLevel.toLowerCase()} verification has been approved. You now have a verified instructor badge.`,
               priority: "HIGH",
               data: {
                 requestId,
@@ -2496,8 +2496,11 @@ export const reviewVerificationRequest = asyncHandler(async (req, res) => {
                 verificationBadge: verificationBadge,
                 approvedAt: updatedRequest.reviewedAt,
                 notificationType: "verification_approved",
+                actionType: "approved",
               },
               actionUrl: "/instructor/profile",
+              sendEmail: false,
+              sendSocket: true,
             }),
           ]);
         } else {
@@ -2526,9 +2529,9 @@ export const reviewVerificationRequest = asyncHandler(async (req, res) => {
             }),
             notificationService.createNotification({
               userId: verificationRequest.instructor.user.id,
-              type: "SYSTEM_ANNOUNCEMENT",
+              type: "SUPPORT_TICKET_UPDATED",
               title: "Verification Update Required",
-              message: `Your ${verificationRequest.verificationLevel.toLowerCase()} verification request needs updates before approval.`,
+              message: `Your ${verificationRequest.verificationLevel.toLowerCase()} verification request needs updates before approval. Reason: ${rejectionReason}`,
               priority: "NORMAL",
               data: {
                 requestId,
@@ -2536,13 +2539,16 @@ export const reviewVerificationRequest = asyncHandler(async (req, res) => {
                 verificationLevel: verificationRequest.verificationLevel,
                 rejectedAt: updatedRequest.reviewedAt,
                 notificationType: "verification_rejected",
+                actionType: "rejected",
               },
               actionUrl: "/instructor/verification",
+              sendEmail: false,
+              sendSocket: true,
             }),
           ]);
         }
       } catch (error) {
-        console.error("Background notification error:", error);
+        console.error("Background notification/email error:", error);
       }
     });
 

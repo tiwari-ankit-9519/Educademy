@@ -70,11 +70,6 @@ import {
   setNotificationsFilters,
   resetNotificationsFilters,
   clearError,
-  clearLastAnnouncementNotification,
-  addSocketNotification,
-  addBulkSocketNotifications,
-  updateSocketNotificationRead,
-  onAnnouncementStatsUpdated,
 } from "@/features/common/notificationSlice";
 import {
   Bell,
@@ -124,7 +119,6 @@ const NotificationsPage = () => {
     notificationStats,
     notificationSettings,
     announcementStats,
-    lastAnnouncementNotification,
     notificationsLoading,
     markReadLoading,
     deleteNotificationLoading,
@@ -136,12 +130,7 @@ const NotificationsPage = () => {
     pendingDeletes,
   } = useSelector((state) => state.notification);
 
-  const {
-    isConnected,
-    markNotificationsRead,
-    subscribeToNotificationEvents,
-    unsubscribeFromNotificationEvents,
-  } = useSocket();
+  const { isConnected, markNotificationsRead } = useSocket();
 
   const [selectedNotifications, setSelectedNotifications] = useState([]);
   const [selectedNotification, setSelectedNotification] = useState(null);
@@ -152,8 +141,6 @@ const NotificationsPage = () => {
   const [isDeleteAllReadDialogOpen, setIsDeleteAllReadDialogOpen] =
     useState(false);
   const [isAnnouncementStatsDialogOpen, setIsAnnouncementStatsDialogOpen] =
-    useState(false);
-  const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] =
     useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
@@ -186,101 +173,6 @@ const NotificationsPage = () => {
     read: 0,
     byPriority: {},
   });
-
-  useEffect(() => {
-    if (
-      isConnected &&
-      subscribeToNotificationEvents &&
-      unsubscribeFromNotificationEvents
-    ) {
-      const handleNewNotification = (notification) => {
-        console.log("Received new notification:", notification);
-        dispatch(addSocketNotification(notification));
-
-        setRealtimeNotifications((prev) => new Set([...prev, notification.id]));
-
-        setTimeout(() => {
-          setRealtimeNotifications((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(notification.id);
-            return newSet;
-          });
-        }, 5000);
-
-        if (notification.type === "SYSTEM_ANNOUNCEMENT") {
-          toast.info(`📢 New announcement: ${notification.title}`);
-        } else {
-          toast.info(`🔔 New notification: ${notification.title}`);
-        }
-      };
-
-      const handleNotificationUpdate = (data) => {
-        console.log("Received notification update:", data);
-        dispatch(updateSocketNotificationRead(data));
-      };
-
-      const handleBulkNotifications = (notifications) => {
-        console.log("Received bulk notifications:", notifications);
-        dispatch(addBulkSocketNotifications(notifications));
-
-        notifications.forEach((notification) => {
-          setRealtimeNotifications(
-            (prev) => new Set([...prev, notification.id])
-          );
-
-          setTimeout(() => {
-            setRealtimeNotifications((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(notification.id);
-              return newSet;
-            });
-          }, 5000);
-        });
-
-        const announcementCount = notifications.filter(
-          (n) => n.type === "SYSTEM_ANNOUNCEMENT"
-        ).length;
-        if (announcementCount > 0) {
-          toast.info(
-            `📢 ${announcementCount} new announcement${
-              announcementCount > 1 ? "s" : ""
-            } received`
-          );
-        }
-      };
-
-      const handleAnnouncementStatsUpdate = (data) => {
-        console.log("Received announcement stats update:", data);
-        dispatch(onAnnouncementStatsUpdated(data));
-      };
-
-      subscribeToNotificationEvents({
-        onNewNotification: handleNewNotification,
-        onNotificationUpdate: handleNotificationUpdate,
-        onBulkNotifications: handleBulkNotifications,
-        onAnnouncementStatsUpdate: handleAnnouncementStatsUpdate,
-      });
-
-      return () => {
-        unsubscribeFromNotificationEvents();
-      };
-    }
-  }, [
-    isConnected,
-    subscribeToNotificationEvents,
-    unsubscribeFromNotificationEvents,
-    dispatch,
-  ]);
-
-  useEffect(() => {
-    if (lastAnnouncementNotification && !isAnnouncementDialogOpen) {
-      setIsAnnouncementDialogOpen(true);
-      setTimeout(() => {
-        setIsAnnouncementDialogOpen(false);
-        dispatch(clearLastAnnouncementNotification());
-      }, 5000);
-    }
-  }, [lastAnnouncementNotification, isAnnouncementDialogOpen, dispatch]);
 
   useEffect(() => {
     if (!hasInitialLoaded) {
@@ -619,53 +511,6 @@ const NotificationsPage = () => {
 
   return (
     <>
-      <Dialog
-        open={isAnnouncementDialogOpen}
-        onOpenChange={() => {}}
-        modal={true}
-      >
-        <DialogContent
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md border-0 max-w-none w-screen h-screen p-0 m-0"
-          onInteractOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
-        >
-          <div className="relative max-w-2xl mx-auto bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white border-0 shadow-2xl rounded-3xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-pink-600/30"></div>
-            <div className="relative z-10 p-8 text-center">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-white/20 rounded-full backdrop-blur-sm">
-                  <Megaphone className="w-12 h-12 text-white" />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-white">
-                  📢 System Announcement
-                </h2>
-
-                {lastAnnouncementNotification && (
-                  <>
-                    <h3 className="text-xl font-semibold text-white/95">
-                      {lastAnnouncementNotification.title}
-                    </h3>
-
-                    <p className="text-white/90 text-lg leading-relaxed max-w-lg mx-auto">
-                      {lastAnnouncementNotification.message}
-                    </p>
-                  </>
-                )}
-
-                <div className="flex justify-center items-center space-x-2 text-white/80 text-sm mt-6">
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
-                  <span>This message will disappear automatically</span>
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900">
         <div className="container mx-auto px-4 py-8 max-w-7xl relative">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">

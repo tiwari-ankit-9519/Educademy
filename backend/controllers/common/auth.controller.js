@@ -47,7 +47,14 @@ const BCRYPT_SALT_ROUNDS = 10;
 
 const fastUserCheck = async (email) => {
   const cacheKey = `user_check:${email}`;
-  let result = await redisService.getJSON(cacheKey);
+  let result;
+
+  try {
+    result = await redisService.getJSON(cacheKey);
+  } catch (redisError) {
+    console.warn("Redis get failed:", redisError);
+    result = null;
+  }
 
   if (!result) {
     result = await prisma.user.findUnique({
@@ -66,7 +73,11 @@ const fastUserCheck = async (email) => {
     });
 
     if (result) {
-      await redisService.setJSON(cacheKey, result, { ex: 300 });
+      try {
+        await redisService.setJSON(cacheKey, result, { ex: 300 });
+      } catch (redisError) {
+        console.warn("Redis set failed:", redisError);
+      }
     }
   }
 
@@ -1671,24 +1682,77 @@ const createTempAuthCode = async (userId) => {
 };
 
 export const googleAuth = (req, res, next) => {
-  const { role = "STUDENT" } = req.query;
+  const { role = "STUDENT", context = "login" } = req.query;
   const validRoles = ["STUDENT", "INSTRUCTOR"];
   const userRole = validRoles.includes(role) ? role : "STUDENT";
 
-  // Store role in session for callback
-  req.session.pendingRole = userRole;
+  try {
+    if (context === "registration") {
+      if (req.session) {
+        req.session.pendingRole = userRole;
+        req.session.isRegistration = true;
+      } else {
+        console.warn(
+          "Session not available, session-based role storage failed"
+        );
+      }
+    } else {
+      if (req.session) {
+        delete req.session.pendingRole;
+        delete req.session.isRegistration;
+      }
+    }
 
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })(req, res, next);
+    const authURL = `/auth/google?role=${userRole}&context=${context}`;
+
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state: JSON.stringify({ role: userRole, context, timestamp: Date.now() }),
+    })(req, res, next);
+  } catch (error) {
+    console.error("googleAuth error:", error);
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/login?error=auth_setup_failed`
+    );
+  }
 };
 
 export const googleAuthCallback = (req, res, next) => {
   passport.authenticate("google", async (err, profile) => {
-    const userRole = req.session.pendingRole || "STUDENT";
-    delete req.session.pendingRole;
+    let isRegistration = false;
+    let userRole = "STUDENT";
 
     try {
+      const stateParam = req.query.state;
+      let stateData = null;
+
+      if (stateParam) {
+        try {
+          stateData = JSON.parse(stateParam);
+          isRegistration = stateData.context === "registration";
+          userRole = stateData.role || "STUDENT";
+        } catch (stateError) {
+          console.warn("Failed to parse state parameter:", stateError);
+        }
+      }
+
+      if (!stateData) {
+        try {
+          if (req.session) {
+            isRegistration = req.session.isRegistration || false;
+            userRole = req.session.pendingRole || "STUDENT";
+            delete req.session.pendingRole;
+            delete req.session.isRegistration;
+          } else {
+            console.warn("No session available for role retrieval");
+          }
+        } catch (sessionError) {
+          console.error("Session read error:", sessionError);
+          isRegistration = false;
+          userRole = "STUDENT";
+        }
+      }
+
       if (err) {
         console.error("Google auth error:", err);
         return res.redirect(
@@ -1697,6 +1761,7 @@ export const googleAuthCallback = (req, res, next) => {
       }
 
       if (!profile) {
+        console.error("No profile returned from Google");
         return res.redirect(
           `${process.env.FRONTEND_URL}/login?error=auth_cancelled`
         );
@@ -1721,7 +1786,6 @@ export const googleAuthCallback = (req, res, next) => {
       });
 
       if (user) {
-        // Existing user
         const existingGoogleLogin = user.socialLogins?.find(
           (login) =>
             login.provider === "google" && login.providerId === profile.id
@@ -1737,7 +1801,6 @@ export const googleAuthCallback = (req, res, next) => {
           });
         }
 
-        // Update user
         const updateData = {
           isVerified: true,
           lastLogin: new Date(),
@@ -1757,7 +1820,8 @@ export const googleAuthCallback = (req, res, next) => {
           },
         });
       } else {
-        // New user
+        const finalRole = isRegistration ? userRole : "STUDENT";
+
         const result = await prisma.$transaction(async (tx) => {
           const newUser = await tx.user.create({
             data: {
@@ -1771,7 +1835,7 @@ export const googleAuthCallback = (req, res, next) => {
                 "",
               email: normalizedEmail,
               profileImage: profile.photos?.[0]?.value || null,
-              role: userRole,
+              role: finalRole,
               isVerified: true,
               isActive: true,
               lastLogin: new Date(),
@@ -1786,7 +1850,7 @@ export const googleAuthCallback = (req, res, next) => {
             },
           });
 
-          await createUserProfile(newUser.id, userRole, tx);
+          await createUserProfile(newUser.id, finalRole, tx);
 
           return newUser;
         });
@@ -1803,22 +1867,25 @@ export const googleAuthCallback = (req, res, next) => {
 
       const authCode = await createTempAuthCode(user.id);
 
-      res.redirect(
+      return res.redirect(
         `${process.env.FRONTEND_URL}/auth/callback?code=${authCode}&success=true&provider=google`
       );
     } catch (error) {
       console.error("Google auth callback error:", error);
-      res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=auth_failed`
+      );
     }
   })(req, res, next);
 };
 
 export const exchangeAuthCode = async (req, res) => {
+  const requestId = generateRequestId();
+
   try {
     const { code } = req.body;
 
     if (!code) {
-      console.log("No code provided in request");
       return res.status(400).json({
         success: false,
         message: "Authorization code is required",
@@ -1843,13 +1910,6 @@ export const exchangeAuthCode = async (req, res) => {
     });
 
     if (!authSession) {
-      const expiredSession = await prisma.session.findFirst({
-        where: {
-          token: code,
-          deviceType: "temp_auth_code",
-        },
-      });
-
       return res.status(400).json({
         success: false,
         message: "Invalid or expired authorization code",
@@ -1862,13 +1922,11 @@ export const exchangeAuthCode = async (req, res) => {
 
     const token = generateToken(authSession.userId);
 
-    console.log("Creating permanent session");
-
     const newSession = await prisma.session.create({
       data: {
         token,
         userId: authSession.userId,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         deviceType: req.get("User-Agent")?.substring(0, 255) || "web",
         ipAddress: req.ip || "127.0.0.1",
         isActive: true,
@@ -1877,6 +1935,37 @@ export const exchangeAuthCode = async (req, res) => {
     });
 
     const user = authSession.user;
+
+    try {
+      await Promise.all([
+        redisService
+          .setJSON(
+            `session:${token}`,
+            {
+              userId: user.id,
+              sessionId: newSession.id,
+              createdAt: newSession.createdAt,
+              expiresAt: newSession.expiresAt,
+              deviceType: newSession.deviceType,
+              ipAddress: newSession.ipAddress,
+              lastActivity: new Date(),
+            },
+            { ex: 30 * 24 * 60 * 60 }
+          )
+          .catch((err) => console.warn("Redis session storage failed:", err)),
+        redisService
+          .sadd(`user_sessions:${user.id}`, token)
+          .catch((err) => console.warn("Redis session list failed:", err)),
+        redisService
+          .expire(`user_sessions:${user.id}`, 30 * 24 * 60 * 60)
+          .catch((err) => console.warn("Redis expire failed:", err)),
+      ]);
+    } catch (redisError) {
+      console.warn(
+        "Redis operations failed, continuing without cache:",
+        redisError
+      );
+    }
 
     res.status(200).json({
       success: true,
@@ -1903,15 +1992,10 @@ export const exchangeAuthCode = async (req, res) => {
           ipAddress: newSession.ipAddress,
         },
       },
-      message: "",
+      message: "Authentication successful",
     });
   } catch (error) {
     console.error("Auth code exchange error:", error);
-    console.error("Error details:", {
-      message: error.message,
-      stack: error.stack,
-      code: req.body?.code ? "present" : "missing",
-    });
 
     res.status(500).json({
       success: false,

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { gsap } from "gsap";
 import {
   Eye,
   EyeOff,
@@ -13,8 +12,6 @@ import {
   Loader2,
   Shield,
   Zap,
-  User,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +24,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useTheme } from "@/components/ThemeProvider";
 import { loginUser, clearError } from "@/features/common/authSlice";
 import SocialLogin from "@/components/SocialLogin";
 
 const LoginPage = () => {
-  const { theme } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector(
@@ -45,215 +40,48 @@ const LoginPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
-  const [focusedField, setFocusedField] = useState("");
 
-  const containerRef = useRef(null);
   const formRef = useRef(null);
-  const titleRef = useRef(null);
-  const socialRef = useRef(null);
-  const cardRef = useRef(null);
-  const backgroundRef = useRef(null);
-  const particlesRef = useRef(null);
-  const gradientRef = useRef(null);
-
-  const initializeAnimations = useCallback(() => {
-    const tl = gsap.timeline();
-
-    gsap.set([cardRef.current, titleRef.current, formRef.current], {
-      opacity: 0,
-      y: 60,
-      scale: 0.95,
-    });
-
-    gsap.set(".floating-shape", {
-      opacity: 0,
-      scale: 0,
-      rotation: -180,
-    });
-
-    gsap.set(".particle", {
-      opacity: 0,
-      scale: 0,
-    });
-
-    gsap.set(backgroundRef.current, {
-      opacity: 0,
-    });
-
-    gsap.set(particlesRef.current, {
-      opacity: 0,
-    });
-
-    tl.to(backgroundRef.current, {
-      duration: 1,
-      opacity: 1,
-      ease: "power2.out",
-    })
-      .to(
-        particlesRef.current,
-        {
-          duration: 0.8,
-          opacity: 1,
-          ease: "power2.out",
-        },
-        "-=0.5"
-      )
-      .to(
-        ".floating-shape",
-        {
-          duration: 1.2,
-          opacity: theme === "dark" ? 0.15 : 0.1,
-          scale: 1,
-          rotation: 0,
-          stagger: 0.15,
-          ease: "back.out(1.7)",
-        },
-        "-=0.5"
-      )
-      .to(
-        cardRef.current,
-        {
-          duration: 1,
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          ease: "power3.out",
-        },
-        "-=0.8"
-      )
-      .to(
-        titleRef.current,
-        {
-          duration: 0.8,
-          opacity: 1,
-          y: 0,
-          ease: "power2.out",
-        },
-        "-=0.6"
-      )
-      .to(
-        formRef.current,
-        {
-          duration: 0.8,
-          opacity: 1,
-          y: 0,
-          ease: "power2.out",
-        },
-        "-=0.4"
-      )
-      .to(
-        ".particle",
-        {
-          duration: 0.6,
-          opacity: 1,
-          scale: 1,
-          stagger: 0.05,
-          ease: "power2.out",
-        },
-        "-=0.4"
-      );
-
-    const floatingShapes = document.querySelectorAll(".floating-shape");
-    floatingShapes.forEach((shape, index) => {
-      gsap.to(shape, {
-        duration: 8 + index * 0.8,
-        y: `${Math.random() * 30 - 15}px`,
-        x: `${Math.random() * 30 - 15}px`,
-        rotation: `${Math.random() * 360}deg`,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: index * 0.3,
-      });
-    });
-
-    const particles = document.querySelectorAll(".particle");
-    particles.forEach((particle, index) => {
-      gsap.to(particle, {
-        duration: 5 + Math.random() * 3,
-        y: `${Math.random() * 40 - 20}px`,
-        x: `${Math.random() * 40 - 20}px`,
-        opacity: Math.random() * 0.3 + 0.2,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: index * 0.2,
-      });
-    });
-  }, [theme]);
 
   useEffect(() => {
     dispatch(clearError());
-    initializeAnimations();
-    animateGradient();
-  }, [dispatch, initializeAnimations]);
-
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-      gsap.to(gradientRef.current, {
-        background: "linear-gradient(135deg, #0f172a, #1e293b, #0f172a)",
-        duration: 1,
-      });
-    } else {
-      document.documentElement.classList.remove("dark");
-      gsap.to(gradientRef.current, {
-        background: "linear-gradient(135deg, #e0f2fe, #f0f9ff, #e0f2fe)",
-        duration: 1,
-      });
-    }
-  }, [theme]);
-
-  const animateGradient = () => {
-    gsap.to(gradientRef.current, {
-      backgroundPosition: "100% 100%",
-      duration: 15,
-      repeat: -1,
-      yoyo: true,
-      ease: "linear",
-    });
-  };
-
-  const animateFieldFocus = (fieldName) => {
-    const field = document.querySelector(`[name="${fieldName}"]`);
-    if (field) {
-      gsap.to(field.parentElement, {
-        duration: 0.3,
-        scale: 1.02,
-        ease: "power2.out",
-      });
-      gsap.to(field, {
-        duration: 0.3,
-        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)",
-        ease: "power2.out",
-      });
-    }
-  };
-
-  const animateFieldBlur = (fieldName) => {
-    const field = document.querySelector(`[name="${fieldName}"]`);
-    if (field) {
-      gsap.to(field.parentElement, {
-        duration: 0.3,
-        scale: 1,
-        ease: "power2.out",
-      });
-      gsap.to(field, {
-        duration: 0.3,
-        boxShadow: "0 0 0 0 rgba(59, 130, 246, 0)",
-        ease: "power2.out",
-      });
-    }
-  };
+  }, [dispatch]);
 
   const shakeForm = () => {
-    gsap.to(formRef.current, {
-      duration: 0.1,
-      x: -8,
-      repeat: 6,
-      yoyo: true,
-      ease: "power2.inOut",
-    });
+    if (formRef.current) {
+      formRef.current.style.transform = "translateX(-8px)";
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.style.transform = "translateX(8px)";
+          setTimeout(() => {
+            if (formRef.current) {
+              formRef.current.style.transform = "translateX(-8px)";
+              setTimeout(() => {
+                if (formRef.current) {
+                  formRef.current.style.transform = "translateX(8px)";
+                  setTimeout(() => {
+                    if (formRef.current) {
+                      formRef.current.style.transform = "translateX(-8px)";
+                      setTimeout(() => {
+                        if (formRef.current) {
+                          formRef.current.style.transform = "translateX(8px)";
+                          setTimeout(() => {
+                            if (formRef.current) {
+                              formRef.current.style.transform =
+                                "translateX(0px)";
+                            }
+                          }, 100);
+                        }
+                      }, 100);
+                    }
+                  }, 100);
+                }
+              }, 100);
+            }
+          }, 100);
+        }
+      }, 100);
+    }
   };
 
   const validateForm = () => {
@@ -328,63 +156,13 @@ const LoginPage = () => {
     }
   };
 
-  const handleFieldFocus = (fieldName) => {
-    setFocusedField(fieldName);
-    animateFieldFocus(fieldName);
-  };
-
-  const handleFieldBlur = () => {
-    setFocusedField("");
-    animateFieldBlur(focusedField);
-  };
-
   return (
-    <div
-      ref={gradientRef}
-      className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900"
-    >
-      <div
-        ref={backgroundRef}
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-      >
-        <div className="floating-shape absolute top-16 left-16 w-24 h-24 bg-indigo-300/20 dark:bg-indigo-500/10 rounded-full"></div>
-        <div className="floating-shape absolute top-32 right-24 w-32 h-32 bg-blue-300/20 dark:bg-blue-500/10 rounded-2xl"></div>
-        <div className="floating-shape absolute bottom-24 left-24 w-28 h-28 bg-cyan-300/20 dark:bg-cyan-500/10 rounded-full"></div>
-        <div className="floating-shape absolute bottom-16 right-16 w-20 h-20 bg-violet-300/20 dark:bg-violet-500/10 rounded-2xl"></div>
-        <div className="floating-shape absolute top-1/2 left-1/3 w-16 h-16 bg-teal-300/10 dark:bg-teal-500/5 rounded-full"></div>
-        <div className="floating-shape absolute top-1/3 right-1/3 w-12 h-12 bg-sky-300/10 dark:bg-sky-500/5 rounded-2xl"></div>
-      </div>
-
-      <div
-        ref={particlesRef}
-        className="absolute inset-0 overflow-hidden pointer-events-none"
-      >
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="particle absolute w-1.5 h-1.5 bg-indigo-300/30 dark:bg-indigo-500/20 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        ref={containerRef}
-        className="flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8"
-      >
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900">
+      <div className="flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-sm sm:max-w-md">
-          <Card
-            ref={cardRef}
-            className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl overflow-hidden"
-          >
+          <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent"></div>
-            <CardHeader
-              ref={titleRef}
-              className="text-center pb-6 sm:pb-8 relative z-10"
-            >
+            <CardHeader className="text-center pb-6 sm:pb-8 relative z-10">
               <div className="mx-auto mb-4 sm:mb-6 relative">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-lg shadow-indigo-300/30 dark:shadow-indigo-500/20">
                   <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -420,7 +198,10 @@ const LoginPage = () => {
                 </Alert>
               )}
 
-              <div ref={formRef} className="space-y-4 sm:space-y-6">
+              <div
+                ref={formRef}
+                className="space-y-4 sm:space-y-6 transition-transform duration-100"
+              >
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
@@ -429,15 +210,13 @@ const LoginPage = () => {
                     Email Address
                   </Label>
                   <div className="relative group">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 sm:w-5 sm:h-5 transition-colors group-focus-within:text-indigo-500" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 sm:w-5 sm:h-5" />
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      onFocus={() => handleFieldFocus("email")}
-                      onBlur={handleFieldBlur}
                       disabled={loading}
                       className={`pl-10 sm:pl-12 pr-4 py-2 sm:py-3 h-10 sm:h-12 bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl transition-all duration-200 focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base ${
                         validationErrors.email
@@ -474,15 +253,13 @@ const LoginPage = () => {
                     </Link>
                   </div>
                   <div className="relative group">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 sm:w-5 sm:h-5 transition-colors group-focus-within:text-indigo-500" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 sm:w-5 sm:h-5" />
                     <Input
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
                       value={formData.password}
                       onChange={handleInputChange}
-                      onFocus={() => handleFieldFocus("password")}
-                      onBlur={handleFieldBlur}
                       disabled={loading}
                       className={`pl-10 sm:pl-12 pr-10 sm:pr-12 py-2 sm:py-3 h-10 sm:h-12 bg-white/70 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl transition-all duration-200 focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base ${
                         validationErrors.password
@@ -537,8 +314,8 @@ const LoginPage = () => {
                 </Button>
               </div>
 
-              <div ref={socialRef}>
-                <SocialLogin role="STUDENT" disabled={loading} />
+              <div>
+                <SocialLogin disabled={loading} />
               </div>
 
               <div className="text-center pt-2">

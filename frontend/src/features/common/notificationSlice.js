@@ -43,6 +43,8 @@ const initialState = {
   pendingMarkAsRead: [],
   pendingDeletes: [],
   lastAnnouncementNotification: null,
+  announcementDisplayQueue: [],
+  isAnnouncementDisplaying: false,
   realtimeUpdates: {
     enabled: true,
     lastUpdate: null,
@@ -115,7 +117,6 @@ export const markNotificationsAsRead = createAsyncThunk(
         notificationIds: markAll ? undefined : notificationIds,
         markAll,
       });
-      toast.success(response.data.message);
       return {
         data: response.data.data,
         notificationIds: markAll
@@ -149,7 +150,6 @@ export const deleteNotification = createAsyncThunk(
 
     try {
       const response = await api.delete(`/notifications/${notificationId}`);
-      toast.success(response.data.message);
       return {
         data: response.data.data,
         notificationId,
@@ -178,7 +178,6 @@ export const deleteAllReadNotifications = createAsyncThunk(
 
     try {
       const response = await api.delete("/notifications/read/all");
-      toast.success(response.data.message);
       return {
         data: response.data.data,
         deletedNotificationIds: readNotificationIds,
@@ -222,7 +221,6 @@ export const updateNotificationSettings = createAsyncThunk(
 
     try {
       const response = await api.put("/notifications/settings", settings);
-      toast.success(response.data.message);
       return {
         data: response.data.data,
         optimisticSettings,
@@ -243,7 +241,6 @@ export const sendTestNotification = createAsyncThunk(
   async (testData, { rejectWithValue }) => {
     try {
       const response = await api.post("/notifications/test", testData);
-      toast.success(response.data.message);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -349,6 +346,29 @@ const removeFromArray = (array, items) => {
   return array.filter((item) => !itemsArray.includes(item));
 };
 
+const processAnnouncementNotification = (state, notification) => {
+  if (notification.type === "SYSTEM_ANNOUNCEMENT") {
+    if (!state.isAnnouncementDisplaying) {
+      state.lastAnnouncementNotification = notification;
+      state.isAnnouncementDisplaying = true;
+    } else {
+      state.announcementDisplayQueue.push(notification);
+    }
+
+    if (notification.data?.announcementId) {
+      state.announcementStats[notification.data.announcementId] = {
+        ...state.announcementStats[notification.data.announcementId],
+        totalNotifications:
+          (state.announcementStats[notification.data.announcementId]
+            ?.totalNotifications || 0) + 1,
+        unreadCount:
+          (state.announcementStats[notification.data.announcementId]
+            ?.unreadCount || 0) + (!notification.isRead ? 1 : 0),
+      };
+    }
+  }
+};
+
 const notificationSlice = createSlice({
   name: "notification",
   initialState,
@@ -431,21 +451,7 @@ const notificationSlice = createSlice({
         };
       }
 
-      if (notification.type === "SYSTEM_ANNOUNCEMENT") {
-        state.lastAnnouncementNotification = notification;
-
-        if (notification.data?.announcementId) {
-          state.announcementStats[notification.data.announcementId] = {
-            ...state.announcementStats[notification.data.announcementId],
-            totalNotifications:
-              (state.announcementStats[notification.data.announcementId]
-                ?.totalNotifications || 0) + 1,
-            unreadCount:
-              (state.announcementStats[notification.data.announcementId]
-                ?.unreadCount || 0) + (!notification.isRead ? 1 : 0),
-          };
-        }
-      }
+      processAnnouncementNotification(state, notification);
 
       state.realtimeUpdates.lastUpdate = new Date().toISOString();
       state.realtimeUpdates.updateCount += 1;
@@ -504,6 +510,8 @@ const notificationSlice = createSlice({
     },
     addBulkSocketNotifications: (state, action) => {
       const notifications = action.payload;
+      const announcementNotifications = [];
+
       notifications.forEach((notification) => {
         const existingIndex = state.socketNotifications.findIndex(
           (n) => n.id === notification.id
@@ -520,28 +528,39 @@ const notificationSlice = createSlice({
           state.notifications.unshift(notification);
         }
 
-        if (
-          notification.type === "SYSTEM_ANNOUNCEMENT" &&
-          notification.data?.announcementId
-        ) {
-          const announcementId = notification.data.announcementId;
-          if (!state.announcementStats[announcementId]) {
+        if (notification.type === "SYSTEM_ANNOUNCEMENT") {
+          announcementNotifications.push(notification);
+
+          if (notification.data?.announcementId) {
+            const announcementId = notification.data.announcementId;
+            if (!state.announcementStats[announcementId]) {
+              state.announcementStats[announcementId] = {
+                totalNotifications: 0,
+                readCount: 0,
+                unreadCount: 0,
+              };
+            }
             state.announcementStats[announcementId] = {
-              totalNotifications: 0,
-              readCount: 0,
-              unreadCount: 0,
+              ...state.announcementStats[announcementId],
+              totalNotifications:
+                state.announcementStats[announcementId].totalNotifications + 1,
+              unreadCount:
+                state.announcementStats[announcementId].unreadCount +
+                (!notification.isRead ? 1 : 0),
             };
           }
-          state.announcementStats[announcementId] = {
-            ...state.announcementStats[announcementId],
-            totalNotifications:
-              state.announcementStats[announcementId].totalNotifications + 1,
-            unreadCount:
-              state.announcementStats[announcementId].unreadCount +
-              (!notification.isRead ? 1 : 0),
-          };
         }
       });
+
+      if (announcementNotifications.length > 0) {
+        const latestAnnouncement = announcementNotifications[0];
+        if (!state.isAnnouncementDisplaying) {
+          state.lastAnnouncementNotification = latestAnnouncement;
+          state.isAnnouncementDisplaying = true;
+        } else {
+          state.announcementDisplayQueue.push(...announcementNotifications);
+        }
+      }
 
       const newUnreadCount = notifications.filter((n) => !n.isRead).length;
       state.unreadCount += newUnreadCount;
@@ -593,6 +612,13 @@ const notificationSlice = createSlice({
     },
     clearLastAnnouncementNotification: (state) => {
       state.lastAnnouncementNotification = null;
+      state.isAnnouncementDisplaying = false;
+
+      if (state.announcementDisplayQueue.length > 0) {
+        const nextAnnouncement = state.announcementDisplayQueue.shift();
+        state.lastAnnouncementNotification = nextAnnouncement;
+        state.isAnnouncementDisplaying = true;
+      }
     },
     setSocketUnreadCount: (state, action) => {
       state.unreadCount = action.payload;
@@ -700,6 +726,10 @@ const notificationSlice = createSlice({
               : 0,
         };
       }
+    },
+    resetAnnouncementDisplay: (state) => {
+      state.isAnnouncementDisplaying = false;
+      state.announcementDisplayQueue = [];
     },
   },
   extraReducers: (builder) => {
@@ -1149,6 +1179,7 @@ export const {
   onAnnouncementStatsUpdated,
   toggleRealtimeUpdates,
   updateAnnouncementNotificationStats,
+  resetAnnouncementDisplay,
 } = notificationSlice.actions;
 
 const notificationReducer = notificationSlice.reducer;

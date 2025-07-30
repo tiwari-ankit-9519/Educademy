@@ -1,10 +1,21 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-const SocialLogin = ({ role = "STUDENT", disabled = false }) => {
+const SocialLogin = ({
+  role = "STUDENT",
+  disabled = false,
+  context = "login",
+}) => {
   const handleSocialLogin = (provider) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
-    const authUrl = `${baseUrl}/auth/${provider}?role=${role}`;
+    let authUrl = `${baseUrl}/auth/${provider}`;
+
+    if (context === "registration") {
+      authUrl += `?role=${role}&context=registration`;
+    } else {
+      authUrl += `?context=login`;
+    }
+
     window.location.href = authUrl;
   };
 
@@ -16,7 +27,7 @@ const SocialLogin = ({ role = "STUDENT", disabled = false }) => {
         </div>
         <div className="relative flex justify-center text-xs sm:text-sm">
           <span className="px-3 sm:px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-            Or sign in with
+            Or {context === "registration" ? "sign up" : "sign in"} with
           </span>
         </div>
       </div>

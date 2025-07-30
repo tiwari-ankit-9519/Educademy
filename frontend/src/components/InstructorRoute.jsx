@@ -1,5 +1,6 @@
 import { Route } from "react-router-dom";
 import { RoleProtectedRoute } from "../components/ProtectedRoute";
+import VerificationPage from "@/pages/instructor/VerificationPage";
 
 export const instructorRoutes = [
   <Route
@@ -74,10 +75,10 @@ export const instructorRoutes = [
   />,
   <Route
     key="instructor-verification"
-    path="/instructor/verification/*"
+    path="/instructor/verifications"
     element={
       <RoleProtectedRoute
-        element={<div>Verification</div>}
+        element={<VerificationPage />}
         allowedRoles={["instructor"]}
       />
     }

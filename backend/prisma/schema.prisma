@@ -138,6 +138,8 @@ model VerificationRequest {
   submittedAt       DateTime                  @default(now())
   reviewedAt        DateTime?
   reviewedBy        String?
+  cancelledAt       DateTime?
+  cancelledBy       String?
   adminNotes        String?                   @db.Text
   rejectionReason   String?                   @db.Text
   additionalInfo    String?                   @db.Text
@@ -158,6 +160,8 @@ model VerificationRequest {
   @@index([submittedAt])
   @@index([reviewedAt])
   @@index([reviewedById])
+  @@index([cancelledAt])
+  @@index([cancelledBy])
   @@index([requestId])
   @@index([createdAt])
   @@index([updatedAt])
@@ -1343,6 +1347,7 @@ enum NotificationType {
   CONTENT_REPORTED
   ACCOUNT_BANNED
   ACCOUNT_REACTIVATED
+  ACCOUNT_VERIFIED
 }
 
 enum NotificationPriority {

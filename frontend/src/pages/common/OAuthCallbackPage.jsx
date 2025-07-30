@@ -33,10 +33,22 @@ const OAuthCallbackPage = () => {
       }
 
       try {
-        await dispatch(exchangeAuthCode({ code })).unwrap();
+        const result = await dispatch(exchangeAuthCode({ code })).unwrap();
+        const userRole = result.data?.user?.role;
         setStatus("success");
         setMessage(`Successfully logged in with ${provider}!`);
-        setTimeout(() => navigate("/"), 1500);
+
+        setTimeout(() => {
+          if (userRole === "STUDENT") {
+            navigate("/");
+          } else if (userRole === "INSTRUCTOR") {
+            navigate("/instructor/dashboard");
+          } else if (userRole === "ADMIN") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
+        }, 1500);
       } catch (error) {
         console.error("Auth code exchange failed:", error);
         setStatus("error");

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
@@ -8,13 +9,14 @@ import {
   addBulkSocketNotifications,
   updateSocketNotificationRead,
   setSocketUnreadCount,
+  onAnnouncementStatsUpdated,
 } from "@/features/common/notificationSlice";
 import {
   setSocketConnectionStatus as setAdminSocketConnectionStatus,
   onAnnouncementCreated,
   onAnnouncementUpdated,
   onAnnouncementDeleted,
-  onAnnouncementStatsUpdated,
+  onAnnouncementStatsUpdated as onAdminAnnouncementStatsUpdated,
   onNotificationStatusUpdate,
 } from "@/features/adminSlice/adminSystem";
 
@@ -82,9 +84,14 @@ const useSocket = () => {
       });
 
       socket.on("notification", (notification) => {
+        console.log("Global notification received:", notification);
         dispatch(addSocketNotification(notification));
 
-        if (!notification.isRead) {
+        if (notification.type === "SYSTEM_ANNOUNCEMENT") {
+          toast.info(`📢 New announcement: ${notification.title}`, {
+            duration: 3000,
+          });
+        } else if (!notification.isRead) {
           toast.info(notification.title, {
             description:
               notification.message.substring(0, 100) +
@@ -95,6 +102,7 @@ const useSocket = () => {
       });
 
       socket.on("bulk_notifications", (notifications) => {
+        console.log("Global bulk notifications received:", notifications);
         dispatch(addBulkSocketNotifications(notifications));
 
         const announcementNotifications = notifications.filter(
@@ -110,11 +118,18 @@ const useSocket = () => {
       });
 
       socket.on("notifications_marked_read", (data) => {
+        console.log("Global notifications marked read:", data);
         dispatch(updateSocketNotificationRead(data));
       });
 
       socket.on("unread_count_updated", (data) => {
+        console.log("Global unread count updated:", data);
         dispatch(setSocketUnreadCount(data.count));
+      });
+
+      socket.on("announcement_stats_updated", (stats) => {
+        console.log("Global announcement stats updated:", stats);
+        dispatch(onAnnouncementStatsUpdated(stats));
       });
 
       socket.on("announcement_created", (announcement) => {
@@ -152,8 +167,8 @@ const useSocket = () => {
         }
       });
 
-      socket.on("announcement_stats_updated", (stats) => {
-        dispatch(onAnnouncementStatsUpdated(stats));
+      socket.on("admin_announcement_stats_updated", (stats) => {
+        dispatch(onAdminAnnouncementStatsUpdated(stats));
       });
 
       socket.on("notification_stats_updated", (data) => {
@@ -270,6 +285,63 @@ const useSocket = () => {
     }
   }, []);
 
+  const subscribeToNotificationEvents = useCallback((handlers) => {
+    console.log(
+      "subscribeToNotificationEvents called (deprecated - handlers now global)"
+    );
+  }, []);
+
+  const unsubscribeFromNotificationEvents = useCallback(() => {
+    console.log(
+      "unsubscribeFromNotificationEvents called (deprecated - handlers now global)"
+    );
+  }, []);
+
+  const subscribeToAnnouncementEvents = useCallback((handlers) => {
+    if (socketRef.current?.connected && handlers) {
+      if (handlers.onAnnouncementCreated) {
+        socketRef.current.on(
+          "announcement_created",
+          handlers.onAnnouncementCreated
+        );
+      }
+      if (handlers.onAnnouncementUpdated) {
+        socketRef.current.on(
+          "announcement_updated",
+          handlers.onAnnouncementUpdated
+        );
+      }
+      if (handlers.onAnnouncementDeleted) {
+        socketRef.current.on(
+          "announcement_deleted",
+          handlers.onAnnouncementDeleted
+        );
+      }
+      if (handlers.onAnnouncementStatsUpdated) {
+        socketRef.current.on(
+          "admin_announcement_stats_updated",
+          handlers.onAnnouncementStatsUpdated
+        );
+      }
+      if (handlers.onNotificationStatusUpdate) {
+        socketRef.current.on(
+          "notification_stats_updated",
+          handlers.onNotificationStatusUpdate
+        );
+      }
+    }
+  }, []);
+
+  const unsubscribeFromAnnouncementEvents = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.off("announcement_created");
+      socketRef.current.off("announcement_updated");
+      socketRef.current.off("announcement_deleted");
+      socketRef.current.off("admin_announcement_stats_updated");
+      socketRef.current.off("notification_stats_updated");
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       connect();
@@ -294,6 +366,10 @@ const useSocket = () => {
     emitAnnouncementCreated,
     emitAnnouncementUpdated,
     emitAnnouncementDeleted,
+    subscribeToNotificationEvents,
+    unsubscribeFromNotificationEvents,
+    subscribeToAnnouncementEvents,
+    unsubscribeFromAnnouncementEvents,
     socket: socketRef.current,
   };
 };

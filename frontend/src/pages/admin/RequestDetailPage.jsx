@@ -198,6 +198,26 @@ const RequestDetailPage = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const renderQualificationTitle = (qual) => {
+    return qual.degree || qual.title || "N/A";
+  };
+
+  const renderQualificationInstitution = (qual) => {
+    return qual.institute || qual.institution || "N/A";
+  };
+
+  const renderExperienceRole = (exp) => {
+    return exp.role || exp.position || exp.title || "N/A";
+  };
+
+  const renderExperienceOrganization = (exp) => {
+    return exp.organization || exp.company || exp.employer || "N/A";
+  };
+
+  const renderExperienceYears = (exp) => {
+    return exp.years || exp.duration || exp.yearsOfExperience || "N/A";
+  };
+
   if (verificationRequestDetailsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900 flex items-center justify-center">
@@ -488,10 +508,10 @@ const RequestDetailPage = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium text-slate-900 dark:text-white">
-                              {qual.degree}
+                              {renderQualificationTitle(qual)}
                             </p>
                             <p className="text-sm text-slate-600 dark:text-slate-400">
-                              {qual.institute}
+                              {renderQualificationInstitution(qual)}
                             </p>
                           </div>
                           <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 border-0">
@@ -527,14 +547,14 @@ const RequestDetailPage = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium text-slate-900 dark:text-white">
-                              {exp.role}
+                              {renderExperienceRole(exp)}
                             </p>
                             <p className="text-sm text-slate-600 dark:text-slate-400">
-                              {exp.organization}
+                              {renderExperienceOrganization(exp)}
                             </p>
                           </div>
                           <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-0">
-                            {exp.years} years
+                            {renderExperienceYears(exp)} years
                           </Badge>
                         </div>
                       </div>

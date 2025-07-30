@@ -71,14 +71,10 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
   const [expandedMenus, setExpandedMenus] = useState(new Set());
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
-  const { notificationStats } = useSelector(
-    (state) => state.notification || {}
-  );
+  const { unreadCount } = useSelector((state) => state.notification || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const unreadCount = notificationStats?.unread || 0;
 
   const toggleExpanded = (menuId) => {
     const newExpanded = new Set(expandedMenus);
@@ -267,13 +263,7 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-verification",
       title: "Verification",
       icon: CheckCircle,
-      children: [
-        {
-          title: "Request Verification",
-          path: "/instructor/verification/request",
-        },
-        { title: "My Requests", path: "/instructor/verification/requests" },
-      ],
+      path: "/instructor/verifications",
     },
   ];
 
@@ -554,7 +544,7 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
         key={item.id}
         variant="ghost"
         className={cn(
-          "w-full h-11 px-3 font-medium transition-all duration-200 rounded-xl flex items-center justify-between",
+          "w-full h-11 px-3 font-medium transition-all duration-200 rounded-xl flex items-center justify-start",
           isItemActive
             ? "bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/30 shadow-sm"
             : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:text-indigo-600 dark:hover:text-indigo-400"
@@ -579,11 +569,6 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
           </div>
           <span className="text-sm">{item.title}</span>
         </div>
-        {item.badge && !isCollapsed && (
-          <Badge className="h-5 w-5 p-0 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-            {item.badge > 99 ? "99+" : item.badge}
-          </Badge>
-        )}
       </Button>
     );
   };
@@ -733,7 +718,7 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleLogout}
-                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl"
+                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 text-white hover:to-red-700 rounded-xl"
                     >
                       {loading ? (
                         <>
