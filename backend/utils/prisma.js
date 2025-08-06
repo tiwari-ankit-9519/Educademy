@@ -6,7 +6,6 @@ const prisma = new PrismaClient({
       ? ["query", "info", "warn", "error"]
       : ["error"],
 
-  // Configure timeouts for slow operations
   datasources: {
     db: {
       url: process.env.DATABASE_URL,

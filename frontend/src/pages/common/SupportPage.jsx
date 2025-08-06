@@ -42,6 +42,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
+import useSocket from "@/hooks/useSocket";
 
 import {
   getSupportTickets,
@@ -81,6 +82,8 @@ import {
   Zap,
   Edit3,
   Plus,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 
 const SupportPage = () => {
@@ -97,10 +100,12 @@ const SupportPage = () => {
     createTicketLoading,
     addResponseLoading,
     updateStatusLoading,
+    socketConnected,
     error,
   } = useSelector((state) => state.ticketSupport);
 
   const { user } = useSelector((state) => state.auth);
+  const { isConnected: socketConnectionStatus } = useSocket();
 
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -169,6 +174,20 @@ const SupportPage = () => {
       });
     }
   }, [ticketStats]);
+
+  useEffect(() => {
+    if (socketConnectionStatus && !socketConnected) {
+      toast.success("Connected to real-time updates", {
+        description: "You'll receive live ticket updates",
+        duration: 3000,
+      });
+    } else if (!socketConnectionStatus && socketConnected) {
+      toast.warning("Lost connection to real-time updates", {
+        description: "Trying to reconnect...",
+        duration: 3000,
+      });
+    }
+  }, [socketConnectionStatus, socketConnected]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...ticketsFilters, [key]: value };
@@ -388,7 +407,7 @@ const SupportPage = () => {
       case "ESCALATED":
         return <Zap className="w-3 h-3" />;
       default:
-        return <Activity className="w-3 h-3" />;
+        return <AlertCircle className="w-3 h-3" />;
     }
   };
 
@@ -440,9 +459,11 @@ const SupportPage = () => {
               <Headphones className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 dark:text-white">
-                {isStaff ? "Support Management" : "My Support Tickets"}
-              </h1>
+              <div className="flex items-center space-x-3 mb-1">
+                <h1 className="text-3xl font-bold text-slate-800 dark:text-white">
+                  {isStaff ? "Support Management" : "My Support Tickets"}
+                </h1>
+              </div>
               <p className="text-slate-600 dark:text-slate-400">
                 {isStaff
                   ? "Manage customer support tickets and responses"
@@ -1205,7 +1226,7 @@ const SupportPage = () => {
                         setIsViewDialogOpen(false);
                         openResponseDialog(selectedTicket);
                       }}
-                      className="rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-md"
+                      className="rounded-xl bg-gradient-to-r from-blue-500 text-white to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-md"
                     >
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Add Response

@@ -104,10 +104,7 @@ export const createAnnouncement = createAsyncThunk(
         "/admin/system/announcements",
         announcementData
       );
-      toast.success(response.data.message);
-
       const createdAnnouncement = response.data.data;
-
       return {
         data: createdAnnouncement,
         tempId,
@@ -147,7 +144,6 @@ export const updateAnnouncement = createAsyncThunk(
         `/admin/system/announcements/${announcementId}`,
         announcementData
       );
-      toast.success(response.data.message);
       return {
         data: response.data.data,
         announcementId,
@@ -177,7 +173,6 @@ export const deleteAnnouncement = createAsyncThunk(
       const response = await api.delete(
         `/admin/system/announcements/${announcementId}`
       );
-      toast.success(response.data.message);
       return {
         deletedAnnouncementId: announcementId,
         data: response.data,

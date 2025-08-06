@@ -192,10 +192,10 @@ const buildTicketFilters = (query, userId, userRole) => {
   return { ...filters, where };
 };
 
-const generateTicketNumber = () => {
+const generateTicketNumber = (ticketId) => {
   const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substr(2, 4);
-  return `TKT-${timestamp}-${random}`.toUpperCase();
+  const idSuffix = ticketId.slice(-4);
+  return `TKT-${timestamp}-${idSuffix}`.toUpperCase();
 };
 
 const determineTicketPriority = (category, description) => {
@@ -243,6 +243,7 @@ const notifyStaffNewTicket = async (ticket, user) => {
       select: { id: true },
     });
 
+    const ticketNumber = generateTicketNumber(ticket.id);
     const notifications = staffUsers.map((staff) =>
       notificationService.createNotification({
         userId: staff.id,
@@ -254,11 +255,27 @@ const notifyStaffNewTicket = async (ticket, user) => {
         priority: ticket.priority === "URGENT" ? "HIGH" : "NORMAL",
         data: {
           ticketId: ticket.id,
-          ticketNumber: ticket.ticketNumber,
+          ticketNumber: ticketNumber,
           category: ticket.category,
           priority: ticket.priority,
           userName: `${user.firstName} ${user.lastName}`,
           userEmail: user.email,
+          ticket: {
+            id: ticket.id,
+            ticketNumber: ticketNumber,
+            subject: ticket.subject,
+            category: ticket.category,
+            priority: ticket.priority,
+            status: ticket.status,
+            createdAt: ticket.createdAt,
+            responseCount: 0,
+            isOverdue: false,
+            user: {
+              name: `${user.firstName} ${user.lastName}`,
+              email: user.email,
+              role: user.role,
+            },
+          },
         },
         actionUrl: `/admin/support/tickets/${ticket.id}`,
         sendEmail: ticket.priority === "URGENT",
@@ -269,6 +286,117 @@ const notifyStaffNewTicket = async (ticket, user) => {
     await Promise.all(notifications);
   } catch (error) {
     console.warn("Failed to notify staff of new ticket:", error);
+  }
+};
+
+const broadcastTicketUpdate = async (
+  ticket,
+  updateType,
+  additionalData = {}
+) => {
+  try {
+    const ticketNumber = generateTicketNumber(ticket.id);
+    const ticketData = {
+      id: ticket.id,
+      ticketNumber: ticketNumber,
+      subject: ticket.subject,
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
+      resolvedAt: ticket.resolvedAt,
+      resolvedBy: ticket.resolvedBy,
+      responseCount: ticket.responseCount || 0,
+      isOverdue: isTicketOverdue(ticket),
+      ...additionalData,
+    };
+
+    if (updateType === "STATUS_UPDATED") {
+      await notificationService.createNotification({
+        userId: ticket.userId,
+        type: "SUPPORT_TICKET_UPDATED",
+        title: "Ticket Status Updated",
+        message: getStatusUpdateMessage(
+          additionalData.oldStatus,
+          ticket.status
+        ),
+        priority: ticket.status === "RESOLVED" ? "HIGH" : "NORMAL",
+        data: {
+          ticketId: ticket.id,
+          ticketNumber: ticketNumber,
+          oldStatus: additionalData.oldStatus,
+          newStatus: ticket.status,
+          updateType: "STATUS_UPDATED",
+          ticket: ticketData,
+        },
+        actionUrl: `/support/tickets/${ticket.id}`,
+        sendEmail: ticket.status === "RESOLVED",
+        sendSocket: true,
+      });
+    }
+
+    if (updateType === "RESPONSE_ADDED") {
+      const isStaffResponse = additionalData.isStaffResponse;
+      const recipientId = isStaffResponse ? ticket.userId : null;
+
+      if (recipientId && recipientId !== additionalData.responderId) {
+        await notificationService.createNotification({
+          userId: recipientId,
+          type: "SUPPORT_TICKET_UPDATED",
+          title: "Support Ticket Response",
+          message: `${
+            isStaffResponse ? "Support team" : "You"
+          } added a response to ticket ${ticketNumber}`,
+          priority: "NORMAL",
+          data: {
+            ticketId: ticket.id,
+            ticketNumber: ticketNumber,
+            responseId: additionalData.responseId,
+            isStaffResponse,
+            updateType: "RESPONSE_ADDED",
+            ticket: ticketData,
+          },
+          actionUrl: `/support/tickets/${ticket.id}`,
+          sendEmail: isStaffResponse,
+          sendSocket: true,
+        });
+      }
+
+      const staffUsers = await prisma.user.findMany({
+        where: {
+          role: { in: STAFF_ROLES.NOTIFICATIONS },
+          isActive: true,
+          id: { not: additionalData.responderId },
+        },
+        select: { id: true },
+      });
+
+      const staffNotifications = staffUsers.map((staff) =>
+        notificationService.createNotification({
+          userId: staff.id,
+          type: "SUPPORT_TICKET_UPDATED",
+          title: "Ticket Response Added",
+          message: `Response added to ticket ${ticketNumber}`,
+          priority: "NORMAL",
+          data: {
+            ticketId: ticket.id,
+            ticketNumber: ticketNumber,
+            responseId: additionalData.responseId,
+            isStaffResponse,
+            updateType: "RESPONSE_ADDED",
+            ticket: ticketData,
+          },
+          actionUrl: `/admin/support/tickets/${ticket.id}`,
+          sendEmail: false,
+          sendSocket: true,
+        })
+      );
+
+      await Promise.all(staffNotifications);
+    }
+  } catch (error) {
+    console.warn("Failed to broadcast ticket update:", error);
   }
 };
 
@@ -331,7 +459,6 @@ export const createSupportTicket = asyncHandler(async (req, res) => {
 
       const { subject, description, category = "GENERAL", priority } = req.body;
 
-      const ticketNumber = generateTicketNumber();
       const determinedPriority =
         priority?.toUpperCase() ||
         determineTicketPriority(category.toUpperCase(), description);
@@ -346,19 +473,12 @@ export const createSupportTicket = asyncHandler(async (req, res) => {
         : [];
 
       const ticketData = {
-        ticketNumber,
         subject: subject.trim(),
         description: description.trim(),
         category: category.toUpperCase(),
         priority: determinedPriority,
         status: "OPEN",
         userId: req.userAuthId,
-        metadata: {
-          userAgent: req.get("User-Agent"),
-          ipAddress: req.ip,
-          attachments,
-          createdVia: "web",
-        },
       };
 
       const ticket = await prisma.supportTicket.create({
@@ -375,6 +495,7 @@ export const createSupportTicket = asyncHandler(async (req, res) => {
         },
       });
 
+      const ticketNumber = generateTicketNumber(ticket.id);
       const cacheKey = `support_tickets:${req.userAuthId}`;
       await redisService.del(cacheKey);
 
@@ -426,7 +547,7 @@ export const createSupportTicket = asyncHandler(async (req, res) => {
         data: {
           ticket: {
             id: ticket.id,
-            ticketNumber: ticket.ticketNumber,
+            ticketNumber: ticketNumber,
             subject: ticket.subject,
             description: ticket.description,
             category: ticket.category,
@@ -565,7 +686,7 @@ export const getSupportTickets = asyncHandler(async (req, res) => {
     const result = {
       tickets: tickets.map((ticket) => ({
         id: ticket.id,
-        ticketNumber: ticket.ticketNumber,
+        ticketNumber: generateTicketNumber(ticket.id),
         subject: ticket.subject,
         category: ticket.category,
         priority: ticket.priority,
@@ -719,7 +840,7 @@ export const getSupportTicket = asyncHandler(async (req, res) => {
     const result = {
       ticket: {
         id: ticket.id,
-        ticketNumber: ticket.ticketNumber,
+        ticketNumber: generateTicketNumber(ticket.id),
         subject: ticket.subject,
         description: ticket.description,
         category: ticket.category,
@@ -729,7 +850,6 @@ export const getSupportTicket = asyncHandler(async (req, res) => {
         updatedAt: ticket.updatedAt,
         resolvedAt: ticket.resolvedAt,
         resolvedBy: ticket.resolvedBy,
-        metadata: ticket.metadata,
         user: canViewAllTickets(req.userRole)
           ? {
               name: `${ticket.user.firstName} ${ticket.user.lastName}`,
@@ -926,6 +1046,21 @@ export const addTicketResponse = asyncHandler(async (req, res) => {
         const updatedTicket = await tx.supportTicket.update({
           where: { id: ticketId },
           data: updateData,
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                role: true,
+              },
+            },
+            _count: {
+              select: {
+                responses: true,
+              },
+            },
+          },
         });
 
         return { response, updatedTicket };
@@ -936,29 +1071,18 @@ export const addTicketResponse = asyncHandler(async (req, res) => {
         await redisService.delPattern(`support_tickets:all:*`);
       }
 
-      const recipientId = isStaffResponse ? ticket.userId : null;
-      if (recipientId && recipientId !== req.userAuthId) {
-        const notificationPromise = notificationService.createNotification({
-          userId: recipientId,
-          type: "SUPPORT_TICKET_UPDATED",
-          title: "Support Ticket Response",
-          message: `${
-            isStaffResponse ? "Support team" : "You"
-          } added a response to ticket ${ticket.ticketNumber}`,
-          priority: "NORMAL",
-          data: {
-            ticketId: ticket.id,
-            ticketNumber: ticket.ticketNumber,
-            responseId: result.response.id,
-            isStaffResponse,
-          },
-          actionUrl: `/support/tickets/${ticket.id}`,
-          sendEmail: isStaffResponse,
-          sendSocket: true,
-        });
-
-        await Promise.allSettled([notificationPromise]);
-      }
+      await broadcastTicketUpdate(
+        {
+          ...result.updatedTicket,
+          responseCount: result.updatedTicket._count.responses,
+        },
+        "RESPONSE_ADDED",
+        {
+          isStaffResponse,
+          responseId: result.response.id,
+          responderId: req.userAuthId,
+        }
+      );
 
       const executionTime = performance.now() - startTime;
 
@@ -1064,6 +1188,12 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
             firstName: true,
             lastName: true,
             email: true,
+            role: true,
+          },
+        },
+        _count: {
+          select: {
+            responses: true,
           },
         },
       },
@@ -1077,6 +1207,7 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
       });
     }
 
+    const oldStatus = ticket.status;
     const updateData = {
       status: status.toUpperCase(),
       updatedAt: new Date(),
@@ -1096,35 +1227,36 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
     const updatedTicket = await prisma.supportTicket.update({
       where: { id: ticketId },
       data: updateData,
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+        _count: {
+          select: {
+            responses: true,
+          },
+        },
+      },
     });
 
     await redisService.delPattern(`support_tickets:${ticket.userId}*`);
     await redisService.delPattern(`support_tickets:all:*`);
 
-    const notificationMessage = getStatusUpdateMessage(
-      ticket.status,
-      status.toUpperCase()
+    await broadcastTicketUpdate(
+      {
+        ...updatedTicket,
+        responseCount: updatedTicket._count.responses,
+      },
+      "STATUS_UPDATED",
+      {
+        oldStatus,
+      }
     );
-    if (notificationMessage) {
-      const notificationPromise = notificationService.createNotification({
-        userId: ticket.userId,
-        type: "SUPPORT_TICKET_UPDATED",
-        title: "Ticket Status Updated",
-        message: notificationMessage,
-        priority: status.toUpperCase() === "RESOLVED" ? "HIGH" : "NORMAL",
-        data: {
-          ticketId: ticket.id,
-          ticketNumber: ticket.ticketNumber,
-          oldStatus: ticket.status,
-          newStatus: status.toUpperCase(),
-        },
-        actionUrl: `/support/tickets/${ticket.id}`,
-        sendEmail: status.toUpperCase() === "RESOLVED",
-        sendSocket: true,
-      });
-
-      await Promise.allSettled([notificationPromise]);
-    }
 
     const executionTime = performance.now() - startTime;
 
@@ -1134,13 +1266,13 @@ export const updateTicketStatus = asyncHandler(async (req, res) => {
       data: {
         ticket: {
           id: updatedTicket.id,
-          ticketNumber: updatedTicket.ticketNumber,
+          ticketNumber: generateTicketNumber(updatedTicket.id),
           status: updatedTicket.status,
           resolvedAt: updatedTicket.resolvedAt,
           resolvedBy: updatedTicket.resolvedBy,
           updatedAt: updatedTicket.updatedAt,
         },
-        statusChanged: ticket.status !== status.toUpperCase(),
+        statusChanged: oldStatus !== status.toUpperCase(),
       },
       meta: {
         requestId,
@@ -1342,10 +1474,8 @@ export const getSupportStats = asyncHandler(async (req, res) => {
       });
     }
 
-    const where = {};
-    if (!canViewAllTickets(req.userRole)) {
-      where.userId = req.userAuthId;
-    }
+    const filters = buildTicketFilters({}, req.userAuthId, req.userRole);
+    const where = filters.where;
 
     const [
       totalTickets,
@@ -1389,7 +1519,9 @@ export const getSupportStats = asyncHandler(async (req, res) => {
         totalTickets,
         openTickets,
         resolvedTickets,
-        closedTickets: totalTickets - openTickets - resolvedTickets,
+        closedTickets: await prisma.supportTicket.count({
+          where: { ...where, status: "CLOSED" },
+        }),
         resolutionRate:
           totalTickets > 0
             ? Math.round((resolvedTickets / totalTickets) * 100)
@@ -1464,12 +1596,13 @@ const isTicketOverdue = (ticket) => {
 };
 
 const generateTicketTimeline = (ticket) => {
+  const ticketNumber = generateTicketNumber(ticket.id);
   const timeline = [
     {
       event: "Ticket Created",
       timestamp: ticket.createdAt,
       type: "created",
-      description: `Ticket ${ticket.ticketNumber} was created`,
+      description: `Ticket ${ticketNumber} was created`,
     },
   ];
 

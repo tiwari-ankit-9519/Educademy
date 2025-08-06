@@ -133,12 +133,10 @@ const AdminAnnouncementsPage = () => {
     expiresAt: "",
   });
 
-  // Track connection status
   useEffect(() => {
     setConnectionStatus(isConnected ? "connected" : "disconnected");
   }, [isConnected]);
 
-  // Socket event handlers
   useEffect(() => {
     if (
       isConnected &&
@@ -148,9 +146,6 @@ const AdminAnnouncementsPage = () => {
       const handleAnnouncementCreated = (data) => {
         dispatch(onAnnouncementCreated(data));
         setRealtimeChanges((prev) => new Set([...prev, data.id]));
-        toast.success(`New announcement created: ${data.title}`);
-
-        // Remove highlight after 3 seconds
         setTimeout(() => {
           setRealtimeChanges((prev) => {
             const newSet = new Set(prev);
@@ -165,7 +160,6 @@ const AdminAnnouncementsPage = () => {
         setRealtimeChanges((prev) => new Set([...prev, data.id]));
         toast.info(`Announcement updated: ${data.title}`);
 
-        // Remove highlight after 3 seconds
         setTimeout(() => {
           setRealtimeChanges((prev) => {
             const newSet = new Set(prev);
@@ -177,18 +171,12 @@ const AdminAnnouncementsPage = () => {
 
       const handleAnnouncementDeleted = (data) => {
         dispatch(onAnnouncementDeleted(data));
-        toast.info(
-          `Announcement deleted: ${
-            data.deletedAnnouncement?.title || "Unknown"
-          }`
-        );
       };
 
       const handleAnnouncementStatsUpdated = (data) => {
         dispatch(onAnnouncementStatsUpdated(data));
         setRealtimeChanges((prev) => new Set([...prev, data.announcementId]));
 
-        // Remove highlight after 2 seconds for stats updates
         setTimeout(() => {
           setRealtimeChanges((prev) => {
             const newSet = new Set(prev);
@@ -202,7 +190,6 @@ const AdminAnnouncementsPage = () => {
         dispatch(onNotificationStatusUpdate(data));
       };
 
-      // Subscribe to events
       subscribeToAnnouncementEvents({
         onAnnouncementCreated: handleAnnouncementCreated,
         onAnnouncementUpdated: handleAnnouncementUpdated,
@@ -222,7 +209,6 @@ const AdminAnnouncementsPage = () => {
     dispatch,
   ]);
 
-  // Initial load
   useEffect(() => {
     if (!hasInitialLoaded) {
       dispatch(getAllAnnouncements({ page: 1, limit: 20 }));
@@ -230,12 +216,10 @@ const AdminAnnouncementsPage = () => {
     }
   }, [dispatch, hasInitialLoaded]);
 
-  // Handle search filter
   useEffect(() => {
     setSearchTerm(announcementsFilters.search || "");
   }, [announcementsFilters.search]);
 
-  // Handle errors
   useEffect(() => {
     if (error) {
       toast.error(error);
@@ -243,25 +227,12 @@ const AdminAnnouncementsPage = () => {
     }
   }, [error, dispatch]);
 
-  // Improved socket emission for created announcements
   useEffect(() => {
     if (isConnected && lastCreatedAnnouncement) {
       try {
-        // Emit to other admins
         if (emitAnnouncementCreated) {
           emitAnnouncementCreated(lastCreatedAnnouncement);
         }
-
-        // Also emit notification creation event for users
-        if (lastCreatedAnnouncement.isActive) {
-          // This should trigger notifications to be sent to users
-          // The backend should handle creating and broadcasting notifications
-          console.log(
-            "Announcement created and should trigger notifications:",
-            lastCreatedAnnouncement
-          );
-        }
-
         dispatch(clearLastCreatedAnnouncement());
       } catch (error) {
         console.error("Failed to emit announcement creation:", error);
@@ -310,9 +281,23 @@ const AdminAnnouncementsPage = () => {
   const loadAnnouncements = () => {
     dispatch(
       getAllAnnouncements({
-        ...announcementsFilters,
-        page: announcementsPagination.page,
-        limit: announcementsPagination.limit,
+        page: 1,
+        limit: 20,
+        ...(announcementsFilters.search && {
+          search: announcementsFilters.search,
+        }),
+        ...(announcementsFilters.type && { type: announcementsFilters.type }),
+        ...(announcementsFilters.priority && {
+          priority: announcementsFilters.priority,
+        }),
+        ...(announcementsFilters.targetAudience && {
+          targetAudience: announcementsFilters.targetAudience,
+        }),
+        ...(announcementsFilters.isActive && {
+          isActive: announcementsFilters.isActive,
+        }),
+        sortBy: announcementsFilters.sortBy || "createdAt",
+        sortOrder: announcementsFilters.sortOrder || "desc",
       })
     );
   };
@@ -334,9 +319,6 @@ const AdminAnnouncementsPage = () => {
         expiresAt: "",
       });
 
-      toast.success("Announcement created and notifications sent!");
-
-      // Emit to other connected admins if connected
       if (isConnected && emitAnnouncementCreated) {
         try {
           emitAnnouncementCreated(result.data);
@@ -363,7 +345,6 @@ const AdminAnnouncementsPage = () => {
 
       toast.success("Announcement updated successfully!");
 
-      // Emit update via socket with improved error handling
       if (isConnected && emitAnnouncementUpdated) {
         try {
           emitAnnouncementUpdated(result.data);
@@ -387,9 +368,7 @@ const AdminAnnouncementsPage = () => {
 
       setIsDeleteDialogOpen(false);
       setAnnouncementToDelete(null);
-      toast.success("Announcement deleted successfully!");
 
-      // Emit deletion via socket
       if (isConnected && emitAnnouncementDeleted) {
         try {
           emitAnnouncementDeleted({
@@ -1325,7 +1304,7 @@ const AdminAnnouncementsPage = () => {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteAnnouncement}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 text-white"
               >
                 Delete
               </AlertDialogAction>

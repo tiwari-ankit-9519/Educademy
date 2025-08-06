@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import Sidebar from "./Sidebar";
 import { Megaphone } from "lucide-react";
 import { clearLastAnnouncementNotification } from "@/features/common/notificationSlice";
+import useSocket from "@/hooks/useSocket";
 
 const Layout = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -13,6 +14,8 @@ const Layout = ({ children }) => {
   const { lastAnnouncementNotification } = useSelector(
     (state) => state.notification
   );
+
+  useSocket();
 
   useEffect(() => {
     if (lastAnnouncementNotification && !isAnnouncementDialogOpen) {

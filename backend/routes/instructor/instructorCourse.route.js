@@ -21,10 +21,10 @@ router.get("/", getCourses);
 router.post("/", uploadImage.single("thumbnail"), createCourse);
 router.get("/dashboard", getInstructorDashboard);
 
+router.get("/stats", getCourseStats);
 router.get("/:courseId", getCourse);
 router.put("/:courseId", uploadImage.single("thumbnail"), updateCourse);
 router.delete("/:courseId", deleteCourse);
-router.get("/:courseId/stats", getCourseStats);
 router.post("/:courseId/submit", submitForReview);
 router.get("/:courseId/validate", validateCourse);
 

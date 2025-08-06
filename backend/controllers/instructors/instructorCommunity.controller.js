@@ -420,7 +420,7 @@ export const answerQuestion = asyncHandler(async (req, res) => {
       userId: question.student.user.id,
       type: "QNA_ANSWER",
       title: "Question Answered",
-      message: `Your question "${question.title.substring(
+      message: `Your question "${question?.title?.substring(
         0,
         50
       )}..." has been answered by the instructor`,
@@ -434,16 +434,6 @@ export const answerQuestion = asyncHandler(async (req, res) => {
       },
       actionUrl: `/courses/${question.course.id}/qna/${questionId}`,
       sendEmail: true,
-    });
-
-    await emailService.sendQuestionAnswered({
-      email: question.student.user.email,
-      firstName: question.student.user.firstName,
-      courseName: question.course.title,
-      questionTitle: question.title,
-      answerPreview: content.substring(0, 200),
-      instructorName: `${instructor.user.firstName} ${instructor.user.lastName}`,
-      questionUrl: `${process.env.FRONTEND_URL}/courses/${question.course.id}/qna/${questionId}`,
     });
 
     await redisService.delPattern(`instructor:${instructorId}:qna:*`);
@@ -1166,15 +1156,6 @@ export const replyToReview = asyncHandler(async (req, res) => {
       },
       actionUrl: `/courses/${review.course.id}/reviews`,
       sendEmail: true,
-    });
-
-    await emailService.sendReviewReply({
-      email: review.author.email,
-      firstName: review.author.firstName,
-      courseName: review.course.title,
-      replyContent: content.substring(0, 200),
-      instructorName: `${instructor.user.firstName} ${instructor.user.lastName}`,
-      reviewUrl: `${process.env.FRONTEND_URL}/courses/${review.course.id}/reviews`,
     });
 
     await redisService.delPattern(`instructor:${instructorId}:reviews:*`);

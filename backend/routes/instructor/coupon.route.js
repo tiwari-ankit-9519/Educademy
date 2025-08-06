@@ -19,7 +19,7 @@ router.post("/create", requireInstructor, createCoupon);
 router.get("/all", isLoggedIn, getCoupons); // Common Controller
 router.get("/analytics", requireInstructor, getCouponAnalytics);
 router.get("/expiring-soon", requireInstructor, getExpiringSoonCoupons);
-router.post("/apply", isLoggedIn, applyCoupon); // For Student
+router.post("/apply", isLoggedIn, applyCoupon); // Common Controller
 router.put("/bulk-update", requireInstructor, bulkUpdateCoupons);
 router.get("/:couponId", isLoggedIn, getCouponById); // Common Controller
 router.put("/:couponId", requireInstructor, updateCoupon);

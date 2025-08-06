@@ -12,6 +12,12 @@ import adminPaymentReducer from "../features/adminSlice/adminPayment";
 import ticketSupportReducer from "@/features/common/ticketSlice";
 import notificationReducer from "@/features/common/notificationSlice";
 import verificationReducer from "@/features/instructor/verificationSlice";
+import couponReducer from "@/features/instructor/couponSlice";
+import instructorCourseReducer from "@/features/instructor/instructorCourseSlice";
+// import earningReducer from "@/features/instructor/earningSlice";
+import instructorCommunityReducer from "@/features/instructor/communitySlice";
+import instructorStudentReducer from "@/features/instructor/instructorStudentSlice";
+import contentManagementReducer from "@/features/instructor/contentManagementSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -30,6 +36,12 @@ const rootReducer = combineReducers({
   ticketSupport: ticketSupportReducer,
   notification: notificationReducer,
   verification: verificationReducer,
+  coupon: couponReducer,
+  instructorCourse: instructorCourseReducer,
+  // earning: earningReducer,
+  instructorCommunity: instructorCommunityReducer,
+  instructorStudent: instructorStudentReducer,
+  contentManagement: contentManagementReducer,
 });
 
 export const store = configureStore({

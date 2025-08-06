@@ -19,6 +19,11 @@ import {
   onAnnouncementStatsUpdated as onAdminAnnouncementStatsUpdated,
   onNotificationStatusUpdate,
 } from "@/features/adminSlice/adminSystem";
+import {
+  setSocketConnectionStatus as setTicketSocketConnectionStatus,
+  syncTicketFromNotification,
+  handleSocketTicketUpdate,
+} from "@/features/common/ticketSlice";
 
 const SOCKET_URL = import.meta.env.PUBLIC_SOCKET_URL || "http://localhost:5000";
 
@@ -33,6 +38,18 @@ const useSocket = () => {
   const { user } = useSelector((state) => state.auth || {});
   const { socketConnectionStatus } = useSelector(
     (state) => state.notification || {}
+  );
+
+  const handleTicketNotification = useCallback(
+    (notification) => {
+      if (
+        notification.type === "SUPPORT_TICKET_UPDATED" ||
+        notification.type === "SUPPORT_TICKET_CREATED"
+      ) {
+        dispatch(syncTicketFromNotification(notification));
+      }
+    },
+    [dispatch]
   );
 
   const connect = useCallback(() => {
@@ -63,6 +80,7 @@ const useSocket = () => {
       socket.on("connect", () => {
         dispatch(setSocketConnectionStatus(true));
         dispatch(setAdminSocketConnectionStatus(true));
+        dispatch(setTicketSocketConnectionStatus(true));
         reconnectAttempts.current = 0;
 
         socket.emit("join", { userId: user.id, role: user.role });
@@ -71,100 +89,52 @@ const useSocket = () => {
       socket.on("disconnect", (reason) => {
         dispatch(setSocketConnectionStatus(false));
         dispatch(setAdminSocketConnectionStatus(false));
+        dispatch(setTicketSocketConnectionStatus(false));
 
         if (reason === "io server disconnect") {
           scheduleReconnect();
         }
       });
 
-      socket.on("connect_error", () => {
+      socket.on("connect_error", (error) => {
         dispatch(setSocketConnectionStatus(false));
         dispatch(setAdminSocketConnectionStatus(false));
+        dispatch(setTicketSocketConnectionStatus(false));
         scheduleReconnect();
       });
 
       socket.on("notification", (notification) => {
-        console.log("Global notification received:", notification);
         dispatch(addSocketNotification(notification));
-
-        if (notification.type === "SYSTEM_ANNOUNCEMENT") {
-          toast.info(`📢 New announcement: ${notification.title}`, {
-            duration: 3000,
-          });
-        } else if (!notification.isRead) {
-          toast.info(notification.title, {
-            description:
-              notification.message.substring(0, 100) +
-              (notification.message.length > 100 ? "..." : ""),
-            duration: 5000,
-          });
-        }
+        handleTicketNotification(notification);
       });
 
       socket.on("bulk_notifications", (notifications) => {
-        console.log("Global bulk notifications received:", notifications);
         dispatch(addBulkSocketNotifications(notifications));
-
-        const announcementNotifications = notifications.filter(
-          (n) => n.type === "SYSTEM_ANNOUNCEMENT"
-        );
-        if (announcementNotifications.length > 0) {
-          const firstAnnouncement = announcementNotifications[0];
-          toast.info("📢 New Announcement", {
-            description: firstAnnouncement.title,
-            duration: 6000,
-          });
-        }
+        notifications.forEach(handleTicketNotification);
       });
 
       socket.on("notifications_marked_read", (data) => {
-        console.log("Global notifications marked read:", data);
         dispatch(updateSocketNotificationRead(data));
       });
 
       socket.on("unread_count_updated", (data) => {
-        console.log("Global unread count updated:", data);
         dispatch(setSocketUnreadCount(data.count));
       });
 
       socket.on("announcement_stats_updated", (stats) => {
-        console.log("Global announcement stats updated:", stats);
         dispatch(onAnnouncementStatsUpdated(stats));
       });
 
       socket.on("announcement_created", (announcement) => {
         dispatch(onAnnouncementCreated(announcement));
-
-        if (user?.role === "ADMIN" || user?.role === "MODERATOR") {
-          toast.success("📢 New Announcement", {
-            description: `"${announcement.title}" has been published`,
-            duration: 4000,
-          });
-        }
       });
 
       socket.on("announcement_updated", (announcement) => {
         dispatch(onAnnouncementUpdated(announcement));
-
-        if (user?.role === "ADMIN" || user?.role === "MODERATOR") {
-          toast.info("📝 Announcement Updated", {
-            description: `"${announcement.title}" has been updated`,
-            duration: 4000,
-          });
-        }
       });
 
       socket.on("announcement_deleted", (data) => {
         dispatch(onAnnouncementDeleted(data));
-
-        if (user?.role === "ADMIN" || user?.role === "MODERATOR") {
-          toast.warning("🗑️ Announcement Deleted", {
-            description: `"${
-              data.deletedAnnouncement?.title || "Announcement"
-            }" has been deleted`,
-            duration: 4000,
-          });
-        }
       });
 
       socket.on("admin_announcement_stats_updated", (stats) => {
@@ -175,13 +145,11 @@ const useSocket = () => {
         dispatch(onNotificationStatusUpdate(data));
       });
 
-      socket.on("system_maintenance", (data) => {
-        toast.warning("🔧 System Maintenance", {
-          description:
-            data.message || "System will be under maintenance shortly",
-          duration: 10000,
-        });
+      socket.on("ticket_updated", (data) => {
+        dispatch(handleSocketTicketUpdate(data));
       });
+
+      socket.on("system_maintenance", (data) => {});
 
       socket.on("forced_logout", () => {
         toast.error("⚠️ Session Expired", {
@@ -192,17 +160,17 @@ const useSocket = () => {
         window.location.href = "/login";
       });
 
-      socket.on("error", () => {
+      socket.on("error", (error) => {
         toast.error("Connection Error", {
           description: "Socket connection error occurred",
           duration: 3000,
         });
       });
     } catch (error) {
-      console.error(error);
+      console.error("🚫 Socket connection failed:", error);
       scheduleReconnect();
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, handleTicketNotification]);
 
   const scheduleReconnect = useCallback(() => {
     if (reconnectAttempts.current >= maxReconnectAttempts) {
@@ -230,6 +198,7 @@ const useSocket = () => {
 
     dispatch(setSocketConnectionStatus(false));
     dispatch(setAdminSocketConnectionStatus(false));
+    dispatch(setTicketSocketConnectionStatus(false));
   }, [dispatch]);
 
   const markNotificationsRead = useCallback((notificationIds) => {
@@ -285,17 +254,9 @@ const useSocket = () => {
     }
   }, []);
 
-  const subscribeToNotificationEvents = useCallback((handlers) => {
-    console.log(
-      "subscribeToNotificationEvents called (deprecated - handlers now global)"
-    );
-  }, []);
+  const subscribeToNotificationEvents = useCallback((handlers) => {}, []);
 
-  const unsubscribeFromNotificationEvents = useCallback(() => {
-    console.log(
-      "unsubscribeFromNotificationEvents called (deprecated - handlers now global)"
-    );
-  }, []);
+  const unsubscribeFromNotificationEvents = useCallback(() => {}, []);
 
   const subscribeToAnnouncementEvents = useCallback((handlers) => {
     if (socketRef.current?.connected && handlers) {
@@ -342,6 +303,38 @@ const useSocket = () => {
     }
   }, []);
 
+  const subscribeToTicketEvents = useCallback((handlers) => {
+    if (socketRef.current?.connected && handlers) {
+      if (handlers.onTicketUpdated) {
+        socketRef.current.on("ticket_updated", handlers.onTicketUpdated);
+      }
+      if (handlers.onTicketCreated) {
+        socketRef.current.on("ticket_created", handlers.onTicketCreated);
+      }
+      if (handlers.onTicketStatusChanged) {
+        socketRef.current.on(
+          "ticket_status_changed",
+          handlers.onTicketStatusChanged
+        );
+      }
+      if (handlers.onTicketResponseAdded) {
+        socketRef.current.on(
+          "ticket_response_added",
+          handlers.onTicketResponseAdded
+        );
+      }
+    }
+  }, []);
+
+  const unsubscribeFromTicketEvents = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.off("ticket_updated");
+      socketRef.current.off("ticket_created");
+      socketRef.current.off("ticket_status_changed");
+      socketRef.current.off("ticket_response_added");
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       connect();
@@ -370,6 +363,8 @@ const useSocket = () => {
     unsubscribeFromNotificationEvents,
     subscribeToAnnouncementEvents,
     unsubscribeFromAnnouncementEvents,
+    subscribeToTicketEvents,
+    unsubscribeFromTicketEvents,
     socket: socketRef.current,
   };
 };

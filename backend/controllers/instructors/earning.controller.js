@@ -353,7 +353,6 @@ const requestPayout = asyncHandler(async (req, res) => {
   const { amount, currency = "INR" } = req.body;
 
   try {
-    // Use utility function for validation
     if (!validateMinPayoutAmount(amount, currency)) {
       return res.status(400).json({
         success: false,
@@ -361,34 +360,46 @@ const requestPayout = asyncHandler(async (req, res) => {
       });
     }
 
-    const availableBalance = await prisma.earning.aggregate({
-      where: {
-        instructorId,
-        status: "PENDING",
-      },
-      _sum: { commission: true },
-    });
+    const [instructor, balanceData] = await Promise.all([
+      prisma.instructor.findUnique({
+        where: { id: instructorId },
+        select: {
+          id: true,
+          paymentDetails: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      }),
 
-    const pendingPayouts = await prisma.payout.aggregate({
-      where: {
-        instructorId,
-        status: { in: ["PENDING", "PROCESSING"] },
-      },
-      _sum: { amount: true },
-    });
+      prisma.$queryRaw`
+        SELECT 
+          COALESCE(SUM(CASE WHEN e.status = 'PENDING' THEN e.commission ELSE 0 END), 0) as available_balance,
+          COALESCE(SUM(CASE WHEN p.status IN ('PENDING', 'PROCESSING') THEN p.amount ELSE 0 END), 0) as pending_payouts
+        FROM "Instructor" i
+        LEFT JOIN "Earning" e ON i.id = e."instructorId"
+        LEFT JOIN "Payout" p ON i.id = p."instructorId"
+        WHERE i.id = ${instructorId}
+      `,
+    ]);
 
-    const completedPayouts = await prisma.payout.aggregate({
-      where: {
-        instructorId,
-        status: "COMPLETED",
-      },
-      _sum: { amount: true },
-    });
+    if (!instructor?.paymentDetails) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Payment details not configured. Please update your payment information.",
+      });
+    }
 
+    const balanceInfo = balanceData[0];
     const totalAvailable =
-      (availableBalance._sum.commission || 0) -
-      (pendingPayouts._sum.amount || 0) -
-      (completedPayouts._sum.amount || 0);
+      parseFloat(balanceInfo.available_balance || 0) -
+      parseFloat(balanceInfo.pending_payouts || 0);
 
     if (amount > totalAvailable) {
       return res.status(400).json({
@@ -401,81 +412,38 @@ const requestPayout = asyncHandler(async (req, res) => {
       });
     }
 
-    const instructor = await prisma.instructor.findUnique({
-      where: { id: instructorId },
-      include: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    if (!instructor.paymentDetails) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Payment details not configured. Please update your payment information.",
-      });
-    }
-
-    // Generate payout reference using utility function
     const payoutReference = generatePayoutReference(instructorId, currency);
 
-    const payout = await prisma.payout.create({
-      data: {
-        amount: new Decimal(amount),
-        currency,
-        status: "PENDING",
-        gatewayId: payoutReference,
-        instructorId,
-      },
-    });
+    const payout = await prisma.$transaction(
+      async (tx) => {
+        const newPayout = await tx.payout.create({
+          data: {
+            amount: new Decimal(amount),
+            currency,
+            status: "PENDING",
+            gatewayId: payoutReference,
+            instructorId,
+          },
+        });
 
-    await prisma.earning.updateMany({
-      where: {
-        instructorId,
-        status: "PENDING",
-      },
-      data: {
-        status: "PAID",
-        paidAt: new Date(),
-      },
-    });
+        await tx.earning.updateMany({
+          where: {
+            instructorId,
+            status: "PENDING",
+          },
+          data: {
+            status: "PAID",
+            paidAt: new Date(),
+          },
+        });
 
-    await notificationService.createNotification({
-      userId: instructor.user.id,
-      type: "payout_requested",
-      title: "Payout Request Submitted",
-      message: `Your payout request for ${formatCurrency(
-        amount,
-        currency
-      )} has been submitted and is pending approval.`,
-      data: {
-        payoutId: payout.id,
-        amount,
-        currency,
-        status: "PENDING",
-        reference: payoutReference,
+        return newPayout;
       },
-    });
-
-    await emailService.sendInstructorPayout({
-      email: instructor.user.email,
-      firstName: instructor.user.firstName,
-      amount,
-      currency,
-      payoutId: payout.id,
-      period: "Current",
-      studentCount: 0,
-    });
-
-    await redisService.delPattern(`earnings_overview:${instructorId}`);
-    await redisService.delPattern(`detailed_earnings:${instructorId}:*`);
-    await redisService.delPattern(`payout_history:${instructorId}:*`);
+      {
+        maxWait: 5000,
+        timeout: 10000,
+      }
+    );
 
     res.status(201).json({
       success: true,
@@ -488,12 +456,65 @@ const requestPayout = asyncHandler(async (req, res) => {
           currency: payout.currency,
           status: payout.status,
           reference: payoutReference,
-          requestedAt: payout.requestedAt,
+          requestedAt: payout.requestedAt || payout.createdAt,
         },
       },
     });
+
+    setImmediate(async () => {
+      try {
+        await Promise.allSettled([
+          notificationService.createNotification({
+            userId: instructor.user.id,
+            type: "payout_requested",
+            title: "Payout Request Submitted",
+            message: `Your payout request for ${formatCurrency(
+              amount,
+              currency
+            )} has been submitted and is pending approval.`,
+            data: {
+              payoutId: payout.id,
+              amount,
+              currency,
+              status: "PENDING",
+              reference: payoutReference,
+            },
+          }),
+
+          emailService.sendInstructorPayout({
+            email: instructor.user.email,
+            firstName: instructor.user.firstName,
+            amount,
+            currency,
+            payoutId: payout.id,
+            period: "Current",
+            studentCount: 0,
+          }),
+
+          redisService.del(`earnings_overview:${instructorId}`),
+          redisService.del(
+            `detailed_earnings:${instructorId}:1:20:all::::createdAt:desc`
+          ),
+          redisService.del(
+            `payout_history:${instructorId}:1:20:all::::requestedAt:desc`
+          ),
+          redisService.del(`financial_dashboard:${instructorId}`),
+        ]);
+      } catch (backgroundError) {
+        console.error("Background operations failed:", backgroundError);
+      }
+    });
   } catch (error) {
     console.error("Request payout error:", error);
+
+    if (error.code === "P2024" || error.message.includes("timeout")) {
+      return res.status(408).json({
+        success: false,
+        message: "Request timeout. Please try again.",
+        error: "TIMEOUT",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to submit payout request",
@@ -1688,7 +1709,6 @@ const getFinancialDashboard = asyncHandler(async (req, res) => {
       });
     }
 
-    // Use utility function for metrics calculation
     const monthlyMetrics = await getEarningsMetrics(instructorId, "monthly");
     const weeklyMetrics = await getEarningsMetrics(instructorId, "weekly");
 
@@ -1724,17 +1744,17 @@ const getFinancialDashboard = asyncHandler(async (req, res) => {
 
         prisma.$queryRaw`
         SELECT 
-          COUNT(DISTINCT en.student_id) as total_students,
+          COUNT(DISTINCT en."studentId") as total_students,
           COUNT(DISTINCT c.id) as active_courses,
           AVG(e.commission) as avg_transaction_value,
-          SUM(CASE WHEN e.created_at >= ${new Date(
+          SUM(CASE WHEN e."createdAt" >= ${new Date(
             Date.now() - 30 * 24 * 60 * 60 * 1000
           )} THEN 1 ELSE 0 END) as recent_sales
         FROM "Earning" e
-        JOIN "Payment" p ON e.payment_id = p.id
-        JOIN "Enrollment" en ON p.id = en.payment_id
-        JOIN "Course" c ON en.course_id = c.id
-        WHERE e.instructor_id = ${instructorId}
+        JOIN "Payment" p ON e."paymentId" = p.id
+        JOIN "Enrollment" en ON p.id = en."paymentId"
+        JOIN "Course" c ON en."courseId" = c.id
+        WHERE e."instructorId" = ${instructorId}
       `,
       ]);
 
@@ -1775,7 +1795,6 @@ const getFinancialDashboard = asyncHandler(async (req, res) => {
       alerts: [],
     };
 
-    // Generate alerts based on conditions
     if (
       upcomingPayouts.length === 0 &&
       monthlyMetrics.current.commission > 100

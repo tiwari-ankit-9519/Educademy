@@ -32,7 +32,6 @@ class SocketManager {
     this.setupMiddleware();
     this.setupEventHandlers();
 
-    console.log("Socket.IO server initialized");
     return this.io;
   }
 
@@ -106,8 +105,6 @@ class SocketManager {
     const socketId = socket.id;
 
     try {
-      console.log(`User ${userId} (${socket.user.role}) connected`);
-
       if (!this.userSockets.has(userId)) {
         this.userSockets.set(userId, new Set());
       }
@@ -156,7 +153,6 @@ class SocketManager {
     });
 
     socket.on("join", (data) => {
-      console.log(`User ${socket.userId} joined with data:`, data);
       socket.emit("joined", {
         userId: socket.userId,
         role: socket.user.role,
@@ -183,21 +179,18 @@ class SocketManager {
     socket.on("announcement_created", (announcement) => {
       if (socket.user.role === "ADMIN" || socket.user.role === "MODERATOR") {
         this.broadcastAnnouncementCreated(announcement, socket.userId);
-        console.log(`Admin ${socket.userId} broadcasted announcement creation`);
       }
     });
 
     socket.on("announcement_updated", (announcement) => {
       if (socket.user.role === "ADMIN" || socket.user.role === "MODERATOR") {
         this.broadcastAnnouncementUpdated(announcement, socket.userId);
-        console.log(`Admin ${socket.userId} broadcasted announcement update`);
       }
     });
 
     socket.on("announcement_deleted", (data) => {
       if (socket.user.role === "ADMIN" || socket.user.role === "MODERATOR") {
         this.broadcastAnnouncementDeleted(data, socket.userId);
-        console.log(`Admin ${socket.userId} broadcasted announcement deletion`);
       }
     });
 
@@ -215,8 +208,6 @@ class SocketManager {
     const socketId = socket.id;
 
     try {
-      console.log(`User ${userId} disconnected: ${reason}`);
-
       if (this.userSockets.has(userId)) {
         this.userSockets.get(userId).delete(socketId);
         if (this.userSockets.get(userId).size === 0) {
@@ -310,10 +301,6 @@ class SocketManager {
       .to("admins")
       .except(`user_${excludeUserId}`)
       .emit("announcement_created", eventData);
-
-    console.log(
-      `Announcement creation broadcasted to admins (excluding ${excludeUserId})`
-    );
   }
 
   broadcastAnnouncementUpdated(announcement, excludeUserId = null) {
@@ -326,10 +313,6 @@ class SocketManager {
       .to("admins")
       .except(`user_${excludeUserId}`)
       .emit("announcement_updated", eventData);
-
-    console.log(
-      `Announcement update broadcasted to admins (excluding ${excludeUserId})`
-    );
   }
 
   broadcastAnnouncementDeleted(data, excludeUserId = null) {
@@ -342,10 +325,6 @@ class SocketManager {
       .to("admins")
       .except(`user_${excludeUserId}`)
       .emit("announcement_deleted", eventData);
-
-    console.log(
-      `Announcement deletion broadcasted to admins (excluding ${excludeUserId})`
-    );
   }
 
   broadcastAnnouncementStats(stats) {
@@ -355,8 +334,6 @@ class SocketManager {
     };
 
     this.io.to("admins").emit("announcement_stats_updated", eventData);
-
-    console.log(`Announcement stats broadcasted to admins`);
   }
 
   async sendNotificationToUser(userId, notification) {
@@ -422,9 +399,7 @@ class SocketManager {
         timestamp: new Date().toISOString(),
       };
       this.io.to(`user_${userId}`).emit(event, eventData);
-      console.log(`Socket event ${event} sent to user ${userId}`);
     } else {
-      console.log(`User ${userId} is not online, event ${event} not sent`);
     }
   }
 
@@ -446,9 +421,6 @@ class SocketManager {
     else if (role === "ADMIN" || role === "MODERATOR") roomName = "admins";
 
     this.io.to(roomName).emit(event, eventData);
-    console.log(
-      `Socket event ${event} sent to role ${role} (room: ${roomName})`
-    );
   }
 
   sendToRoom(roomId, event, data) {
@@ -463,7 +435,6 @@ class SocketManager {
       ...data,
       timestamp: new Date().toISOString(),
     });
-    console.log(`Socket event ${event} broadcasted to all users`);
   }
 
   broadcastAnnouncement(announcement, targetAudience = "ALL") {
@@ -480,9 +451,6 @@ class SocketManager {
     else if (targetAudience === "ADMINS") roomName = "admins";
 
     this.io.to(roomName).emit("announcement_broadcast", eventData);
-    console.log(
-      `Announcement broadcasted to ${targetAudience} (room: ${roomName})`
-    );
   }
 
   emitBulkNotificationsToAudience(userIds, notifications) {
@@ -680,7 +648,6 @@ setInterval(() => {
 
 setInterval(() => {
   const stats = socketManager.getSystemStats();
-  console.log("Socket.io System Stats:", stats);
 }, 60 * 60 * 1000);
 
 export default socketManager;

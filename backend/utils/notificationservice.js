@@ -11,7 +11,6 @@ class NotificationService {
 
   setSocketManager(socketManager) {
     this.socketManager = socketManager;
-    console.log("Socket manager set in NotificationService");
   }
 
   setEmailService(emailService) {
@@ -93,8 +92,6 @@ class NotificationService {
     sendSocket = true,
   }) {
     try {
-      console.log(`Creating bulk notifications for ${userIds.length} users`);
-
       const notifications = [];
       const batchSize = 100;
 
@@ -134,10 +131,6 @@ class NotificationService {
 
         notifications.push(...successfulBatchNotifications);
       }
-
-      console.log(
-        `Created ${notifications.length} notifications out of ${userIds.length} attempts`
-      );
 
       if (sendSocket && this.socketManager && notifications.length > 0) {
         const notificationsByUser = notifications.reduce(
@@ -783,7 +776,6 @@ class NotificationService {
         },
       });
 
-      console.log(`Cleaned up ${result.count} old read notifications`);
       return result.count;
     } catch (error) {
       console.error("Failed to cleanup old notifications", error);

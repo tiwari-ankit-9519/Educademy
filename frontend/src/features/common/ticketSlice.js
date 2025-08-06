@@ -17,6 +17,7 @@ const initialState = {
   ticketStatsLoading: false,
   supportCategoriesLoading: false,
   needsRefresh: false,
+  socketConnected: false,
   ticketsPagination: {
     page: 1,
     limit: 20,
@@ -315,6 +316,101 @@ const ticketSupportSlice = createSlice({
     clearRefreshFlag: (state) => {
       state.needsRefresh = false;
     },
+    setSocketConnectionStatus: (state, action) => {
+      state.socketConnected = action.payload;
+    },
+    handleSocketTicketUpdate: (state, action) => {
+      const { updateType, ticket, ...additionalData } = action.payload;
+
+      switch (updateType) {
+        case "STATUS_UPDATED": {
+          state.tickets = state.tickets.map((t) =>
+            t.id === ticket.id
+              ? {
+                  ...t,
+                  status: ticket.status,
+                  updatedAt: ticket.updatedAt,
+                  resolvedAt: ticket.resolvedAt,
+                  resolvedBy: ticket.resolvedBy,
+                }
+              : t
+          );
+
+          if (
+            state.ticketDetails &&
+            state.ticketDetails.ticket.id === ticket.id
+          ) {
+            state.ticketDetails.ticket = {
+              ...state.ticketDetails.ticket,
+              status: ticket.status,
+              updatedAt: ticket.updatedAt,
+              resolvedAt: ticket.resolvedAt,
+              resolvedBy: ticket.resolvedBy,
+            };
+          }
+          break;
+        }
+
+        case "RESPONSE_ADDED": {
+          state.tickets = state.tickets.map((t) =>
+            t.id === ticket.id
+              ? {
+                  ...t,
+                  responseCount: ticket.responseCount,
+                  updatedAt: ticket.updatedAt,
+                  status: ticket.status,
+                  lastResponse: {
+                    id: additionalData.responseId,
+                    createdAt: ticket.updatedAt,
+                    isStaffResponse: additionalData.isStaffResponse,
+                  },
+                }
+              : t
+          );
+
+          if (
+            state.ticketDetails &&
+            state.ticketDetails.ticket.id === ticket.id
+          ) {
+            state.ticketDetails.ticket.responseCount = ticket.responseCount;
+            state.ticketDetails.ticket.updatedAt = ticket.updatedAt;
+            state.ticketDetails.ticket.status = ticket.status;
+          }
+          break;
+        }
+
+        case "TICKET_CREATED": {
+          const existingTicket = state.tickets.find((t) => t.id === ticket.id);
+          if (!existingTicket) {
+            state.tickets.unshift(ticket);
+            state.ticketsPagination = updatePaginationAfterAddition(
+              state.ticketsPagination,
+              1
+            );
+          }
+          break;
+        }
+
+        default:
+          break;
+      }
+    },
+    handleSocketTicketResponseUpdate: (state, action) => {
+      const { ticketId, response } = action.payload;
+
+      if (state.ticketDetails && state.ticketDetails.ticket.id === ticketId) {
+        const existingResponseIndex =
+          state.ticketDetails.ticket.responses.findIndex(
+            (r) => r.id === response.id
+          );
+
+        if (existingResponseIndex === -1) {
+          state.ticketDetails.ticket.responses.push(response);
+          state.ticketDetails.ticket.responseCount =
+            (state.ticketDetails.ticket.responseCount || 0) + 1;
+        }
+      }
+    },
     optimisticTicketUpdate: (state, action) => {
       const { ticketId, updates } = action.payload;
       state.tickets = state.tickets.map((ticket) =>
@@ -381,6 +477,90 @@ const ticketSupportSlice = createSlice({
 
       if (state.ticketDetails && state.ticketDetails.ticket.id === ticketId) {
         state.ticketDetails.ticket.priority = priority;
+      }
+    },
+    syncTicketFromNotification: (state, action) => {
+      const notification = action.payload;
+
+      if (notification.type === "SUPPORT_TICKET_UPDATED" && notification.data) {
+        if (notification.data.updateType && notification.data.ticket) {
+          const { updateType, ticket, ...additionalData } = notification.data;
+
+          switch (updateType) {
+            case "STATUS_UPDATED": {
+              state.tickets = state.tickets.map((t) =>
+                t.id === ticket.id
+                  ? {
+                      ...t,
+                      status: ticket.status,
+                      updatedAt: ticket.updatedAt,
+                      resolvedAt: ticket.resolvedAt,
+                      resolvedBy: ticket.resolvedBy,
+                    }
+                  : t
+              );
+
+              if (
+                state.ticketDetails &&
+                state.ticketDetails.ticket.id === ticket.id
+              ) {
+                state.ticketDetails.ticket = {
+                  ...state.ticketDetails.ticket,
+                  status: ticket.status,
+                  updatedAt: ticket.updatedAt,
+                  resolvedAt: ticket.resolvedAt,
+                  resolvedBy: ticket.resolvedBy,
+                };
+              }
+              break;
+            }
+
+            case "RESPONSE_ADDED": {
+              state.tickets = state.tickets.map((t) =>
+                t.id === ticket.id
+                  ? {
+                      ...t,
+                      responseCount: ticket.responseCount,
+                      updatedAt: ticket.updatedAt,
+                      status: ticket.status,
+                      lastResponse: {
+                        id: additionalData.responseId,
+                        createdAt: ticket.updatedAt,
+                        isStaffResponse: additionalData.isStaffResponse,
+                      },
+                    }
+                  : t
+              );
+
+              if (
+                state.ticketDetails &&
+                state.ticketDetails.ticket.id === ticket.id
+              ) {
+                state.ticketDetails.ticket.responseCount = ticket.responseCount;
+                state.ticketDetails.ticket.updatedAt = ticket.updatedAt;
+                state.ticketDetails.ticket.status = ticket.status;
+              }
+              break;
+            }
+
+            default:
+              break;
+          }
+        }
+      } else if (
+        notification.type === "SUPPORT_TICKET_CREATED" &&
+        notification.data?.ticket
+      ) {
+        const ticket = notification.data.ticket;
+        const existingTicket = state.tickets.find((t) => t.id === ticket.id);
+
+        if (!existingTicket) {
+          state.tickets.unshift(ticket);
+          state.ticketsPagination = updatePaginationAfterAddition(
+            state.ticketsPagination,
+            1
+          );
+        }
       }
     },
   },
@@ -706,11 +886,15 @@ export const {
   resetTicketSupportState,
   markForRefresh,
   clearRefreshFlag,
+  setSocketConnectionStatus,
+  handleSocketTicketUpdate,
+  handleSocketTicketResponseUpdate,
   optimisticTicketUpdate,
   optimisticTicketAdd,
   optimisticResponseAdd,
   removeOptimisticResponse,
   updateTicketPriority,
+  syncTicketFromNotification,
 } = ticketSupportSlice.actions;
 
 const ticketSupportReducer = ticketSupportSlice.reducer;

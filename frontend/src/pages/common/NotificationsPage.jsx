@@ -188,7 +188,6 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     if (isConnected && hasInitialLoaded) {
-      console.log("Socket connected, refreshing notifications...");
       dispatch(getNotifications({ page: 1, limit: 20 }));
       dispatch(getUnreadCount());
     }
@@ -529,14 +528,6 @@ const NotificationsPage = () => {
             </div>
 
             <div className="flex items-center space-x-3">
-              <Badge
-                variant={isConnected ? "default" : "destructive"}
-                className="rounded-xl shadow-sm"
-              >
-                <Activity className="w-3 h-3 mr-1" />
-                {isConnected ? "Connected" : "Disconnected"}
-              </Badge>
-
               {realtimeNotifications.size > 0 && (
                 <Badge className="rounded-xl shadow-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
                   <Activity className="w-3 h-3 mr-1 animate-pulse" />
@@ -570,21 +561,6 @@ const NotificationsPage = () => {
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
-
-              <Dialog
-                open={isTestDialogOpen}
-                onOpenChange={setIsTestDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="rounded-xl border-white/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm hover:bg-white/50 dark:hover:bg-slate-700/50"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Test
                   </Button>
                 </DialogTrigger>
               </Dialog>
@@ -684,7 +660,7 @@ const NotificationsPage = () => {
             </Card>
           </div>
 
-          {selectedNotifications.length > 0 && (
+          {/* {selectedNotifications.length > 0 && (
             <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl mb-6">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -736,7 +712,7 @@ const NotificationsPage = () => {
                 </div>
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/50 shadow-xl rounded-2xl">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-slate-700/10 to-transparent rounded-2xl"></div>
@@ -822,25 +798,6 @@ const NotificationsPage = () => {
                       <SelectItem value="LOW">Low</SelectItem>
                     </SelectContent>
                   </Select>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      dispatch(resetNotificationsFilters());
-                      setSearchTerm("");
-                      setSelectedNotifications([]);
-                      dispatch(
-                        getNotifications({
-                          page: 1,
-                          limit: notificationsPagination.limit,
-                        })
-                      );
-                    }}
-                    className="rounded-xl border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Clear
-                  </Button>
                 </div>
               </div>
 
@@ -875,7 +832,7 @@ const NotificationsPage = () => {
                     variant="outline"
                     onClick={() => setIsDeleteAllReadDialogOpen(true)}
                     disabled={deleteAllReadLoading}
-                    className="rounded-xl text-red-600 hover:text-red-700"
+                    className="rounded-xl text-white"
                   >
                     <Archive className="w-4 h-4 mr-1" />
                     Delete All Read

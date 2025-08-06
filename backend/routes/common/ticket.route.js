@@ -39,7 +39,6 @@ router.get("/stats", trackRoute("Tickets", "getSupportStats"), getSupportStats);
 
 router.post(
   "/tickets/:ticketId/responses",
-  requireStaff,
   trackRoute("Tickets", "addTicketResponse"),
   addTicketResponse
 );

@@ -654,13 +654,6 @@ const getCourses = asyncHandler(async (req, res) => {
             hasPrev: pageNumber > 1,
             useCursor: false,
           },
-      summary: {
-        totalCourses: shouldUseCursor ? null : total,
-        draftCourses: summaryMap.draftcourses || 0,
-        underReviewCourses: summaryMap.underreviewcourses || 0,
-        publishedCourses: summaryMap.publishedcourses || 0,
-        rejectedCourses: summaryMap.rejectedcourses || 0,
-      },
     };
 
     try {
@@ -2311,17 +2304,7 @@ const getCourseStats = asyncHandler(async (req, res) => {
   const startTime = performance.now();
 
   try {
-    const { courseId } = req.params;
-
-    if (!courseId) {
-      return res.status(400).json({
-        success: false,
-        message: "Course ID is required",
-        code: "MISSING_COURSE_ID",
-      });
-    }
-
-    const cacheKey = `course_stats:${courseId}:instructor:${req.userAuthId}`;
+    const cacheKey = `instructor_course_stats:${req.userAuthId}`;
     let cachedResult = await redisService.getJSON(cacheKey);
 
     if (cachedResult) {
@@ -2344,9 +2327,16 @@ const getCourseStats = asyncHandler(async (req, res) => {
       select: { id: true },
     });
 
-    const course = await prisma.course.findFirst({
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor profile not found",
+        code: "INSTRUCTOR_NOT_FOUND",
+      });
+    }
+
+    const courses = await prisma.course.findMany({
       where: {
-        id: courseId,
         instructorId: instructor.id,
       },
       include: {
@@ -2356,12 +2346,19 @@ const getCourseStats = asyncHandler(async (req, res) => {
             createdAt: true,
             status: true,
             progress: true,
+            studentId: true,
           },
         },
         reviews: {
           select: {
             id: true,
             rating: true,
+            createdAt: true,
+          },
+        },
+        qnaQuestions: {
+          select: {
+            id: true,
             createdAt: true,
           },
         },
@@ -2375,12 +2372,11 @@ const getCourseStats = asyncHandler(async (req, res) => {
       },
     });
 
-    if (!course) {
+    if (!courses.length) {
       return res.status(404).json({
         success: false,
-        message:
-          "Course not found or you don't have permission to view its statistics",
-        code: "COURSE_NOT_FOUND",
+        message: "No courses found for this instructor",
+        code: "NO_COURSES_FOUND",
       });
     }
 
@@ -2388,18 +2384,29 @@ const getCourseStats = asyncHandler(async (req, res) => {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+    let allEnrollments = [];
+    let allReviews = [];
+    let allQnaQuestions = [];
+    let totalSections = 0;
+
+    courses.forEach((course) => {
+      allEnrollments.push(...course.enrollments);
+      allReviews.push(...course.reviews);
+      allQnaQuestions.push(...course.qnaQuestions);
+      totalSections += course._count.sections;
+    });
+
     const enrollmentStats = {
-      total: course.enrollments.length,
-      active: course.enrollments.filter((e) => e.status === "ACTIVE").length,
-      completed: course.enrollments.filter((e) => e.status === "COMPLETED")
+      total: allEnrollments.length,
+      active: allEnrollments.filter((e) => e.status === "ACTIVE").length,
+      completed: allEnrollments.filter((e) => e.status === "COMPLETED").length,
+      last30Days: allEnrollments.filter((e) => e.createdAt >= thirtyDaysAgo)
         .length,
-      last30Days: course.enrollments.filter((e) => e.createdAt >= thirtyDaysAgo)
-        .length,
-      last7Days: course.enrollments.filter((e) => e.createdAt >= sevenDaysAgo)
+      last7Days: allEnrollments.filter((e) => e.createdAt >= sevenDaysAgo)
         .length,
     };
 
-    const activeEnrollments = course.enrollments.filter(
+    const activeEnrollments = allEnrollments.filter(
       (e) => e.status === "ACTIVE"
     );
     const progressStats = {
@@ -2415,29 +2422,24 @@ const getCourseStats = asyncHandler(async (req, res) => {
     };
 
     const ratingStats = {
-      total: course.reviews.length,
-      average: course.averageRating || 0,
+      total: allReviews.length,
+      average:
+        allReviews.length > 0
+          ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
+          : 0,
       distribution: {
-        5: course.reviews.filter((r) => r.rating === 5).length,
-        4: course.reviews.filter((r) => r.rating === 4).length,
-        3: course.reviews.filter((r) => r.rating === 3).length,
-        2: course.reviews.filter((r) => r.rating === 2).length,
-        1: course.reviews.filter((r) => r.rating === 1).length,
+        5: allReviews.filter((r) => r.rating === 5).length,
+        4: allReviews.filter((r) => r.rating === 4).length,
+        3: allReviews.filter((r) => r.rating === 3).length,
+        2: allReviews.filter((r) => r.rating === 2).length,
+        1: allReviews.filter((r) => r.rating === 1).length,
       },
-      last30Days: course.reviews.filter((r) => r.createdAt >= thirtyDaysAgo)
-        .length,
+      last30Days: allReviews.filter((r) => r.createdAt >= thirtyDaysAgo).length,
     };
 
     const earnings = await prisma.earning.findMany({
       where: {
         instructorId: instructor.id,
-        payment: {
-          enrollments: {
-            some: {
-              courseId: courseId,
-            },
-          },
-        },
       },
       select: {
         amount: true,
@@ -2461,23 +2463,19 @@ const getCourseStats = asyncHandler(async (req, res) => {
         .reduce((sum, e) => sum + parseFloat(e.commission), 0),
     };
 
-    const qnaQuestions = await prisma.qnAQuestion.count({
-      where: { courseId: courseId },
-    });
-
     const qnaAnswers = await prisma.qnAAnswer.count({
       where: {
-        question: {
-          courseId: courseId,
-        },
+        instructorId: instructor.id,
       },
     });
 
     const engagementStats = {
-      qnaQuestions,
+      qnaQuestions: allQnaQuestions.length,
       qnaAnswers,
       questionResponseRate:
-        qnaQuestions > 0 ? (qnaAnswers / qnaQuestions) * 100 : 0,
+        allQnaQuestions.length > 0
+          ? (qnaAnswers / allQnaQuestions.length) * 100
+          : 0,
       reviewRate:
         enrollmentStats.total > 0
           ? (ratingStats.total / enrollmentStats.total) * 100
@@ -2488,14 +2486,18 @@ const getCourseStats = asyncHandler(async (req, res) => {
           : 0,
     };
 
+    const uniqueStudents = new Set(allEnrollments.map((e) => e.studentId)).size;
+
     const result = {
-      courseInfo: {
-        id: course.id,
-        title: course.title,
-        status: course.status,
-        publishedAt: course.publishedAt,
-        createdAt: course.createdAt,
-        lastUpdated: course.lastUpdated,
+      overview: {
+        totalCourses: courses.length,
+        totalStudents: uniqueStudents,
+        totalSections: totalSections,
+        publishedCourses: courses.filter((c) => c.status === "PUBLISHED")
+          .length,
+        draftCourses: courses.filter((c) => c.status === "DRAFT").length,
+        underReviewCourses: courses.filter((c) => c.status === "UNDER_REVIEW")
+          .length,
       },
       enrollment: enrollmentStats,
       progress: progressStats,
@@ -2530,7 +2532,6 @@ const getCourseStats = asyncHandler(async (req, res) => {
       error: error.message,
       stack: error.stack,
       userId: req.userAuthId,
-      courseId: req.params.courseId,
     });
 
     const executionTime = performance.now() - startTime;

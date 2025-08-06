@@ -200,33 +200,19 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       id: "instructor-courses",
       title: "My Courses",
       icon: BookOpen,
-      children: [
-        { title: "All Courses", path: "/instructor/courses" },
-        { title: "Create Course", path: "/instructor/courses/create" },
-        { title: "Course Stats", path: "/instructor/courses/stats" },
-      ],
+      path: "/instructor/courses",
     },
-    {
-      id: "instructor-content",
-      title: "Course Content",
-      icon: Edit3,
-      children: [
-        { title: "Sections & Lessons", path: "/instructor/content/sections" },
-        { title: "Quizzes", path: "/instructor/content/quizzes" },
-        { title: "Assignments", path: "/instructor/content/assignments" },
-        { title: "Content Stats", path: "/instructor/content/stats" },
-      ],
-    },
+    // {
+    //   id: "instructor-content",
+    //   title: "Add Quiz and Assignments",
+    //   icon: Edit3,
+    //   path: "/instructor/:courseId/content",
+    // },
     {
       id: "instructor-students",
-      title: "Students",
+      title: "Students Management",
       icon: GraduationCap,
-      children: [
-        { title: "Enrolled Students", path: "/instructor/students" },
-        { title: "Student Analytics", path: "/instructor/students/analytics" },
-        { title: "Grading", path: "/instructor/students/grading" },
-        { title: "Certificates", path: "/instructor/students/certificates" },
-      ],
+      path: "/instructor/students",
     },
     {
       id: "instructor-community",
@@ -234,30 +220,20 @@ const Sidebar = ({ className, isCollapsed, setIsCollapsed }) => {
       icon: MessageSquare,
       children: [
         { title: "Q&A", path: "/instructor/community/qna" },
-        { title: "Reviews", path: "/instructor/community/reviews" },
-        { title: "Community Overview", path: "/instructor/community/overview" },
+        { title: "Overview", path: "/instructor/community/overview" },
       ],
     },
     {
       id: "instructor-earnings",
       title: "Earnings",
       icon: DollarSign,
-      children: [
-        { title: "Overview", path: "/instructor/earnings/overview" },
-        { title: "Detailed Report", path: "/instructor/earnings/detailed" },
-        { title: "Payout History", path: "/instructor/earnings/payouts" },
-        { title: "Revenue Analytics", path: "/instructor/earnings/analytics" },
-      ],
+      path: "/instructor/earnings",
     },
     {
       id: "instructor-coupons",
       title: "Coupons",
       icon: Package,
-      children: [
-        { title: "All Coupons", path: "/instructor/coupons" },
-        { title: "Create Coupon", path: "/instructor/coupons/create" },
-        { title: "Analytics", path: "/instructor/coupons/analytics" },
-      ],
+      path: "/instructor/coupons",
     },
     {
       id: "instructor-verification",
